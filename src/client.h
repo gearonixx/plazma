@@ -1,0 +1,85 @@
+#pragma once
+
+#include <qobject.h>
+#include <td/telegram/Client.h>
+#include <td/telegram/td_api.h>
+#include <td/telegram/td_api.hpp>
+
+#include <QDebug>
+#include <QObject>
+#include <QThread>
+
+#include "detail.h"
+
+namespace td_api = td::td_api;
+
+using RequestPtr = td::td_api::object_ptr<td::td_api::Function>;
+
+class TelegramRequestBuilder {
+public:
+    RequestPtr setTdLibParameters();
+    RequestPtr getVersion();
+    RequestPtr setPhoneNumber(const lcString& phone_number);
+    RequestPtr checkAuthCode(const lcString& code);
+};
+
+class TelegramClient final : public QObject {
+    Q_OBJECT
+
+signals:
+    void phoneNumberRequired();
+    void authCodeRequired();
+
+public slots:
+    void phoneNumberReceived(const QString& phone_number);
+    void authCodeReceived(const QString& auth_code);
+
+private:
+    static constexpr int LOG_LEVEL = 1;
+    static constexpr int RECEIVE_TIMEOUT = 5;
+
+    using RequestPtr = td::td_api::object_ptr<td::td_api::Function>;
+
+    void createInstance();
+    bool isUnsolicitedUpdate(const td::ClientManager::Response& response) const;
+
+    template <typename T>
+    void send_request(td::td_api::object_ptr<T> request) {
+        update_request_id();
+
+        client_manager_->send(client_id_, current_request_id_, std::move(request));
+    }
+
+    template <typename T>
+    void log_request(T& req) {
+        std::string full = td_api::to_string(req);
+        std::string name = full.substr(0, full.find(' '));
+
+        qDebug() << "[REQUEST] Sending:" << QString::fromStdString(name);
+    }
+
+    void send(RequestPtr req) {
+        log_request(req);
+        send_request(std::move(req));
+    }
+
+    void process_update(td_api::object_ptr<td_api::Object> update);
+    td::ClientManager::RequestId update_request_id();
+
+    std::unique_ptr<td::ClientManager> client_manager_;
+    std::unique_ptr<TelegramRequestBuilder> request_builder_;
+    td::ClientManager::ClientId client_id_{0};
+    td::ClientManager::RequestId current_request_id_{0};
+    std::unique_ptr<QThread> polling_thread_;
+
+    bool is_authorized_{false};
+
+    void pollForUpdates();
+
+public:
+    TelegramClient();
+    ~TelegramClient();
+    bool IsAuthorized() const;
+
+    void startPolling();
+};
