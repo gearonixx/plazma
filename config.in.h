@@ -1,0 +1,16 @@
+#ifndef VERSION_H
+#define VERSION_H
+
+#ifndef APP_VERSION
+#define APP_VERSION "@CMAKE_PROJECT_VERSION@"
+#endif
+
+#ifndef APP_MAJOR_VERSION
+#define APP_MAJOR_VERSION "@APP_MAJOR_VERSION@"
+#endif
+
+#define APPLICATION_NAME "Plazma"
+#define APPLICATION_ID "dev.gearonixx.plazma"
+#define SERVICE_NAME "Plazma-service"
+
+#endif  // VERSION_H

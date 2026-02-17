@@ -60,23 +60,19 @@ void TelegramClient::createInstance() {
     send(request_builder_->getVersion());
 }
 
-template <std::derived_from<td_api::Object> T, typename... Fs> 
-void dispatch(td_api::object_ptr<T>& obj, Fs&&... handlers) { 
-    td_api::downcast_call(*obj, detail::overloaded(std::forward<Fs>(handlers)..., [](auto&) {})); // ;O
+template <std::derived_from<td_api::Object> T, typename... Fs>
+void dispatch(td_api::object_ptr<T>& obj, Fs&&... handlers) {
+    td_api::downcast_call(*obj, detail::overloaded(std::forward<Fs>(handlers)..., [](auto&) {}));  // ;O
 }
 
 void TelegramClient::process_update(td_api::object_ptr<td_api::Object> update) {
     dispatch(update, [this](td_api::updateAuthorizationState& update_authorization_state) {
         dispatch(
             update_authorization_state.authorization_state_,
-            [this](td_api::authorizationStateWaitTdlibParameters &) { send(request_builder_->setTdLibParameters()); },
-            [this](td_api::authorizationStateWaitPhoneNumber &) { emit phoneNumberRequired(); },
-            [this](td_api::authorizationStateWaitCode &) { 
-                emit authCodeRequired(); 
-            },
-            [this](td_api::authorizationStateReady &) {
-                is_authorized_ = true;
-            }
+            [this](td_api::authorizationStateWaitTdlibParameters&) { send(request_builder_->setTdLibParameters()); },
+            [this](td_api::authorizationStateWaitPhoneNumber&) { emit phoneNumberRequired(); },
+            [this](td_api::authorizationStateWaitCode&) { emit authCodeRequired(); },
+            [this](td_api::authorizationStateReady&) { is_authorized_ = true; }
         );
     });
 }
@@ -94,8 +90,7 @@ void TelegramClient::pollForUpdates() {
             qDebug() << "Received an update";
             process_update(std::move(response.object));
         } else {
-             qDebug() << "Response for request" << response.request_id
-                     << ":" << td_api::to_string(response.object);
+            qDebug() << "Response for request" << response.request_id << ":" << td_api::to_string(response.object);
         }
     }
 }

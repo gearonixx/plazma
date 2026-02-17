@@ -15,15 +15,15 @@
 
 #include "client.h"
 
-constexpr const char APPLICATION_ID[] = "dev.gearonixx.plazma";
-constexpr const char APPLICATION_NAME[] = "plazma";
-constexpr const char APPLICATION_DISPLAY_NAME[] = "Plazma";  
+#include "core/osSignalHandler.h"
+
+#include "../config.in.h"
 
 Q_DECL_EXPORT int main(int argc, char* argv[]) {
     QApplication app(argc, argv);
 
     QCoreApplication::setApplicationName(APPLICATION_NAME);
-    QGuiApplication::setApplicationDisplayName(APPLICATION_DISPLAY_NAME);
+    QGuiApplication::setApplicationDisplayName(APPLICATION_NAME);
     QCoreApplication::setApplicationVersion(PLAZMA_VERSION_STRING);
 
     QPushButton button;

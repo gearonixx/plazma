@@ -37,6 +37,6 @@ qt_add_resources(RESOURCES src/resources.qrc)
 file(GLOB_RECURSE SOURCES "src/*.cpp" "src/*.h")
 add_executable(plazma ${SOURCES} ${RESOURCES})
 
-target_include_directories(plazma PRIVATE ${CMAKE_BINARY_DIR})
+target_include_directories(plazma PRIVATE ${CMAKE_SOURCE_DIR} ${CMAKE_BINARY_DIR})
 
 target_link_libraries(plazma Qt6::Widgets Qt6::Core Qt6::Qml Qt6::Quick Td::TdStatic)
