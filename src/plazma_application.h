@@ -18,12 +18,20 @@
 class PlazmaApplication : public PLAZMA_BASE_CLASS {
     Q_OBJECT
 
-private:
-    PlazmaApplication(int& argc, char* argv[]);
+    void onObjectCreated(const QObject* qmlObject, const QUrl& objectUrl);
 
 public:
+    PlazmaApplication(int& argc, char* argv[]);
+
     void init();
+
+public slots:
+    void forceQuit();
 
 private:
     QQmlApplicationEngine* engine_{};
-}
+
+    QUrl rootQmlFileUrl_{};
+
+    bool force_quit_ = false;
+};
