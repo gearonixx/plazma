@@ -1,13 +1,16 @@
 #pragma once
 
+#include "core/controllers/coreController.h"
+
 #if defined(Q_OS_ANDROID) || defined(Q_OS_IOS)
 #include <QGuiApplication>
 #else
 #include <QApplication>
 #endif
 
-#include <QObject>
 #include <QQmlApplicationEngine>
+
+#include "client.h"
 
 #if defined(Q_OS_ANDROID) || defined(Q_OS_IOS)
 #define PLAZMA_BASE_CLASS QGuiApplication
@@ -25,13 +28,17 @@ public:
 
     void init();
 
+    QQmlApplicationEngine* qmlEngine() const;
 public slots:
     void forceQuit();
 
 private:
-    QQmlApplicationEngine* engine_{};
+    QQmlApplicationEngine* qmlEngine_{};
 
     QUrl rootQmlFileUrl_{};
 
-    bool force_quit_ = false;
+    QScopedPointer<CoreController> coreController_;
+    QSharedPointer<TelegramClient> telegramClient_;
+
+    static bool forceQuit_;
 };

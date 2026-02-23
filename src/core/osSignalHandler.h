@@ -4,7 +4,6 @@
 
 class OsSignalHandler : public QObject {
     Q_OBJECT
-
 public:
     static void setup();
 

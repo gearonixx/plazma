@@ -1,8 +1,6 @@
 #include "phone_number_model.h"
 #include <QDebug>
 
-PhoneNumberModel::PhoneNumberModel(QObject* parent) : QObject(parent) {}
-
 void PhoneNumberModel::submitPhoneNumber(const QString& phone_number) {
     Q_ASSERT_X(
         waitingForPhone_,

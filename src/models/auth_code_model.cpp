@@ -1,8 +1,6 @@
 #include "auth_code_model.h"
 #include <QDebug>
 
-AuthorizationCodeModel::AuthorizationCodeModel(QObject* parent) : QObject(parent) {}
-
 void AuthorizationCodeModel::submitAuthCode(const QString& code) {
     Q_ASSERT_X(
         waitingForAuthCode_,
