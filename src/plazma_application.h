@@ -18,7 +18,7 @@
 class PlazmaApplication : public PLAZMA_BASE_CLASS {
     Q_OBJECT
 
-    void onObjectCreated(const QObject* qmlObject, const QUrl& objectUrl);
+    void onObjectCreated(QObject* qmlObject, const QUrl& objectUrl);
 
 public:
     PlazmaApplication(int& argc, char* argv[]);

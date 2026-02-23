@@ -5,6 +5,8 @@
 
 #include <QQmlApplicationEngine>
 
+#include <QtQuick/QQuickWindow>
+
 static constexpr const char* kRootQmlFileUrl = "qrc://main.qml";
 
 void PlazmaApplication::init() {
@@ -22,13 +24,18 @@ void PlazmaApplication::init() {
     );
 };
 
-void PlazmaApplication::onObjectCreated(const QObject* qmlObject, const QUrl& objectUrl) {
+void PlazmaApplication::onObjectCreated(QObject* qmlObject, const QUrl& objectUrl) {
     Q_ASSERT(!rootQmlFileUrl_.isEmpty());
     bool isMainFile = rootQmlFileUrl_ == objectUrl;
 
     if (!qmlObject && isMainFile) {
         QCoreApplication::exit(1);
         return;
+    };
+
+    if (auto win = qobject_cast<QQuickWindow*>(qmlObject)) {
+        win->installEventFilter(this);
+        win->show();
     };
 };
 
