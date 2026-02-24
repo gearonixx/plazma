@@ -14,9 +14,10 @@ build:
 	mkdir -p $(BUILD_DIR)
 	cmake -B $(BUILD_DIR)
 	cmake --build $(BUILD_DIR)
+	cmake --build $(BUILD_DIR) -j$$(nproc)
 
 quick:
-	cmake --build $(BUILD_DIR)
+	cmake --build $(BUILD_DIR) -j$$(nproc)
 
 clean:
 	rm -rf $(BUILD_DIR)
@@ -25,4 +26,4 @@ fresh:
 	rm -rf tdlib
 
 format:
-	find . -name "*.c" -o -name "*.h" -o -name "*.cpp" | xargs -P$(nproc) clang-format -i
+	find . -name "*.c" -o -name "*.h" -o -name "*.cpp" | xargs -P$$(nproc) clang-format -i

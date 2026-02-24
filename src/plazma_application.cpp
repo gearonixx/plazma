@@ -9,7 +9,8 @@
 
 #include "config.in.h"
 
-static constexpr const char* kRootQmlFileUrl = "qrc:///main.qml";
+static constexpr const char* kRootQmlFileUrl = "qrc:/ui/main.qml";
+static constexpr const char* kQmlModulesUrl = "qrc:/ui/Modules/";
 
 bool PlazmaApplication::forceQuit_ = false;
 
@@ -35,6 +36,8 @@ void PlazmaApplication::init() {
 
     telegramClient_.reset(new TelegramClient);
     coreController_.reset(new CoreController(qmlEngine_, telegramClient_.data()));
+
+    qmlEngine_->addImportPath(kQmlModulesUrl);
 
     qmlEngine_->load(rootQmlFileUrl_);
 
