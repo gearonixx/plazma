@@ -19,8 +19,8 @@ Page {
 
         BasicButtonType {
             id: startButton
-            Layout.fullWidth: true
-            Layout.bottomMargin: 48 + Settings
+            Layout.fillWidth: true
+            Layout.bottomMargin: 48
             Layout.leftMargin: 16
             Layout.rightMargin: 16
             Layout.alignment: Qt.AlignBottom

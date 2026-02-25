@@ -1,6 +1,8 @@
 import QtQuick
 import QtQuick.Controls
 
+import "Pages"
+
 ApplicationWindow {
     id: root
     width: 400

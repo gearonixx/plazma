@@ -19,6 +19,8 @@ build:
 quick:
 	cmake --build $(BUILD_DIR) -j$$(nproc)
 
+q: quick run
+
 clean:
 	rm -rf $(BUILD_DIR)
 
