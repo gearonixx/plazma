@@ -6,7 +6,7 @@
 
 // TODO: provide telegramClient_ as a qml context
 CoreController::CoreController(QQmlApplicationEngine* engine, TelegramClient* client, QObject* parent)
-    : QObject(parent), engine_(engine) {
+    : QObject(parent), qmlEngine_(engine), systemsController_(std::shared_ptr<QVariant>(), this) {
     initModels(client);
 
     new Utils(engine);
@@ -21,3 +21,5 @@ void CoreController::initModels(TelegramClient* client) {
         APPLICATION_ID, 1, 0, "AuthorizationCodeModel", authCodeModel_.data()
     );
 };
+
+void CoreController::setQmlRoot() { systemsController_.setQmlRoot(qmlEngine_.rootObjects().at(0)); }

@@ -1,6 +1,6 @@
 #pragma once
 
-#include <qqmlapplicationengine.h>
+#include <QQmlApplicationEngine>
 #include <QObject>
 
 class Utils : public QObject {

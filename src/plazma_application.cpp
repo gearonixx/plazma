@@ -35,7 +35,10 @@ void PlazmaApplication::init() {
     );
 
     telegramClient_.reset(new TelegramClient);
+
     coreController_.reset(new CoreController(qmlEngine_, telegramClient_.data()));
+
+    coreController_->setQmlRoot();
 
     qmlEngine_->addImportPath(kQmlModulesUrl);
 
