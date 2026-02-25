@@ -2,6 +2,8 @@
 #include "../../utils.h"
 #include "../config.in.h"
 
+#include <QCoreApplication>
+
 // TODO: make a system controller possible
 
 // TODO: provide telegramClient_ as a qml context
@@ -22,4 +24,13 @@ void CoreController::initModels(TelegramClient* client) {
     );
 };
 
-void CoreController::setQmlRoot() { systemsController_.setQmlRoot(qmlEngine_.rootObjects().at(0)); }
+void CoreController::setQmlRoot() {
+    if (qmlEngine_.rootObjects().isEmpty()) {
+        qDebug() << "No rootObjects loaded";
+
+        QCoreApplication::exit(0);
+        return;
+    }
+
+    systemsController_.setQmlRoot(qmlEngine_.rootObjects().at(0));
+}

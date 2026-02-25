@@ -38,16 +38,16 @@ void PlazmaApplication::init() {
 
     coreController_.reset(new CoreController(qmlEngine_, telegramClient_.data()));
 
-    coreController_->setQmlRoot();
-
     qmlEngine_->addImportPath(kQmlModulesUrl);
 
     qmlEngine_->load(rootQmlFileUrl_);
 
     if (qmlEngine_->rootObjects().isEmpty()) {
-        QCoreApplication::exit(0);
+        exit(0);
         return;
     }
+
+    coreController_->setQmlRoot();
 };
 
 void PlazmaApplication::onObjectCreated(QObject* qmlObject, const QUrl& objectUrl) {
