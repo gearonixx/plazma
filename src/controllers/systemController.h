@@ -12,7 +12,7 @@ public:
 
 public slots:
     void setQmlRoot(QObject* qmlRoot);
-    bool isAuthenticated();
+    static bool isAuthenticated();
 
 private:
     QObject* m_qmlRoot_;

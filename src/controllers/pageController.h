@@ -1,0 +1,33 @@
+#pragma once
+
+#include <qqml.h>
+
+#include <QObject>
+
+
+namespace PageLoader {
+    Q_NAMESPACE
+
+    enum class PageEnum {
+        PageStart = 0,
+        PageLogin
+    };
+
+
+    static void declareQmlEnum() {
+        qmlRegisterUncreatableMetaObject(staticMetaObject, "PageEnum", 1, 0, "PageEnum", "Error: only enums");
+    }
+}
+
+class PageController: public QObject {
+    Q_OBJECT
+
+public:
+    explicit PageController(QObject* parent = nullptr);
+
+    void showOnStartup();
+
+signals:
+    void goToPage(PageLoader::PageEnum page);
+
+};

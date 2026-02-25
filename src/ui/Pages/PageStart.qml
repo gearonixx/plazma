@@ -6,6 +6,8 @@ import dev.gearonixx.plazma 1.0
 
 import "../Controls"
 
+import PageEnum 1.0
+
 
 Page {
     id: root
@@ -26,6 +28,13 @@ Page {
             Layout.alignment: Qt.AlignBottom
 
             text: "Let's get started"
+
+
+            clickedFunc: function() {
+                console.log('go to the login page');
+                PageController.goToPage(PageEnum.PageLogin)
+            }
+
         }
     }
 

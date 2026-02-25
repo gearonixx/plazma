@@ -28,6 +28,8 @@ public:
 
     void init();
 
+    void registerTypes();
+
     QQmlApplicationEngine* qmlEngine() const;
 public slots:
     void forceQuit();
@@ -41,4 +43,10 @@ private:
     QSharedPointer<TelegramClient> telegramClient_;
 
     static bool forceQuit_;
+
+
+protected:
+    bool eventFilter(QObject* obj, QEvent* event) override {
+        return PLAZMA_BASE_CLASS::eventFilter(obj, event);
+    };
 };

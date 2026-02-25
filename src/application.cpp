@@ -1,4 +1,4 @@
-#include "plazma_application.h"
+#include "application.h"
 
 #include <QObject>
 #include <QUrl>
@@ -8,6 +8,8 @@
 #include <QtQuick/QQuickWindow>
 
 #include "config.in.h"
+
+#include "controllers/pageController.h"
 
 static constexpr const char* kRootQmlFileUrl = "qrc:/ui/main.qml";
 static constexpr const char* kQmlModulesUrl = "qrc:/ui/Modules/";
@@ -39,7 +41,6 @@ void PlazmaApplication::init() {
     coreController_.reset(new CoreController(qmlEngine_, telegramClient_.data()));
 
     qmlEngine_->addImportPath(kQmlModulesUrl);
-
     qmlEngine_->load(rootQmlFileUrl_);
 
     if (qmlEngine_->rootObjects().isEmpty()) {
@@ -48,6 +49,9 @@ void PlazmaApplication::init() {
     }
 
     coreController_->setQmlRoot();
+
+    // TODO
+    coreController_->pageController()->showOnStartup();
 };
 
 void PlazmaApplication::onObjectCreated(QObject* qmlObject, const QUrl& objectUrl) {
@@ -65,6 +69,12 @@ void PlazmaApplication::onObjectCreated(QObject* qmlObject, const QUrl& objectUr
     };
 };
 
+void PlazmaApplication::registerTypes() {
+   PageLoader::declareQmlEnum();
+};
+
 void PlazmaApplication::forceQuit() { forceQuit_ = true; };
 
 QQmlApplicationEngine* PlazmaApplication::qmlEngine() const { return qmlEngine_; };
+
+

@@ -3,13 +3,15 @@
 #include "../config.in.h"
 
 #include <QCoreApplication>
+#include <QQmlContext>
 
 // TODO: make a system controller possible
 
 // TODO: provide telegramClient_ as a qml context
 CoreController::CoreController(QQmlApplicationEngine* engine, TelegramClient* client, QObject* parent)
-    : QObject(parent), qmlEngine_(engine), systemsController_(std::shared_ptr<QVariant>(), this) {
+    : QObject(parent), qmlEngine_(engine) {
     initModels(client);
+    initControllers();
 
     new Utils(engine);
 };
@@ -24,13 +26,27 @@ void CoreController::initModels(TelegramClient* client) {
     );
 };
 
-void CoreController::setQmlRoot() {
-    if (qmlEngine_.rootObjects().isEmpty()) {
-        qDebug() << "No rootObjects loaded";
+void CoreController::initControllers() {
+    // TODO
+    auto tmp_ptr = std::shared_ptr<QVariant>();
+    systemsController_.reset(new SystemsController(tmp_ptr, this));
+    qmlEngine_->rootContext()->setContextProperty("systemsController", systemsController_.data());
 
+    pageController_.reset(new PageController());
+    qmlEngine_->rootContext()->setContextProperty("PageController", pageController_.data());
+}
+
+void CoreController::setQmlRoot() const {
+    if (qmlEngine_->rootObjects().isEmpty()) {
+        qDebug() << "No rootObjects loaded";
         QCoreApplication::exit(0);
         return;
     }
 
-    systemsController_.setQmlRoot(qmlEngine_.rootObjects().at(0));
+    systemsController_->setQmlRoot(qmlEngine_->rootObjects().at(0));
+}
+
+
+QSharedPointer<PageController> CoreController::pageController() const {
+   return pageController_;
 }

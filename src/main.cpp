@@ -10,24 +10,27 @@
 
 #include "core/osSignalHandler.h"
 
-#include "plazma_application.h"
+#include "application.h"
 
 #include "../config.in.h"
 
 Q_DECL_EXPORT int main(int argc, char* argv[]) {
-    PlazmaApplication plazma(argc, argv);
+    PlazmaApplication app(argc, argv);
     OsSignalHandler::setup();
 
-    plazma.setApplicationName(APPLICATION_NAME);
-    plazma.setApplicationDisplayName(APPLICATION_NAME);
-    plazma.setApplicationVersion(PLAZMA_VERSION_STRING);
+    app.setApplicationName(APPLICATION_NAME);
+    app.setApplicationDisplayName(APPLICATION_NAME);
+    app.setApplicationVersion(PLAZMA_VERSION_STRING);
 
-    plazma.init();
+    app.registerTypes();
+
+    app.init();
+
 
     qInfo().noquote() << QString("Started %1 version %2 %3").arg(APPLICATION_NAME, APP_VERSION, APPLICATION_ID);
     qInfo().noquote() << QString("%1 (%2)").arg(QSysInfo::prettyProductName(), QSysInfo::currentCpuArchitecture());
 
-    plazma.exec();
+    app.exec();
 
     return 0;
 }
