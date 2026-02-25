@@ -45,8 +45,6 @@ void PlazmaApplication::init() {
         QCoreApplication::exit(0);
         return;
     }
-
-    telegramClient_->startPolling();
 };
 
 void PlazmaApplication::onObjectCreated(QObject* qmlObject, const QUrl& objectUrl) {

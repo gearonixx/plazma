@@ -2,6 +2,8 @@
 #include "../../utils.h"
 #include "../config.in.h"
 
+// TODO: make a system controller possible
+
 // TODO: provide telegramClient_ as a qml context
 CoreController::CoreController(QQmlApplicationEngine* engine, TelegramClient* client, QObject* parent)
     : QObject(parent), engine_(engine) {
