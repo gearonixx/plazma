@@ -13,6 +13,7 @@ namespace PageLoader {
         PageLogin
     };
 
+    Q_ENUM_NS(PageEnum);
 
     static void declareQmlEnum() {
         qmlRegisterUncreatableMetaObject(staticMetaObject, "PageEnum", 1, 0, "PageEnum", "Error: only enums");
@@ -26,6 +27,9 @@ public:
     explicit PageController(QObject* parent = nullptr);
 
     void showOnStartup();
+
+public slots:
+    QString getPagePath(PageLoader::PageEnum page);
 
 signals:
     void goToPage(PageLoader::PageEnum page);

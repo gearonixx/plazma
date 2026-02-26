@@ -7,6 +7,17 @@ import dev.gearonixx.plazma 1.0
 Page {
     anchors.fill: parent
 
+    Connections {
+       objectName: "pageControllerConnection"
+       target: PageController
+
+       function onGoToPage(page) {
+           const page = PageController.getPagePath(page);
+
+
+       }
+    }
+
     RowLayout {
         anchors.left: parent.left
         anchors.right: parent.right
