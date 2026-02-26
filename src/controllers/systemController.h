@@ -8,7 +8,7 @@ class SystemsController : public QObject {
 
 public:
     template <typename T>
-    explicit SystemsController(const std::shared_ptr<T>& setting, const QObject* parent = nullptr) {};
+    explicit SystemsController(const std::shared_ptr<T>& setting, const QObject* parent = nullptr){};
 
 public slots:
     void setQmlRoot(QObject* qmlRoot);

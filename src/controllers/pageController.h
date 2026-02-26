@@ -4,23 +4,19 @@
 
 #include <QObject>
 
-
 namespace PageLoader {
-    Q_NAMESPACE
+Q_NAMESPACE
 
-    enum class PageEnum {
-        PageStart = 0,
-        PageLogin
-    };
+enum class PageEnum { PageStart = 0, PageLogin };
 
-    Q_ENUM_NS(PageEnum);
+Q_ENUM_NS(PageEnum);
 
-    static void declareQmlEnum() {
-        qmlRegisterUncreatableMetaObject(staticMetaObject, "PageEnum", 1, 0, "PageEnum", "Error: only enums");
-    }
+static void declareQmlEnum() {
+    qmlRegisterUncreatableMetaObject(staticMetaObject, "PageEnum", 1, 0, "PageEnum", "Error: only enums");
 }
+}  // namespace PageLoader
 
-class PageController: public QObject {
+class PageController : public QObject {
     Q_OBJECT
 
 public:
@@ -33,5 +29,4 @@ public slots:
 
 signals:
     void goToPage(PageLoader::PageEnum page);
-
 };

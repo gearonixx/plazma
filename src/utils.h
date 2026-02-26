@@ -1,7 +1,7 @@
 #pragma once
 
-#include <QQmlApplicationEngine>
 #include <QObject>
+#include <QQmlApplicationEngine>
 
 class Utils : public QObject {
     Q_OBJECT

@@ -24,6 +24,11 @@ void CoreController::initModels(TelegramClient* client) {
     qmlRegisterSingletonInstance<AuthorizationCodeModel>(
         APPLICATION_ID, 1, 0, "AuthorizationCodeModel", authCodeModel_.data()
     );
+
+    // ---
+
+    language_model_.reset(new LanguageModel());
+    qmlRegisterSingletonInstance<LanguageModel>(APPLICATION_ID, 1, 0, "LanguageModel", language_model_.data());
 };
 
 void CoreController::initControllers() {
@@ -46,7 +51,4 @@ void CoreController::setQmlRoot() const {
     systemsController_->setQmlRoot(qmlEngine_->rootObjects().at(0));
 }
 
-
-QSharedPointer<PageController> CoreController::pageController() const {
-   return pageController_;
-}
+QSharedPointer<PageController> CoreController::pageController() const { return pageController_; }

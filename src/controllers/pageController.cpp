@@ -1,13 +1,10 @@
 #include "pageController.h"
 
-
-PageController::PageController(QObject* parent): QObject(parent) {};
-
+PageController::PageController(QObject* parent) : QObject(parent) {};
 
 void PageController::showOnStartup() {
-   //
+    //
 };
-
 
 // PageLogin
 QString PageController::getPagePath(PageLoader::PageEnum page) {

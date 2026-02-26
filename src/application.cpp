@@ -10,6 +10,7 @@
 #include "config.in.h"
 
 #include "controllers/pageController.h"
+#include "models/language_model.h"
 
 static constexpr const char* kRootQmlFileUrl = "qrc:/ui/main.qml";
 static constexpr const char* kQmlModulesUrl = "qrc:/ui/Modules/";
@@ -70,11 +71,11 @@ void PlazmaApplication::onObjectCreated(QObject* qmlObject, const QUrl& objectUr
 };
 
 void PlazmaApplication::registerTypes() {
-   PageLoader::declareQmlEnum();
+    LanguageSettings::declareQmlAvailableLanguageEnum();
+
+    PageLoader::declareQmlEnum();
 };
 
 void PlazmaApplication::forceQuit() { forceQuit_ = true; };
 
 QQmlApplicationEngine* PlazmaApplication::qmlEngine() const { return qmlEngine_; };
-
-

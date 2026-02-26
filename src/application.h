@@ -44,9 +44,6 @@ private:
 
     static bool forceQuit_;
 
-
 protected:
-    bool eventFilter(QObject* obj, QEvent* event) override {
-        return PLAZMA_BASE_CLASS::eventFilter(obj, event);
-    };
+    bool eventFilter(QObject* obj, QEvent* event) override { return PLAZMA_BASE_CLASS::eventFilter(obj, event); };
 };

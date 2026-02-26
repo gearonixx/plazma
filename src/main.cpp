@@ -26,7 +26,6 @@ Q_DECL_EXPORT int main(int argc, char* argv[]) {
 
     app.init();
 
-
     qInfo().noquote() << QString("Started %1 version %2 %3").arg(APPLICATION_NAME, APP_VERSION, APPLICATION_ID);
     qInfo().noquote() << QString("%1 (%2)").arg(QSysInfo::prettyProductName(), QSysInfo::currentCpuArchitecture());
 

@@ -1,7 +1,5 @@
 #pragma once
 
-#include <QObject>
-
 #include "../client.h"
 
 class AuthorizationCodeModel : public QObject {

@@ -11,7 +11,6 @@ import PageEnum 1.0
 
 Page {
     id: root
-    anchors.fill: parent
 
     ColumnLayout {
         id: content
@@ -34,6 +33,21 @@ Page {
                 PageController.goToPage(PageEnum.PageLogin)
             }
 
+        }
+
+        BasicButtonType {
+            id: startButton
+            Layout.fillWidth: true
+            Layout.bottomMargin: 48
+            Layout.leftMargin: 16
+            Layout.rightMargin: 16
+            Layout.alignment: Qt.AlignBottom
+
+            text: "Change Language"
+
+            clickedFunc: function() {
+
+            }
         }
     }
 
