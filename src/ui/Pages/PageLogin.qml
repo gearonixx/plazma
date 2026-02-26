@@ -7,15 +7,8 @@ import dev.gearonixx.plazma 1.0
 Page {
     anchors.fill: parent
 
-    Connections {
-       objectName: "pageControllerConnection"
-       target: PageController
-
-       function onGoToPage(page) {
-           const page = PageController.getPagePath(page);
-
-
-       }
+    Component.onCompleted: {
+        PhoneNumberModel.startPolling();
     }
 
     RowLayout {
@@ -24,6 +17,7 @@ Page {
         spacing: 4
 
         visible: PhoneNumberModel.waitingForPhone
+
 
         TextField {
             id: phoneField

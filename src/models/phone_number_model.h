@@ -19,6 +19,9 @@ public:
 
     Q_INVOKABLE void submitPhoneNumber(const QString& phone_number);
 
+    // TODO rewrite
+    Q_INVOKABLE void startPolling() const { client_->startPolling(); }
+
     // getters
     bool waitingForPhone() const { return waitingForPhone_; }
 

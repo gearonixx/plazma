@@ -31,7 +31,6 @@ Page {
 
 
             clickedFunc: function() {
-                console.log('go to the login page');
                 PageController.goToPage(PageEnum.PageLogin)
             }
 

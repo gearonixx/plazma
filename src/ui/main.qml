@@ -11,5 +11,20 @@ ApplicationWindow {
     title: "Plazma"
     visibility: Window.Windowed
 
-    PageStart {}
+    Connections {
+        objectName: "pageControllerConnection"
+        target: PageController
+
+        function onGoToPage(page) {
+            const pagePath = PageController.getPagePath(page);
+
+            stackView.push(pagePath, { "objectName": pagePath }, StackView.Immediate);
+        }
+    }
+
+    StackView {
+        id: stackView
+        anchors.fill: parent
+        initialItem: PageStart {}
+    }
 }
