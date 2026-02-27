@@ -4,6 +4,9 @@
 
 #include <QCoreApplication>
 #include <QQmlContext>
+#include <QDebug>
+
+#include <QTranslator>
 
 // TODO: make a system controller possible
 
@@ -24,8 +27,6 @@ void CoreController::initModels(TelegramClient* client) {
     qmlRegisterSingletonInstance<AuthorizationCodeModel>(
         APPLICATION_ID, 1, 0, "AuthorizationCodeModel", authCodeModel_.data()
     );
-
-    // ---
 
     language_model_.reset(new LanguageModel());
     qmlRegisterSingletonInstance<LanguageModel>(APPLICATION_ID, 1, 0, "LanguageModel", language_model_.data());
@@ -52,3 +53,18 @@ void CoreController::setQmlRoot() const {
 }
 
 QSharedPointer<PageController> CoreController::pageController() const { return pageController_; }
+
+void CoreController::initTranslationsBindings() {
+    QObject::connect(language_model_.get(), &LanguageModel::updateTranslations,
+        this, &CoreController::updateTranslator);
+};
+
+void CoreController::updateTranslator(const QLocale& locale) {
+    if (!translator_->isEmpty()) {
+        QCoreApplication::removeTranslator(translator_.data());
+    }
+
+    const QString lang = locale.name();
+
+    qDebug() << lang;
+};

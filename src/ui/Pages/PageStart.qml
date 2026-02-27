@@ -46,7 +46,7 @@ Page {
             text: "Change Language"
 
             clickedFunc: function() {
-
+                LanguageModel.changeLanguage(LanguageSettings.Russian)
             }
         }
     }

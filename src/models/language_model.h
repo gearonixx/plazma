@@ -5,9 +5,11 @@
 #include <QObject>
 #include <QString>
 
+#include <QAbstractListModel>
+
 namespace LanguageSettings {
 Q_NAMESPACE
-enum class AvailablePageEnum { English, Russian, China_cn };
+enum class AvailablePageEnum { English = 0, Russian, China_cn };
 
 Q_ENUM_NS(AvailablePageEnum);
 
@@ -18,10 +20,19 @@ static void declareQmlAvailableLanguageEnum() {
 }
 }  // namespace LanguageSettings
 
-class LanguageModel : public QObject {
+class LanguageModel : public QAbstractListModel {
     Q_OBJECT
 public:
     explicit LanguageModel(QObject* parent = nullptr);
 
     QString getLanguageName(const LanguageSettings::AvailablePageEnum language);
+
+public slots:
+    void changeLanguage(const LanguageSettings::AvailablePageEnum language);
+
+signals:
+    void updateTranslations(const QLocale);
 };
+
+
+

@@ -21,3 +21,13 @@ QString LanguageModel::getLanguageName(const Lang language) {
 
     return languageName;
 }
+
+
+void LanguageModel::changeLanguage(const Lang language) {
+    switch (language) {
+        case Lang::English: emit updateTranslations(QLocale::English); break;
+        case Lang::Russian: emit updateTranslations(QLocale::Russian); break;
+        case Lang::China_cn: emit updateTranslations(QLocale::Chinese); break;
+        default: emit updateTranslations(QLocale::English); break;
+    }
+}

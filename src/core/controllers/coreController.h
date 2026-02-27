@@ -1,5 +1,6 @@
 #pragma once
 
+#include <QCoreApplication>
 #include <QQmlApplicationEngine>
 
 #include "src/controllers/pageController.h"
@@ -22,7 +23,13 @@ private:
     void initModels(TelegramClient* client);
     void initControllers();
 
+    void initTranslationsBindings();
+    void updateTranslator(const QLocale &locale);
+
+
     QQmlApplicationEngine* qmlEngine_{};
+
+    QSharedPointer<QTranslator> translator_;
 
     QSharedPointer<PageController> pageController_;
 
