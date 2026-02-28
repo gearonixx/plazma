@@ -9,11 +9,12 @@
 
 class Settings : public QObject {
 public:
+    explicit Settings(QObject* parent = nullptr);
+
     QLocale getAppLanguage() const {
         const QString localeStr = settings_.value("config/language", QLocale::system().name()).toString();
 
         qDebug() << "default locale name " << localeStr;
-
 
         return QLocale(localeStr);
     }

@@ -1,7 +1,5 @@
 #include <QApplication>
 
-#include "version.h"
-
 #include <qcoreapplication.h>
 #include <qguiapplication.h>
 #include <QPushButton>
@@ -12,15 +10,18 @@
 
 #include "application.h"
 
-#include "../config.in.h"
+#include "version.h"
 
 Q_DECL_EXPORT int main(int argc, char* argv[]) {
     PlazmaApplication app(argc, argv);
     OsSignalHandler::setup();
 
     app.setApplicationName(APPLICATION_NAME);
+    app.setOrganizationName(ORGANIZATION_NAME);
     app.setApplicationDisplayName(APPLICATION_NAME);
-    app.setApplicationVersion(PLAZMA_VERSION_STRING);
+    app.setApplicationVersion(APP_VERSION);
+
+    qDebug() << app.organizationName();
 
     app.registerTypes();
 

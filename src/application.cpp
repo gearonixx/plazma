@@ -7,7 +7,7 @@
 
 #include <QtQuick/QQuickWindow>
 
-#include "config.in.h"
+#include "version.h"
 
 #include "controllers/pageController.h"
 #include "models/language_model.h"

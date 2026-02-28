@@ -10,6 +10,7 @@
 #endif
 
 #define APPLICATION_NAME "Plazma"
+#define ORGANIZATION_NAME "plazma"
 #define APPLICATION_ID "dev.gearonixx.plazma"
 #define SERVICE_NAME "Plazma-service"
 

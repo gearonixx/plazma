@@ -77,6 +77,12 @@ int LanguageModel::getCurrentLanguageIndex() const {
 
 //
 
-int LanguageModel::rowCount(const QModelIndex& parent) const { Q_UNUSED(parent); }
+int LanguageModel::rowCount(const QModelIndex& parent) const {
+    Q_UNUSED(parent);
+    return static_cast<int>(availableLanguages_.size());
+}
 
-QVariant LanguageModel::data(const QModelIndex& index, int role) const {}
+QVariant LanguageModel::data(const QModelIndex& index, int role) const {
+    // TODO(grnx)
+    return QVariant();
+}

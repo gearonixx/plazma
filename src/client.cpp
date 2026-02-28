@@ -25,7 +25,7 @@ RequestPtr TelegramRequestBuilder::setTdLibParameters() {
     request->api_hash_ = "a3406de8d171bb422bb6ddf3bbd800e2";
     request->system_language_code_ = "en";
     request->device_model_ = "dev.gearonixx.plazma";
-    request->application_version_ = PLAZMA_VERSION_STRING;
+    request->application_version_ = APP_VERSION;
 
     return request;
 }

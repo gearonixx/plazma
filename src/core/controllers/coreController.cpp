@@ -1,6 +1,5 @@
 #include "coreController.h"
 #include "../../utils.h"
-#include "../config.in.h"
 
 #include <QCoreApplication>
 #include <QDebug>
@@ -9,6 +8,8 @@
 #include <QDirIterator>
 
 #include <QTranslator>
+
+#include "version.h"
 
 // TODO: make a system controller possible
 
