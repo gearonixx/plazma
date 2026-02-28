@@ -32,3 +32,7 @@ using lcString = std::string;
 
 template <typename T>
 using lcVector = std::vector<T>;
+
+
+template <typename Ret, typename... Args>
+using lcCallback = std::function<Ret(Args...)>;

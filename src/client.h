@@ -13,14 +13,22 @@
 
 namespace td_api = td::td_api;
 
+
+
 using RequestPtr = td::td_api::object_ptr<td::td_api::Function>;
+using ResponsePtr = td::td_api::object_ptr<td::td_api::Object>;
+
+using ResponseHandler = lcCallback<void, ResponsePtr>;
+
+using RequestId = td::ClientManager::RequestId;
 
 class TelegramRequestBuilder {
 public:
-    RequestPtr setTdLibParameters();
-    RequestPtr getVersion();
-    RequestPtr setPhoneNumber(const lcString& phone_number);
-    RequestPtr checkAuthCode(const lcString& code);
+    static RequestPtr setTdLibParameters();
+    static RequestPtr getVersion();
+    static RequestPtr setPhoneNumber(const lcString& phone_number);
+    static RequestPtr checkAuthCode(const lcString& code);
+    static RequestPtr getMe();
 };
 
 class TelegramClient final : public QObject {
@@ -44,8 +52,10 @@ private:
     bool isUnsolicitedUpdate(const td::ClientManager::Response& response) const;
 
     template <typename T>
-    void send_request(td::td_api::object_ptr<T> request) {
-        update_request_id();
+    void send_request(td::td_api::object_ptr<T> request, ResponseHandler response_handler = [](ResponsePtr){}) {
+        auto request_id = update_request_id();
+
+        if (response_handler) { response_handlers_.emplace(request_id, response_handler);}
 
         client_manager_->send(client_id_, current_request_id_, std::move(request));
     }
@@ -58,9 +68,9 @@ private:
         qDebug() << "[REQUEST] Sending:" << QString::fromStdString(name);
     }
 
-    void send(RequestPtr req) {
+    void send(RequestPtr req, const ResponseHandler& handler = [](ResponsePtr){}) {
         log_request(req);
-        send_request(std::move(req));
+        send_request(std::move(req), handler);
     }
 
     void process_update(td_api::object_ptr<td_api::Object> update);
@@ -72,9 +82,13 @@ private:
     td::ClientManager::RequestId current_request_id_{0};
     std::unique_ptr<QThread> polling_thread_;
 
+    std::map<RequestId, ResponseHandler> response_handlers_;
+
     bool is_authorized_{false};
 
     void pollForUpdates();
+
+
 
 public:
     TelegramClient();

@@ -60,6 +60,8 @@ QString LanguageModel::getCurrentLanguageName() const { return availableLanguage
 // ideally AvailableLanguageEnum values would just match QLocale::Language values directly,
 // so you wouldn't need any mapping at all
 
+// TODO
+// telegram geolocation
 int LanguageModel::getCurrentLanguageIndex() const {
     QLocale currentLocale = settings_->getAppLanguage();
 
@@ -87,5 +89,5 @@ QVariant LanguageModel::data(const QModelIndex& index, int role) const {
         return QVariant();
     }
 
-    return static_cast<int>(availableLanguages_[index.row()].index);
+    return static_cast<int>(availableLanguages_[index.row()].page);
 }
