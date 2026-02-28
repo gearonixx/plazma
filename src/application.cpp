@@ -62,7 +62,7 @@ void PlazmaApplication::onObjectCreated(QObject* qmlObject, const QUrl& objectUr
     bool isMainFile = rootQmlFileUrl_ == objectUrl;
 
     if (isMainFile && !qmlObject) {
-        QCoreApplication::exit(1);
+        exit(1);
         return;
     };
 

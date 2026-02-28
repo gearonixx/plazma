@@ -5,6 +5,7 @@
 
 using Lang = LanguageSettings::AvailablePageEnum;
 
+// TODO(grnx): impl i18n from telegram?
 LanguageModel::LanguageModel(std::shared_ptr<Settings> settings, QObject* parent)
     : settings_(settings), QAbstractListModel(parent) {
     QMetaEnum metaEnum = QMetaEnum::fromType<LanguageSettings::AvailablePageEnum>();
@@ -53,7 +54,6 @@ void LanguageModel::changeLanguage(const Lang language) {
 }
 
 // slots
-
 QString LanguageModel::getCurrentLanguageName() const { return availableLanguages_[getCurrentLanguageIndex()].name; };
 
 // TODO(grnx)

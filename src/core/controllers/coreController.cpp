@@ -43,7 +43,7 @@ void CoreController::initModels(TelegramClient* client) {
         APPLICATION_ID, 1, 0, "AuthorizationCodeModel", authCodeModel_.data()
     );
 
-    language_model_.reset(new LanguageModel());
+    language_model_.reset(new LanguageModel(settings_));
     qmlRegisterSingletonInstance<LanguageModel>(APPLICATION_ID, 1, 0, "LanguageModel", language_model_.data());
 };
 
@@ -73,6 +73,7 @@ QSharedPointer<PageController> CoreController::pageController() const { return p
 
 void CoreController::initTranslationsBindings() {
     connect(language_model_.get(), &LanguageModel::updateTranslations, this, &CoreController::updateTranslator);
+    connect(this, &CoreController::translationsUpdated, language_model_.get(), &LanguageModel::translationsUpdated);
 };
 
 void CoreController::updateTranslator(const QLocale& locale) const {
@@ -112,8 +113,6 @@ void CoreController::updateTranslator(const QLocale& locale) const {
     }
 
     qmlEngine_->retranslate();
-
-    qDebug() << strFileName;
 
     emit translationsUpdated();
 };

@@ -36,6 +36,16 @@ Page {
 
         }
 
+        Text {
+            Layout.fillWidth: true
+            Layout.leftMargin: 16
+            Layout.rightMargin: 16
+            Layout.alignment: Qt.AlignHCenter
+
+            text: LanguageModel.currentLanguageName
+            horizontalAlignment: Text.AlignHCenter
+        }
+
         BasicButtonType {
             id: languageButton
             Layout.fillWidth: true
