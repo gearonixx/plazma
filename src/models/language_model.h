@@ -4,8 +4,11 @@
 
 #include <QObject>
 #include <QString>
+#include <memory>
 
 #include <QAbstractListModel>
+
+#include "src/settings.h"
 
 namespace LanguageSettings {
 Q_NAMESPACE
@@ -26,19 +29,24 @@ struct ModelLanguageData {
 class LanguageModel : public QAbstractListModel {
     Q_OBJECT
 public:
-    explicit LanguageModel(QObject* parent = nullptr);
-
-    QString getLanguageName(const LanguageSettings::AvailablePageEnum language);
+    explicit LanguageModel(std::shared_ptr<Settings> settings, QObject* parent = nullptr);
 
     int rowCount(const QModelIndex& parent) const override;
     QVariant data(const QModelIndex& index, int role) const override;
 
+    Q_PROPERTY(QString currentLanguageName READ getCurrentLanguageName NOTIFY translationsUpdated)
+
+    QString getLocalLanguageName(const LanguageSettings::AvailablePageEnum language);
 public slots:
     void changeLanguage(const LanguageSettings::AvailablePageEnum language);
+    QString getCurrentLanguageName() const;
+    int getCurrentLanguageIndex() const;
 
 signals:
     void updateTranslations(const QLocale);
+    void translationsUpdated() const;
 
 private:
     QVector<ModelLanguageData> availableLanguages_;
+    std::shared_ptr<Settings> settings_;
 };

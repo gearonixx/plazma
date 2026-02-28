@@ -1,20 +1,21 @@
 #include "language_model.h"
 
-#include <QDebug>
 #include <QMetaEnum>
+#include <memory>
 
 using Lang = LanguageSettings::AvailablePageEnum;
 
-LanguageModel::LanguageModel(QObject* parent) : QAbstractListModel(parent) {
+LanguageModel::LanguageModel(std::shared_ptr<Settings> settings, QObject* parent)
+    : settings_(settings), QAbstractListModel(parent) {
     QMetaEnum metaEnum = QMetaEnum::fromType<LanguageSettings::AvailablePageEnum>();
 
     for (int key = 0; key < metaEnum.keyCount(); key++) {
         auto language = static_cast<Lang>(key);
-        availableLanguages_.push_back(ModelLanguageData{getLanguageName(language), language});
+        availableLanguages_.push_back(ModelLanguageData{getLocalLanguageName(language), language});
     }
 }
 
-QString LanguageModel::getLanguageName(const Lang language) {
+QString LanguageModel::getLocalLanguageName(const Lang language) {
     QString languageName;
 
     switch (language) {
@@ -50,6 +51,31 @@ void LanguageModel::changeLanguage(const Lang language) {
             break;
     }
 }
+
+// slots
+
+QString LanguageModel::getCurrentLanguageName() const { return availableLanguages_[getCurrentLanguageIndex()].name; };
+
+// TODO(grnx)
+// ideally AvailableLanguageEnum values would just match QLocale::Language values directly,
+// so you wouldn't need any mapping at all
+
+int LanguageModel::getCurrentLanguageIndex() const {
+    QLocale currentLocale = settings_->getAppLanguage();
+
+    switch (currentLocale.language()) {
+        case QLocale::English:
+            return static_cast<int>(Lang::English);
+        case QLocale::Russian:
+            return static_cast<int>(Lang::Russian);
+        case QLocale::Chinese:
+            return static_cast<int>(Lang::China_cn);
+        default:
+            return static_cast<int>(Lang::English);
+    }
+};
+
+//
 
 int LanguageModel::rowCount(const QModelIndex& parent) const { Q_UNUSED(parent); }
 

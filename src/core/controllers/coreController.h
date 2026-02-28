@@ -25,7 +25,6 @@ public:
     QSharedPointer<PageController> pageController() const;
     void setQmlRoot() const;
 
-
 signals:
     void translationsUpdated() const;
 
