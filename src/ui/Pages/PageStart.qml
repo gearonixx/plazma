@@ -7,6 +7,7 @@ import dev.gearonixx.plazma 1.0
 import "../Controls"
 
 import PageEnum 1.0
+import AvailablePageEnum 1.0
 
 
 Page {
@@ -36,7 +37,7 @@ Page {
         }
 
         BasicButtonType {
-            id: startButton
+            id: languageButton
             Layout.fillWidth: true
             Layout.bottomMargin: 48
             Layout.leftMargin: 16
@@ -46,7 +47,7 @@ Page {
             text: "Change Language"
 
             clickedFunc: function() {
-                LanguageModel.changeLanguage(LanguageSettings.Russian)
+                LanguageModel.changeLanguage(AvailablePageEnum.Russian)
             }
         }
     }

@@ -21,6 +21,8 @@ PlazmaApplication::PlazmaApplication(int& argc, char* argv[]) : PLAZMA_BASE_CLAS
     setDesktopFileName(APPLICATION_NAME);
 
     setQuitOnLastWindowClosed(false);
+
+    settings_ = std::shared_ptr<Settings>(new Settings);
 }
 
 void PlazmaApplication::init() {
@@ -72,7 +74,6 @@ void PlazmaApplication::onObjectCreated(QObject* qmlObject, const QUrl& objectUr
 
 void PlazmaApplication::registerTypes() {
     LanguageSettings::declareQmlAvailableLanguageEnum();
-
     PageLoader::declareQmlEnum();
 };
 

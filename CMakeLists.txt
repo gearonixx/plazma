@@ -33,6 +33,16 @@ find_package(Qt6 REQUIRED COMPONENTS Core Widgets Qml Quick)
 
 qt_add_resources(RESOURCES src/resources.qrc)
 
+# i18n begin
+
+set(PLAZMA_TS_FILES
+        ${CMAKE_CURRENT_LIST_DIR/src/locales/ru.ts}
+)
+
+# qt_create_translation (...)
+
+
+# i18n end
 
 file(GLOB_RECURSE SOURCES "src/*.cpp" "src/*.h")
 add_executable(plazma ${SOURCES} ${RESOURCES})

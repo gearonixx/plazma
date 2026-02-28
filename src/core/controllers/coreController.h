@@ -5,6 +5,7 @@
 
 #include "src/controllers/pageController.h"
 #include "src/controllers/systemController.h"
+#include "src/settings.h"
 
 #include "src/models/auth_code_model.h"
 #include "src/models/language_model.h"
@@ -14,7 +15,9 @@ class CoreController : public QObject {
     Q_OBJECT;
 
 public:
-    explicit CoreController(QQmlApplicationEngine* engine_, TelegramClient* client, QObject* parent = nullptr);
+    explicit CoreController(QQmlApplicationEngine* engine_,
+    std::shared_ptr<Settings> settings,
+    TelegramClient* client, QObject* parent = nullptr);
 
     QSharedPointer<PageController> pageController() const;
     void setQmlRoot() const;
@@ -23,11 +26,14 @@ private:
     void initModels(TelegramClient* client);
     void initControllers();
 
-    void initTranslationsBindings();
-    void updateTranslator(const QLocale &locale);
+    void initSignalHandlers();
 
+    void initTranslationsBindings();
+    void updateTranslator(const QLocale& locale);
 
     QQmlApplicationEngine* qmlEngine_{};
+
+    std::shared_ptr<Settings> settings_{};
 
     QSharedPointer<QTranslator> translator_;
 

@@ -3,18 +3,27 @@
 #include "../config.in.h"
 
 #include <QCoreApplication>
-#include <QQmlContext>
 #include <QDebug>
+#include <QQmlContext>
 
 #include <QTranslator>
 
 // TODO: make a system controller possible
 
 // TODO: provide telegramClient_ as a qml context
-CoreController::CoreController(QQmlApplicationEngine* engine, TelegramClient* client, QObject* parent)
-    : QObject(parent), qmlEngine_(engine) {
+CoreController::CoreController(QQmlApplicationEngine* engine,
+    std::shared_ptr<Settings> settings,
+TelegramClient* client, QObject* parent)
+    : QObject(parent),
+settings_(settings),
+qmlEngine_(engine) {
     initModels(client);
     initControllers();
+
+    initSignalHandlers();
+
+    translator_.reset(new QTranslator());
+    updateTranslator(settings_->getAppLanguage());
 
     new Utils(engine);
 };
@@ -36,10 +45,14 @@ void CoreController::initControllers() {
     // TODO
     auto tmp_ptr = std::shared_ptr<QVariant>();
     systemsController_.reset(new SystemsController(tmp_ptr, this));
-    qmlEngine_->rootContext()->setContextProperty("systemsController", systemsController_.data());
+    qmlEngine_->rootContext()->setContextProperty("SystemsController", systemsController_.data());
 
     pageController_.reset(new PageController());
     qmlEngine_->rootContext()->setContextProperty("PageController", pageController_.data());
+}
+
+void CoreController::initSignalHandlers() {
+    initTranslationsBindings();
 }
 
 void CoreController::setQmlRoot() const {
@@ -55,14 +68,15 @@ void CoreController::setQmlRoot() const {
 QSharedPointer<PageController> CoreController::pageController() const { return pageController_; }
 
 void CoreController::initTranslationsBindings() {
-    QObject::connect(language_model_.get(), &LanguageModel::updateTranslations,
-        this, &CoreController::updateTranslator);
+    connect(language_model_.get(), &LanguageModel::updateTranslations, this, &CoreController::updateTranslator);
 };
 
 void CoreController::updateTranslator(const QLocale& locale) {
     if (!translator_->isEmpty()) {
         QCoreApplication::removeTranslator(translator_.data());
     }
+
+    QList<QString> availableTranslations;
 
     const QString lang = locale.name();
 

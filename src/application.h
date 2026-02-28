@@ -1,6 +1,7 @@
 #pragma once
 
 #include "core/controllers/coreController.h"
+#include "settings.h"
 
 #if defined(Q_OS_ANDROID) || defined(Q_OS_IOS)
 #include <QGuiApplication>
@@ -11,6 +12,7 @@
 #include <QQmlApplicationEngine>
 
 #include "client.h"
+#include <memory>
 
 #if defined(Q_OS_ANDROID) || defined(Q_OS_IOS)
 #define PLAZMA_BASE_CLASS QGuiApplication
@@ -38,6 +40,8 @@ private:
     QQmlApplicationEngine* qmlEngine_{};
 
     QUrl rootQmlFileUrl_{};
+
+    std::shared_ptr<Settings> settings_;
 
     QScopedPointer<CoreController> coreController_;
     QSharedPointer<TelegramClient> telegramClient_;
