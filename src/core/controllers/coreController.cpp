@@ -6,11 +6,16 @@
 #include <QDebug>
 #include <QQmlContext>
 
+#include <QDirIterator>
+
 #include <QTranslator>
 
 // TODO: make a system controller possible
 
 // TODO: provide telegramClient_ as a qml context
+
+// TODO: init server, make the telegram auth logic
+// + add the user to the server
 CoreController::CoreController(
     QQmlApplicationEngine* engine,
     std::shared_ptr<Settings> settings,
@@ -70,14 +75,26 @@ void CoreController::initTranslationsBindings() {
     connect(language_model_.get(), &LanguageModel::updateTranslations, this, &CoreController::updateTranslator);
 };
 
-void CoreController::updateTranslator(const QLocale& locale) {
+void CoreController::updateTranslator(const QLocale& locale) const {
     if (!translator_->isEmpty()) {
         QCoreApplication::removeTranslator(translator_.data());
     }
 
     QList<QString> availableTranslations;
+    const QList<QString> nameFilters = {"*.qm"};
 
-    const QString lang = locale.name();
+    QDirIterator it(QString(":/locales"), nameFilters, QDir::Filter::Files, QDirIterator::NoIteratorFlags);
 
-    qDebug() << lang;
+    while (it.hasNext()) {
+        availableTranslations << it.next();
+    }
+
+    if (availableTranslations.isEmpty()) {
+        qDebug() << "No translations found";
+        return;
+    }
+
+    for (const QString& translation : availableTranslations) {
+        qDebug() << translation;
+    }
 };

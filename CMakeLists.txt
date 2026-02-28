@@ -29,18 +29,23 @@ project(plazma)
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
-find_package(Qt6 REQUIRED COMPONENTS Core Widgets Qml Quick)
+find_package(Qt6 REQUIRED COMPONENTS Core Widgets Qml Quick LinguistTools)
 
 qt_add_resources(RESOURCES src/resources.qrc)
 
 # i18n begin
+set(CMAKE_AUTORCC ON)
 
 set(PLAZMA_TS_FILES
-        ${CMAKE_CURRENT_LIST_DIR/src/locales/ru.ts}
+        ${CMAKE_CURRENT_LIST_DIR}/src/locales/ru.ts
 )
 
-# qt_create_translation (...)
+file(GLOB_RECURSE PLAZMA_TS_RESOURCES *.cpp *.h *.qrc)
 
+qt_create_translation(PLAZMA_QM_FILES ${PLAZMA_TS_RESOURCES} ${PLAZMA_TS_FILES})
+
+configure_file(${CMAKE_CURRENT_LIST_DIR}/src/locales/locales.qrc.in ${CMAKE_CURRENT_BINARY_DIR}/locales.qrc)
+qt6_add_resources(QRC ${CMAKE_CURRENT_BINARY_DIR}/locales.qrc)
 
 # i18n end
 
@@ -48,5 +53,7 @@ file(GLOB_RECURSE SOURCES "src/*.cpp" "src/*.h")
 add_executable(plazma ${SOURCES} ${RESOURCES})
 
 target_include_directories(plazma PRIVATE ${CMAKE_SOURCE_DIR} ${CMAKE_BINARY_DIR})
+
+target_sources(plazma PRIVATE ${PLAZMA_QM_FILES} ${QRC})
 
 target_link_libraries(plazma Qt6::Widgets Qt6::Core Qt6::Qml Qt6::Quick Td::TdStatic)

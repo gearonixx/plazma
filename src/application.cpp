@@ -30,7 +30,7 @@ void PlazmaApplication::init() {
 
     rootQmlFileUrl_ = QString::fromUtf8(kRootQmlFileUrl);
 
-    QObject::connect(
+    connect(
         qmlEngine_,
         &QQmlApplicationEngine::objectCreated,
         this,
@@ -41,7 +41,7 @@ void PlazmaApplication::init() {
 
     telegramClient_.reset(new TelegramClient);
 
-    coreController_.reset(new CoreController(qmlEngine_, telegramClient_.data()));
+    coreController_.reset(new CoreController(qmlEngine_, settings_, telegramClient_.data()));
 
     qmlEngine_->addImportPath(kQmlModulesUrl);
     qmlEngine_->load(rootQmlFileUrl_);

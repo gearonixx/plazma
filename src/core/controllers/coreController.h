@@ -32,7 +32,7 @@ private:
     void initSignalHandlers();
 
     void initTranslationsBindings();
-    void updateTranslator(const QLocale& locale);
+    void updateTranslator(const QLocale& locale) const;
 
     QQmlApplicationEngine* qmlEngine_{};
 
