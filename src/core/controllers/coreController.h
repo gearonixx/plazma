@@ -15,9 +15,12 @@ class CoreController : public QObject {
     Q_OBJECT;
 
 public:
-    explicit CoreController(QQmlApplicationEngine* engine_,
-    std::shared_ptr<Settings> settings,
-    TelegramClient* client, QObject* parent = nullptr);
+    explicit CoreController(
+        QQmlApplicationEngine* engine_,
+        std::shared_ptr<Settings> settings,
+        TelegramClient* client,
+        QObject* parent = nullptr
+    );
 
     QSharedPointer<PageController> pageController() const;
     void setQmlRoot() const;

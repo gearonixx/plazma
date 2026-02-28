@@ -11,12 +11,13 @@
 // TODO: make a system controller possible
 
 // TODO: provide telegramClient_ as a qml context
-CoreController::CoreController(QQmlApplicationEngine* engine,
+CoreController::CoreController(
+    QQmlApplicationEngine* engine,
     std::shared_ptr<Settings> settings,
-TelegramClient* client, QObject* parent)
-    : QObject(parent),
-settings_(settings),
-qmlEngine_(engine) {
+    TelegramClient* client,
+    QObject* parent
+)
+    : QObject(parent), settings_(settings), qmlEngine_(engine) {
     initModels(client);
     initControllers();
 
@@ -51,9 +52,7 @@ void CoreController::initControllers() {
     qmlEngine_->rootContext()->setContextProperty("PageController", pageController_.data());
 }
 
-void CoreController::initSignalHandlers() {
-    initTranslationsBindings();
-}
+void CoreController::initSignalHandlers() { initTranslationsBindings(); }
 
 void CoreController::setQmlRoot() const {
     if (qmlEngine_->rootObjects().isEmpty()) {

@@ -11,8 +11,8 @@
 
 #include <QQmlApplicationEngine>
 
-#include "client.h"
 #include <memory>
+#include "client.h"
 
 #if defined(Q_OS_ANDROID) || defined(Q_OS_IOS)
 #define PLAZMA_BASE_CLASS QGuiApplication
