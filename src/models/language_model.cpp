@@ -83,6 +83,9 @@ int LanguageModel::rowCount(const QModelIndex& parent) const {
 }
 
 QVariant LanguageModel::data(const QModelIndex& index, int role) const {
-    // TODO(grnx)
-    return QVariant();
+    if (!index.isValid() || index.row() < 0 || index.row() >= static_cast<int>(availableLanguages_.size())) {
+        return QVariant();
+    }
+
+    return static_cast<int>(availableLanguages_[index.row()].index);
 }
