@@ -97,4 +97,23 @@ void CoreController::updateTranslator(const QLocale& locale) const {
     for (const QString& translation : availableTranslations) {
         qDebug() << translation;
     }
+
+    // ru
+    const QString lang = locale.name().split("_").first();
+    const QString strFileName = QString(":/locales/%1.qm").arg(lang);
+
+    if (translator_->load(locale, strFileName)) {
+        if (QCoreApplication::installTranslator(translator_.data())) {
+            settings_->setAppLanguage(locale);
+        } else {
+            qWarning() << "Failed to load translation file:" << strFileName;
+            settings_->setAppLanguage(QLocale::English);
+        }
+    }
+
+    qmlEngine_->retranslate();
+
+    qDebug() << strFileName;
+
+    emit translationsUpdated();
 };

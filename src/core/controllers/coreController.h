@@ -25,6 +25,10 @@ public:
     QSharedPointer<PageController> pageController() const;
     void setQmlRoot() const;
 
+
+signals:
+    void translationsUpdated() const;
+
 private:
     void initModels(TelegramClient* client);
     void initControllers();
