@@ -27,6 +27,16 @@ static QByteArray toMethodString(HttpMethod method) {
     return kMethods.at(method);
 }
 
+// temporary
+struct UserLogin {
+    qint64 userId = 0;
+    QString username;
+    QString firstName;
+    QString lastName;
+    QString phoneNumber;
+    bool isPremium = false;
+};
+
 class RpcClient : public QObject {
     Q_OBJECT
 public:
@@ -59,7 +69,7 @@ public:
     plazma::task_queue::TaskQueue* fileLoader() const { return file_loader_.get(); }
 
 signals:
-    void loginSuccess(QJsonObject user);
+    void loginSuccess(UserLogin user);
     void loginError(int statusCode, QString error);
 
 private:

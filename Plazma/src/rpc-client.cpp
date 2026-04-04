@@ -1,6 +1,10 @@
 #include "rpc-client.h"
 #include "session.h"
 
+namespace validators {
+std::optional<UserLogin> ensureLoginResponse(const QJsonObject& json, QString& error);
+}
+
 void RpcClient::call(const QString& endpoint, const QJsonObject& body, const HttpMethod& method) {
     Q_ASSERT(nam_ != nullptr);
 
@@ -42,9 +46,18 @@ void RpcClient::loginUser(const Session& session) {
             emit loginError(statusCode, reply->errorString());
         } else {
             auto doc = QJsonDocument::fromJson(reply->readAll());
-            auto obj = doc.object();
-            qDebug() << "[RPC] loginUser =>" << obj;
-            emit loginSuccess(obj);
+            auto json = doc.object();
+
+            QString validationError;
+            const auto user = validators::ensureLoginResponse(json, validationError);
+
+            if (!user) {
+                qWarning() << "[RPC] loginUser validation failed:" << validationError;
+                emit loginError(0, validationError);
+            } else {
+                qDebug() << "[RPC] loginUser =>" << user->userId << user->username;
+                emit loginSuccess(*user);
+            }
         }
 
         reply->deleteLater();
