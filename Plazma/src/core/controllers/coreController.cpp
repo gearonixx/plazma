@@ -77,8 +77,20 @@ void CoreController::initAuthBindings() {
     connect(userModel_.data(), &UserModel::userChanged, this, [this]() {
         if (!userModel_->isLoaded()) return;
 
-        session_->start(userModel_->me());
-        rpc_->loginUser(*session_);
+        UserLogin user{
+            .userId = userModel_->id(),
+            .username = userModel_->username(),
+            .firstName = userModel_->firstName(),
+            .lastName = userModel_->lastName(),
+            .phoneNumber = userModel_->phoneNumber(),
+            .isPremium = userModel_->isPremium(),
+        };
+
+        rpc_->loginUser(user);
+    });
+
+    connect(rpc_.data(), &RpcClient::loginSuccess, this, [this](const UserLogin& user) {
+        session_->start(user);
     });
 }
 

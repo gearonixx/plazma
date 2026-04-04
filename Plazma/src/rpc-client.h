@@ -9,6 +9,7 @@
 #include <QNetworkReply>
 #include <QObject>
 
+#include "session.h"
 #include "storage/task_queue.h"
 
 /// @brief HTTP request method
@@ -26,16 +27,6 @@ static QByteArray toMethodString(HttpMethod method) {
     };
     return kMethods.at(method);
 }
-
-// temporary
-struct UserLogin {
-    qint64 userId = 0;
-    QString username;
-    QString firstName;
-    QString lastName;
-    QString phoneNumber;
-    bool isPremium = false;
-};
 
 class RpcClient : public QObject {
     Q_OBJECT
@@ -57,7 +48,7 @@ public:
           file_loader_(std::make_unique<plazma::task_queue::TaskQueue>()) {}
 
     void call(const QString& endpoint, const QJsonObject& body = {}, const HttpMethod& method = HttpMethod::kGet);
-    void loginUser(const class Session& session);
+    void loginUser(const UserLogin& user);
     void uploadFile(
         const QString& endpoint,
         const QString& fieldName,

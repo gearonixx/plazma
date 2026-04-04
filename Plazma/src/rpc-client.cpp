@@ -1,5 +1,4 @@
 #include "rpc-client.h"
-#include "session.h"
 
 namespace validators {
 std::optional<UserLogin> ensureLoginResponse(const QJsonObject& json, QString& error);
@@ -20,7 +19,7 @@ void RpcClient::call(const QString& endpoint, const QJsonObject& body, const Htt
     qDebug() << "[RPC]" << toMethodString(method) << endpoint;
 }
 
-void RpcClient::loginUser(const Session& session) {
+void RpcClient::loginUser(const UserLogin& user) {
     Q_ASSERT(nam_ != nullptr);
 
     QNetworkRequest req(QUrl(QString(kBaseUrl) + "/v1/auth/login"));
@@ -28,12 +27,12 @@ void RpcClient::loginUser(const Session& session) {
     req.setRawHeader("Connection", "close");
 
     QJsonObject body{
-        {"user_id", session.userId()},
-        {"username", session.username()},
-        {"first_name", session.firstName()},
-        {"last_name", session.lastName()},
-        {"phone_number", session.phoneNumber()},
-        {"is_premium", session.premium()},
+        {"user_id", user.userId},
+        {"username", user.username},
+        {"first_name", user.firstName},
+        {"last_name", user.lastName},
+        {"phone_number", user.phoneNumber},
+        {"is_premium", user.isPremium},
     };
 
     QByteArray data = QJsonDocument(body).toJson(QJsonDocument::Compact);

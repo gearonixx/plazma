@@ -4,7 +4,15 @@
 #include <QString>
 
 #include "basic_types.h"
-#include "client.h"
+
+struct UserLogin final {
+    qint64 userId = 0;
+    QString username;
+    QString firstName;
+    QString lastName;
+    QString phoneNumber;
+    bool isPremium = false;
+};
 
 class Session final : public QObject {
     Q_OBJECT
@@ -20,7 +28,7 @@ class Session final : public QObject {
 public:
     explicit Session(QObject* parent = nullptr);
 
-    void start(const UserPtr& user);
+    void start(const UserLogin& user);
 
     [[nodiscard]] bool valid() const { return valid_; }
     [[nodiscard]] int64 userId() const { return userId_; }
@@ -34,8 +42,6 @@ signals:
     void sessionChanged();
 
 private:
-    static QString extractUsername(const UserPtr& user);
-
     bool valid_ = false;
     int64 userId_ = 0;
     QString username_;
