@@ -5,6 +5,7 @@
 
         <file>ui/Pages/PageStart.qml</file>
         <file>ui/Pages/PageLogin.qml</file>
+        <file>ui/Pages/PageMain.qml</file>
 
         <file>ui/Controls/BasicButtonType.qml</file>
 

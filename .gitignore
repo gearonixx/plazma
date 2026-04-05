@@ -2,6 +2,7 @@ __pycache__/
 build*/
 cmake-build-*/
 compile_commands.json
+cmake-debug-build
 Testing/
 
 .cache/

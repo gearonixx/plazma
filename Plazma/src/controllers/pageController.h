@@ -7,7 +7,7 @@
 namespace PageLoader {
 Q_NAMESPACE
 
-enum class PageEnum { PageStart = 0, PageLogin };
+enum class PageEnum { PageStart = 0, PageLogin, PageMain };
 
 Q_ENUM_NS(PageEnum);
 

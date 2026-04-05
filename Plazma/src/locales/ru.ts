@@ -45,6 +45,19 @@ Telegram app</source>
     </message>
 </context>
 <context>
+    <name>PageMain</name>
+    <message>
+        <location filename="../ui/Pages/PageMain.qml" line="43"/>
+        <source>Welcome, %1</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/Pages/PageMain.qml" line="69"/>
+        <source>Upload Video</source>
+        <translation type="unfinished">Загрузить видео</translation>
+    </message>
+</context>
+<context>
     <name>PageStart</name>
     <message>
         <location filename="../ui/Pages/PageStart.qml" line="46"/>

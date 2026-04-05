@@ -1,7 +1,7 @@
 {
-  "name": "realmedium",
+  "name": "plazma",
   "dockerComposeFile": "../docker-compose.yml",
-  "service": "realmedium-sample",
+  "service": "plazma-server",
   "workspaceFolder": "/realmedium",
   "overrideCommand": true,
   "customizations": {

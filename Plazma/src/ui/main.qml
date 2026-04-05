@@ -3,6 +3,9 @@ import QtQuick.Controls
 
 import "Pages"
 
+import dev.gearonixx.plazma 1.0
+
+import PageEnum 1.0
 import Style 1.0
 
 ApplicationWindow {
@@ -22,6 +25,17 @@ ApplicationWindow {
             const pagePath = PageController.getPagePath(page);
 
             stackView.push(pagePath, { "objectName": pagePath }, StackView.Immediate);
+        }
+    }
+
+    Connections {
+        target: Session
+
+        function onSessionChanged() {
+            if (Session.valid) {
+                const pagePath = PageController.getPagePath(PageEnum.PageMain);
+                stackView.replace(null, pagePath, {}, StackView.Immediate);
+            }
         }
     }
 
