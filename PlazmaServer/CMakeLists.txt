@@ -38,6 +38,7 @@ list(REMOVE_ITEM SOURCES ${UNIT_TEST_SOURCES} ${CMAKE_CURRENT_SOURCE_DIR}/src/ma
 
 # The Service
 add_executable(${PROJECT_NAME} src/main.cpp ${SOURCES})
+target_include_directories(${PROJECT_NAME} PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/src)
 target_link_libraries(${PROJECT_NAME} PRIVATE userver::core userver::scylla userver::s3api ${PROJECT_NAME}-dto)
 
 find_package(ICU COMPONENTS uc i18n REQUIRED)

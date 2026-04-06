@@ -2,6 +2,7 @@
 
 #include <docs/api.hpp>
 #include <userver/components/component_config.hpp>
+#include <userver/crypto/hash.hpp>
 #include <userver/storages/scylla/operations.hpp>
 
 #include "validators/login_validator.hpp"
@@ -9,11 +10,25 @@
 
 namespace real_medium::handlers::users::auth_login {
 
+namespace {
+
+// Row is vector<pair<string, variant>> — helper to find a column by name
+const userver::storages::scylla::operations::SelectOne::Value&
+FindColumn(const userver::storages::scylla::operations::SelectOne::Row& row, const std::string& name) {
+    for (const auto& [col, val] : row) {
+        if (col == name) return val;
+    }
+    throw std::runtime_error("Column not found: " + name);
+}
+
+}  // namespace
+
 Handler::Handler(
     const userver::components::ComponentConfig& config,
     const userver::components::ComponentContext& context
 ) : HttpHandlerJsonBase(config, context),
     session_(context.FindComponent<userver::components::Scylla>("scylla").GetSession()) {}
+
 
 userver::formats::json::Value Handler::HandleRequestJsonThrow(
     const userver::server::http::HttpRequest& request,
@@ -29,21 +44,36 @@ userver::formats::json::Value Handler::HandleRequestJsonThrow(
         return err.GetDetails();
     }
 
-    auto usersByPhone = session_->GetTable("users_by_phone");
-    userver::storages::scylla::operations::InsertOne insert;
+    auto users_by_phone = session_->GetTable("users_by_phone");
 
-    // this is temporary
-    insert.BindString("phone_number", dto.phone_number);
-    insert.BindInt64("user_id", dto.user_id);
-    insert.BindString("username", dto.username.value_or(""));
-    insert.BindString("first_name", dto.first_name);
-    insert.BindString("last_name", dto.last_name.value_or(""));
-    insert.BindBool("is_premium", dto.is_premium);
-    usersByPhone.Execute(insert);
+    userver::storages::scylla::operations::SelectOne select_user;
+    select_user.AddAllColumns();
+    select_user.WhereString("phone_number", dto.phone_number);
 
-    userver::formats::json::ValueBuilder builder;
-    builder["ok"] = true;
-    return builder.ExtractValue();
+    auto user_row = users_by_phone.Execute(select_user);
+
+    if (user_row.empty()) {
+        userver::storages::scylla::operations::InsertOne insert_user;
+        insert_user.SetInt64("user_id", dto.user_id);
+        insert_user.SetString("username", dto.username);
+        insert_user.SetString("first_name", dto.first_name);
+        insert_user.SetString("last_name", dto.last_name);
+        insert_user.SetString("phone_number", dto.phone_number);
+        insert_user.SetBool("is_premium", dto.is_premium);
+        users_by_phone.Execute(insert_user);
+
+        user_row = users_by_phone.Execute(select_user);
+    }
+
+    userver::formats::json::ValueBuilder response;
+    response["user"]["user_id"] = std::get<std::int64_t>(FindColumn(user_row, "user_id"));
+    response["user"]["username"] = std::get<std::string>(FindColumn(user_row, "username"));
+    response["user"]["first_name"] = std::get<std::string>(FindColumn(user_row, "first_name"));
+    response["user"]["phone_number"] = std::get<std::string>(FindColumn(user_row, "phone_number"));
+    response["user"]["is_premium"] = std::get<bool>(FindColumn(user_row, "is_premium"));
+
+    return response.ExtractValue();
 }
+
 
 }  // namespace real_medium::handlers::users::auth_login

@@ -4,6 +4,6 @@
 
 namespace real_medium::validator {
 
-void validate(const handlers::TelegramLoginDTO& dto);
+void validate(const ::handlers::TelegramLoginDTO& dto);
 
 }  // namespace real_medium::validator

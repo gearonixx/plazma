@@ -15,6 +15,10 @@ void validate(const handlers::TelegramLoginDTO& dto) {
     if (dto.user_id <= 0) {
         throw utils::error::ValidationException("user_id", "Invalid field");
     }
+
+    if (dto.password.empty()) {
+        throw utils::error::ValidationException("password", "Field is missing");
+    }
 }
 
 }  // namespace real_medium::validator

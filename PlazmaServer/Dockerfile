@@ -41,4 +41,7 @@ RUN git clone https://github.com/gearonixx/userver.git /opt/userver \
   ./scripts/build_and_install_all.sh \
   && cd / && rm -rf /opt/userver
 
+
+RUN mkdir -p /home/user/.local && ln -sf /root/.local/bin /home/user/.local/bin && ln -sf /root/.local/etc /home/user/.local/etc
+
 EXPOSE 8080-8100
