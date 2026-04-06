@@ -31,6 +31,9 @@ public:
     RequestBuilder(QNetworkAccessManager* nam, QNetworkRequest req, HttpMethod method, QByteArray body)
         : nam_(nam), req_(std::move(req)), method_(method), body_(std::move(body)) {}
 
+    RequestBuilder(QNetworkAccessManager* nam, QNetworkRequest req, QHttpMultiPart* multiPart)
+        : nam_(nam), req_(std::move(req)), method_(HttpMethod::kPost), multiPart_(multiPart) {}
+
     RequestBuilder& done(Fn<void(QJsonObject)> cb) { done_ = std::move(cb); return *this; }
     RequestBuilder& fail(Fn<void(int, QString)> cb) { fail_ = std::move(cb); return *this; }
     void send();
@@ -40,6 +43,7 @@ private:
     QNetworkRequest req_;
     HttpMethod method_;
     QByteArray body_;
+    QHttpMultiPart* multiPart_ = nullptr;
     Fn<void(QJsonObject)> done_;
     Fn<void(int, QString)> fail_;
 };
@@ -53,6 +57,7 @@ public:
           file_loader_(std::make_unique<plazma::task_queue::TaskQueue>()) {}
 
     RequestBuilder request(const QString& endpoint, const QJsonObject& body = {}, const HttpMethod& method = HttpMethod::kGet);
+    RequestBuilder request(const QString& endpoint, QHttpMultiPart* multiPart);
     void loginUser(const UserLogin& user);
     void uploadFile(
         const QString& endpoint,

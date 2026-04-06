@@ -5,7 +5,14 @@ std::optional<UserLogin> ensureLoginResponse(const QJsonObject& json, QString& e
 }
 
 void RequestBuilder::send() {
-    auto* reply = nam_->sendCustomRequest(req_, toMethodString(method_), body_);
+    QNetworkReply* reply = nullptr;
+
+    if (multiPart_) {
+        reply = nam_->post(req_, multiPart_);
+        multiPart_->setParent(reply);
+    } else {
+        reply = nam_->sendCustomRequest(req_, toMethodString(method_), body_);
+    }
 
     QObject::connect(reply, &QNetworkReply::finished, reply, [reply, done = std::move(done_), fail = std::move(fail_)]() {
         if (reply->error() != QNetworkReply::NoError) {
@@ -31,6 +38,16 @@ RequestBuilder Api::request(const QString& endpoint, const QJsonObject& body, co
     qDebug() << "[API]" << toMethodString(method) << endpoint;
 
     return RequestBuilder(nam_, req, method, QJsonDocument(body).toJson(QJsonDocument::Compact));
+}
+
+RequestBuilder Api::request(const QString& endpoint, QHttpMultiPart* multiPart) {
+    Q_ASSERT(nam_ != nullptr);
+
+    QNetworkRequest req(QUrl(QString(kBaseUrl) + endpoint));
+
+    qDebug() << "[API] POST (multipart)" << endpoint;
+
+    return RequestBuilder(nam_, req, multiPart);
 }
 
 void Api::loginUser(const UserLogin& user) {
@@ -75,9 +92,7 @@ void Api::uploadFile(
     auto* multiPart = new QHttpMultiPart(QHttpMultiPart::FormDataType);
 
     QHttpPart filePart;
-    filePart.setHeader(
-        QNetworkRequest::ContentTypeHeader, mime
-    );
+    filePart.setHeader(QNetworkRequest::ContentTypeHeader, mime);
     filePart.setHeader(
         QNetworkRequest::ContentDispositionHeader,
         QStringLiteral("form-data; name=\"%1\"; filename=\"%2\"").arg(fieldName, filename)
@@ -85,19 +100,12 @@ void Api::uploadFile(
     filePart.setBody(filedata);
     multiPart->append(filePart);
 
-    QNetworkRequest req(QUrl(QString(kBaseUrl) + endpoint));
-
-    auto* reply = nam_->post(req, multiPart);
-    multiPart->setParent(reply);
-
-    connect(reply, &QNetworkReply::finished, this, [reply]() {
-        if (reply->error() != QNetworkReply::NoError) {
-            qWarning() << "[API] upload failed:" << reply->errorString();
-        } else {
-            qDebug() << "[API] upload ok:" << reply->attribute(QNetworkRequest::HttpStatusCodeAttribute).toInt();
-        }
-        reply->deleteLater();
-    });
-
-    qDebug() << "[API] POST (multipart)" << endpoint << filename << filedata.size() << "bytes";
+    request(endpoint, multiPart)
+        .done([endpoint](const QJsonObject&) {
+            qDebug() << "[API] upload ok:" << endpoint;
+        })
+        .fail([](int code, const QString& error) {
+            qWarning() << "[API] upload failed:" << code << error;
+        })
+        .send();
 }
