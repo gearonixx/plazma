@@ -36,7 +36,6 @@ userver::formats::json::Value Handler::HandleRequestJsonThrow(
     userver::server::request::RequestContext& /*context*/
 ) const {
     const auto dto = request_json.As<::handlers::TelegramLoginDTO>();
-
     try {
         validator::validate(dto);
     } catch (const utils::error::ValidationException& err) {
@@ -51,17 +50,16 @@ userver::formats::json::Value Handler::HandleRequestJsonThrow(
     select_user.WhereString("phone_number", dto.phone_number);
 
     auto user_row = users_by_phone.Execute(select_user);
-
     if (user_row.empty()) {
         userver::storages::scylla::operations::InsertOne insert_user;
-        insert_user.SetInt64("user_id", dto.user_id);
-        insert_user.SetString("username", dto.username);
-        insert_user.SetString("first_name", dto.first_name);
-        insert_user.SetString("last_name", dto.last_name);
-        insert_user.SetString("phone_number", dto.phone_number);
-        insert_user.SetBool("is_premium", dto.is_premium);
-        users_by_phone.Execute(insert_user);
+        insert_user.BindInt64("user_id", dto.user_id);
+        insert_user.BindString("username", dto.username.value_or(""));
+        insert_user.BindString("first_name", dto.first_name);
+        insert_user.BindString("last_name", dto.last_name.value_or(""));
+        insert_user.BindString("phone_number", dto.phone_number);
+        insert_user.BindBool("is_premium", dto.is_premium);
 
+        users_by_phone.Execute(insert_user);
         user_row = users_by_phone.Execute(select_user);
     }
 
@@ -71,9 +69,7 @@ userver::formats::json::Value Handler::HandleRequestJsonThrow(
     response["user"]["first_name"] = std::get<std::string>(FindColumn(user_row, "first_name"));
     response["user"]["phone_number"] = std::get<std::string>(FindColumn(user_row, "phone_number"));
     response["user"]["is_premium"] = std::get<bool>(FindColumn(user_row, "is_premium"));
-
     return response.ExtractValue();
 }
-
 
 }  // namespace real_medium::handlers::users::auth_login

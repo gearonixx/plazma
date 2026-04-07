@@ -34,20 +34,17 @@ std::optional<MultipartFile> ParseFirstFilePart(
     auto next_delim = body.find(delim, data_start);
     if (next_delim == std::string::npos) return std::nullopt;
 
-    // strip trailing \r\n before delimiter
     auto data_end = next_delim - 2;
 
     MultipartFile result;
     result.data = body.substr(data_start, data_end - data_start);
 
-    // extract filename from Content-Disposition
     if (auto pos = headers.find("filename=\""); pos != std::string::npos) {
         pos += 10;
         auto end = headers.find('"', pos);
         result.filename = headers.substr(pos, end - pos);
     }
 
-    // extract Content-Type
     if (auto pos = headers.find("Content-Type: "); pos != std::string::npos) {
         pos += 14;
         auto end = headers.find("\r\n", pos);
