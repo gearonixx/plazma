@@ -108,7 +108,7 @@ MpvObject::MpvObject(QQuickItem* parent) : QQuickFramebufferObject(parent) {
     mpv_set_option_string(mpv_, "terminal", "no");
     mpv_set_option_string(mpv_, "msg-level", "all=warn");
     mpv_set_option_string(mpv_, "vo", "libmpv");
-    mpv_set_option_string(mpv_, "hwdec", "auto-safe");
+    mpv_set_option_string(mpv_, "hwdec", hwdec_.toUtf8().constData());
     mpv_set_option_string(mpv_, "keep-open", "yes");
     mpv_set_option_string(mpv_, "idle", "yes");
     mpv_set_option_string(mpv_, "force-seekable", "yes");
@@ -129,6 +129,8 @@ MpvObject::MpvObject(QQuickItem* parent) : QQuickFramebufferObject(parent) {
     mpv_observe_property(mpv_, 0, "eof-reached",        MPV_FORMAT_FLAG);
     mpv_observe_property(mpv_, 0, "width",              MPV_FORMAT_INT64);
     mpv_observe_property(mpv_, 0, "height",             MPV_FORMAT_INT64);
+    mpv_observe_property(mpv_, 0, "hwdec-current",      MPV_FORMAT_STRING);
+    mpv_observe_property(mpv_, 0, "video-codec",        MPV_FORMAT_STRING);
 
     connect(this, &MpvObject::onMpvEvents, this, &MpvObject::handleMpvEvents, Qt::QueuedConnection);
     mpv_set_wakeup_callback(mpv_, &MpvObject::onMpvWakeup, this);
@@ -215,6 +217,13 @@ void MpvObject::setLoop(bool l) {
     loop_ = l;
     mpv_set_property_string(mpv_, "loop-file", l ? "inf" : "no");
     emit loopChanged();
+}
+
+void MpvObject::setHwdec(const QString& mode) {
+    if (mode == hwdec_) return;
+    hwdec_ = mode;
+    mpv_set_property_string(mpv_, "hwdec", mode.toUtf8().constData());
+    emit hwdecChanged();
 }
 
 void MpvObject::toggleLoop() { setLoop(!loop_); }
@@ -350,6 +359,18 @@ void MpvObject::handleMpvEvents() {
                     }
                 } else if (name == "eof-reached" && prop->format == MPV_FORMAT_FLAG) {
                     if (*static_cast<int*>(prop->data)) emit endReached();
+                } else if (name == "hwdec-current" && prop->format == MPV_FORMAT_STRING) {
+                    const QString v = QString::fromUtf8(*static_cast<char**>(prop->data));
+                    if (v != hwdecCurrent_) {
+                        hwdecCurrent_ = v;
+                        emit hwdecCurrentChanged();
+                    }
+                } else if (name == "video-codec" && prop->format == MPV_FORMAT_STRING) {
+                    const QString v = QString::fromUtf8(*static_cast<char**>(prop->data));
+                    if (v != videoCodec_) {
+                        videoCodec_ = v;
+                        emit videoCodecChanged();
+                    }
                 }
                 break;
             }

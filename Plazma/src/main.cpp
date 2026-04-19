@@ -1,3 +1,5 @@
+#include <clocale>
+
 #include <QApplication>
 
 #include <qcoreapplication.h>
@@ -13,7 +15,11 @@
 #include "version.h"
 
 Q_DECL_EXPORT int main(int argc, char* argv[]) {
+    std::setlocale(LC_NUMERIC, "C");
+
     PlazmaApplication app(argc, argv);
+
+    std::setlocale(LC_NUMERIC, "C");
     OsSignalHandler::setup();
 
     app.setApplicationName(APPLICATION_NAME);

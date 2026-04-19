@@ -23,6 +23,9 @@ class MpvObject : public QQuickFramebufferObject {
     Q_PROPERTY(int videoHeight READ videoHeight NOTIFY videoSizeChanged)
     Q_PROPERTY(QVariantList audioTracks READ audioTracks NOTIFY tracksChanged)
     Q_PROPERTY(QVariantList subtitleTracks READ subtitleTracks NOTIFY tracksChanged)
+    Q_PROPERTY(QString hwdec READ hwdec WRITE setHwdec NOTIFY hwdecChanged)
+    Q_PROPERTY(QString hwdecCurrent READ hwdecCurrent NOTIFY hwdecCurrentChanged)
+    Q_PROPERTY(QString videoCodec READ videoCodec NOTIFY videoCodecChanged)
 
 public:
     explicit MpvObject(QQuickItem* parent = nullptr);
@@ -59,6 +62,11 @@ public:
     QVariantList audioTracks() const { return audioTracks_; }
     QVariantList subtitleTracks() const { return subtitleTracks_; }
 
+    QString hwdec() const { return hwdec_; }
+    void setHwdec(const QString& mode);
+    QString hwdecCurrent() const { return hwdecCurrent_; }
+    QString videoCodec() const { return videoCodec_; }
+
     mpv_handle* handle() const { return mpv_; }
 
 public slots:
@@ -92,6 +100,9 @@ signals:
     void hasMediaChanged();
     void videoSizeChanged();
     void tracksChanged();
+    void hwdecChanged();
+    void hwdecCurrentChanged();
+    void videoCodecChanged();
     void fileLoaded();
     void playbackError(const QString& message);
     void endReached();
@@ -122,4 +133,7 @@ private:
     int videoHeight_ = 0;
     QVariantList audioTracks_;
     QVariantList subtitleTracks_;
+    QString hwdec_ = QStringLiteral("auto-safe");
+    QString hwdecCurrent_;
+    QString videoCodec_;
 };

@@ -20,10 +20,6 @@ Page {
     // Tracks which step the user has reached (survives model flag resets)
     property int authStep: 0  // 0 = phone, 1 = code, 2 = done
 
-    Component.onCompleted: {
-        PhoneNumberModel.startPolling()
-    }
-
     Connections {
         target: AuthorizationCodeModel
         function onWaitingForCodeChanged() {

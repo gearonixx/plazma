@@ -54,7 +54,7 @@ Page {
             Layout.leftMargin: 40
             Layout.rightMargin: 40
             Layout.bottomMargin: 48
-            text: qsTr("Connect with your Telegram account\nto start messaging")
+            text: qsTr("Connect with your Telegram account\nto start watching")
             font.pixelSize: 15
             color: PlazmaStyle.color.textSecondary
             horizontalAlignment: Text.AlignHCenter
@@ -72,7 +72,7 @@ Page {
             pressedColor: PlazmaStyle.color.burntOrange
             textColor: "#FFFFFF"
 
-            text: qsTr("Start Messaging")
+            text: qsTr("Start Watching")
             font.pixelSize: 16
             font.weight: Font.DemiBold
 

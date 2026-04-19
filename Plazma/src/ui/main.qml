@@ -43,9 +43,39 @@ ApplicationWindow {
         }
     }
 
+    Connections {
+        target: PhoneNumberModel
+
+        function onWaitingForPhoneChanged() {
+            if (PhoneNumberModel.waitingForPhone && !Session.valid) {
+                const pagePath = PageController.getPagePath(PageEnum.PageStart);
+                stackView.replace(null, pagePath, {}, StackView.Immediate);
+            }
+        }
+    }
+
     StackView {
         id: stackView
         anchors.fill: parent
-        initialItem: PageStart {}
+
+        initialItem: Rectangle {
+            color: PlazmaStyle.color.warmWhite
+
+            Rectangle {
+                anchors.centerIn: parent
+                width: 120
+                height: 120
+                radius: 60
+                color: PlazmaStyle.color.softAmber
+
+                Text {
+                    anchors.centerIn: parent
+                    text: "P"
+                    font.pixelSize: 52
+                    font.weight: Font.Bold
+                    color: PlazmaStyle.color.warmGold
+                }
+            }
+        }
     }
 }

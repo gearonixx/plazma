@@ -60,47 +60,47 @@
 <context>
     <name>PageLogin</name>
     <message>
-        <location filename="../ui/Pages/PageLogin.qml" line="54"/>
+        <location filename="../ui/Pages/PageLogin.qml" line="50"/>
         <source>Login failed: %1</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/Pages/PageLogin.qml" line="124"/>
+        <location filename="../ui/Pages/PageLogin.qml" line="120"/>
         <source>Your Phone Number</source>
         <translation>Ваш номер телефона</translation>
     </message>
     <message>
-        <location filename="../ui/Pages/PageLogin.qml" line="136"/>
+        <location filename="../ui/Pages/PageLogin.qml" line="132"/>
         <source>Please confirm your country code
 and enter your phone number</source>
         <translation>Подтвердите код страны
 и введите номер телефона</translation>
     </message>
     <message>
-        <location filename="../ui/Pages/PageLogin.qml" line="151"/>
+        <location filename="../ui/Pages/PageLogin.qml" line="147"/>
         <source>+1 234 567 8900</source>
         <translation>+7 999 123 4567</translation>
     </message>
     <message>
-        <location filename="../ui/Pages/PageLogin.qml" line="188"/>
-        <location filename="../ui/Pages/PageLogin.qml" line="297"/>
+        <location filename="../ui/Pages/PageLogin.qml" line="184"/>
+        <location filename="../ui/Pages/PageLogin.qml" line="293"/>
         <source>Next</source>
         <translation>Далее</translation>
     </message>
     <message>
-        <location filename="../ui/Pages/PageLogin.qml" line="231"/>
+        <location filename="../ui/Pages/PageLogin.qml" line="227"/>
         <source>Enter The Code</source>
         <translation>Введите код</translation>
     </message>
     <message>
-        <location filename="../ui/Pages/PageLogin.qml" line="243"/>
+        <location filename="../ui/Pages/PageLogin.qml" line="239"/>
         <source>We&apos;ve sent the code to your
 Telegram app</source>
         <translation>Мы отправили код в ваше
 приложение Telegram</translation>
     </message>
     <message>
-        <location filename="../ui/Pages/PageLogin.qml" line="258"/>
+        <location filename="../ui/Pages/PageLogin.qml" line="254"/>
         <source>Your code</source>
         <translation>Ваш код</translation>
     </message>
@@ -215,89 +215,119 @@ Telegram app</source>
 <context>
     <name>PagePlayer</name>
     <message>
-        <location filename="../ui/Pages/PagePlayer.qml" line="59"/>
+        <location filename="../ui/Pages/PagePlayer.qml" line="75"/>
         <source>Saved: %1</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/Pages/PagePlayer.qml" line="60"/>
+        <location filename="../ui/Pages/PagePlayer.qml" line="76"/>
         <source>Error: %1</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/Pages/PagePlayer.qml" line="61"/>
+        <location filename="../ui/Pages/PagePlayer.qml" line="77"/>
         <source>End of video</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/Pages/PagePlayer.qml" line="91"/>
-        <location filename="../ui/Pages/PagePlayer.qml" line="92"/>
-        <location filename="../ui/Pages/PagePlayer.qml" line="253"/>
+        <location filename="../ui/Pages/PagePlayer.qml" line="114"/>
+        <location filename="../ui/Pages/PagePlayer.qml" line="115"/>
+        <location filename="../ui/Pages/PagePlayer.qml" line="276"/>
         <source>Volume %1%</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/Pages/PagePlayer.qml" line="93"/>
+        <location filename="../ui/Pages/PagePlayer.qml" line="116"/>
         <source>Muted</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/Pages/PagePlayer.qml" line="93"/>
+        <location filename="../ui/Pages/PagePlayer.qml" line="116"/>
         <source>Unmuted</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/Pages/PagePlayer.qml" line="104"/>
-        <location filename="../ui/Pages/PagePlayer.qml" line="478"/>
+        <location filename="../ui/Pages/PagePlayer.qml" line="127"/>
+        <location filename="../ui/Pages/PagePlayer.qml" line="501"/>
         <source>Loop on</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/Pages/PagePlayer.qml" line="104"/>
-        <location filename="../ui/Pages/PagePlayer.qml" line="478"/>
+        <location filename="../ui/Pages/PagePlayer.qml" line="127"/>
+        <location filename="../ui/Pages/PagePlayer.qml" line="501"/>
         <source>Loop off</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/Pages/PagePlayer.qml" line="162"/>
+        <location filename="../ui/Pages/PagePlayer.qml" line="185"/>
         <source>Player</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/Pages/PagePlayer.qml" line="208"/>
+        <location filename="../ui/Pages/PagePlayer.qml" line="231"/>
         <source>No video selected</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/Pages/PagePlayer.qml" line="216"/>
+        <location filename="../ui/Pages/PagePlayer.qml" line="239"/>
         <source>Pick a video from the feed</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/Pages/PagePlayer.qml" line="531"/>
+        <location filename="../ui/Pages/PagePlayer.qml" line="566"/>
         <source>Take screenshot</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/Pages/PagePlayer.qml" line="538"/>
+        <location filename="../ui/Pages/PagePlayer.qml" line="573"/>
         <source>Audio track</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/Pages/PagePlayer.qml" line="543"/>
-        <location filename="../ui/Pages/PagePlayer.qml" line="559"/>
+        <location filename="../ui/Pages/PagePlayer.qml" line="578"/>
+        <location filename="../ui/Pages/PagePlayer.qml" line="594"/>
         <source>Track %1</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/Pages/PagePlayer.qml" line="551"/>
+        <location filename="../ui/Pages/PagePlayer.qml" line="586"/>
         <source>Subtitles</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/Pages/PagePlayer.qml" line="553"/>
+        <location filename="../ui/Pages/PagePlayer.qml" line="588"/>
         <source>Off</source>
         <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/Pages/PagePlayer.qml" line="35"/>
+        <source>Automatic</source>
+        <translation>Автоматически</translation>
+    </message>
+    <message>
+        <location filename="../ui/Pages/PagePlayer.qml" line="38"/>
+        <source>Software (CPU)</source>
+        <translation>Программное (CPU)</translation>
+    </message>
+    <message>
+        <location filename="../ui/Pages/PagePlayer.qml" line="602"/>
+        <source>Hardware acceleration</source>
+        <translation>Аппаратное ускорение</translation>
+    </message>
+    <message>
+        <location filename="../ui/Pages/PagePlayer.qml" line="559"/>
+        <source>Decoder: %1  ·  %2</source>
+        <translation>Декодер: %1  ·  %2</translation>
+    </message>
+    <message>
+        <location filename="../ui/Pages/PagePlayer.qml" line="557"/>
+        <source>CPU</source>
+        <translation>CPU</translation>
+    </message>
+    <message>
+        <location filename="../ui/Pages/PagePlayer.qml" line="82"/>
+        <source>HW %1 unavailable — using CPU</source>
+        <translation>HW %1 недоступно — используется CPU</translation>
     </message>
 </context>
 <context>
@@ -310,14 +340,14 @@ Telegram app</source>
     <message>
         <location filename="../ui/Pages/PageStart.qml" line="57"/>
         <source>Connect with your Telegram account
-to start messaging</source>
+to start watching</source>
         <translation>Подключите свой аккаунт Telegram,
-чтобы начать общение</translation>
+чтобы начать смотреть</translation>
     </message>
     <message>
         <location filename="../ui/Pages/PageStart.qml" line="75"/>
-        <source>Start Messaging</source>
-        <translation>Начать общение</translation>
+        <source>Start Watching</source>
+        <translation>Погнали</translation>
     </message>
     <message>
         <location filename="../ui/Pages/PageStart.qml" line="96"/>

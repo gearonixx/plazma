@@ -43,6 +43,8 @@ void PlazmaApplication::init() {
 
     coreController_.reset(new CoreController(qmlEngine_, settings_, telegramClient_.data()));
 
+    telegramClient_->startPolling();
+
     qmlEngine_->addImportPath(kQmlModulesUrl);
     qmlEngine_->load(rootQmlFileUrl_);
 
