@@ -6,8 +6,12 @@
         <file>ui/Pages/PageStart.qml</file>
         <file>ui/Pages/PageLogin.qml</file>
         <file>ui/Pages/PageMain.qml</file>
+        <file>ui/Pages/PageFeed.qml</file>
+        <file>ui/Pages/PageUpload.qml</file>
+        <file>ui/Pages/PagePlayer.qml</file>
 
         <file>ui/Controls/BasicButtonType.qml</file>
+        <file>ui/Controls/NavBar.qml</file>
 
         <file>ui/Modules/Style/PlazmaStyle.qml</file>
         <file>ui/Modules/Style/qmldir</file>

@@ -7,7 +7,14 @@
 namespace PageLoader {
 Q_NAMESPACE
 
-enum class PageEnum { PageStart = 0, PageLogin, PageMain };
+enum class PageEnum {
+    PageStart = 0,
+    PageLogin,
+    PageMain,
+    PageFeed,
+    PageUpload,
+    PagePlayer,
+};
 
 Q_ENUM_NS(PageEnum);
 
@@ -29,4 +36,5 @@ public slots:
 
 signals:
     void goToPage(PageLoader::PageEnum page);
+    void replacePage(PageLoader::PageEnum page);
 };

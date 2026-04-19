@@ -36,10 +36,12 @@ components_manager:
       consistency: local_quorum
       serial_consistency: local_serial
       request_timeout: 10s
-      pool_size: 16
+      pool:
+        num_threads_io: 2
+        core_connections_per_host: 4
       app_name: scylla_app_name_4
-      shard_awareness: true
       retry_policy: default
+      load_balancing_policy: round_robin
       speculative_execution:
         enabled: false
         max_attempts: 2
@@ -80,6 +82,14 @@ components_manager:
         throttling_enabled: false
         url_trailing_slash: strict-match
         max_request_size: 104857600
+
+    handler-videos-list:
+        path: /v1/videos
+        method: GET
+        task_processor: main-task-processor
+        throttling_enabled: false
+        url_trailing_slash: strict-match
+
     s3-client: {}
     # tests-control:
     #   load-enabled: $is_testing

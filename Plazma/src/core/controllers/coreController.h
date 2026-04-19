@@ -13,6 +13,7 @@
 #include "src/models/phone_number_model.h"
 #include "src/models/file_dialog_model.h"
 #include "src/models/user_model.h"
+#include "src/models/video_feed_model.h"
 #include "src/platform/file_dialog.h"
 #include "src/session.h"
 
@@ -64,4 +65,6 @@ private:
 
     QScopedPointer<platform::FileDialog> fileDialog_;
     QSharedPointer<FileDialogModel> fileDialogModel_;
+
+    QSharedPointer<VideoFeedModel> videoFeedModel_;
 };

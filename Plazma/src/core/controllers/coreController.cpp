@@ -66,6 +66,19 @@ void CoreController::initControllers() {
     fileDialog_.reset(new platform::FileDialog(&session_->api()));
     fileDialogModel_.reset(new FileDialogModel(fileDialog_.data()));
     qmlRegisterSingletonInstance<FileDialogModel>(APPLICATION_ID, 1, 0, "FileDialogModel", fileDialogModel_.data());
+
+    videoFeedModel_.reset(new VideoFeedModel(&session_->api()));
+    qmlRegisterSingletonInstance<VideoFeedModel>(APPLICATION_ID, 1, 0, "VideoFeedModel", videoFeedModel_.data());
+
+    connect(&session_->api(), &Api::uploadFinished, videoFeedModel_.data(),
+            [this](const QString&, const QString& filename) {
+                emit videoFeedModel_->uploadFinished(filename);
+                videoFeedModel_->refresh();
+            });
+    connect(&session_->api(), &Api::uploadFailed, videoFeedModel_.data(),
+            [this](const QString&, int code, const QString& error) {
+                emit videoFeedModel_->uploadFailed(code, error);
+            });
 }
 
 void CoreController::initSignalHandlers() {

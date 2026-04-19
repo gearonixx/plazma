@@ -105,11 +105,27 @@ void Api::uploadFile(
     multiPart->append(filePart);
 
     request(endpoint, multiPart)
-        .done([endpoint](const QJsonObject&) {
+        .done([this, endpoint, filename](const QJsonObject&) {
             qDebug() << "[API] upload ok:" << endpoint;
+            emit uploadFinished(endpoint, filename);
         })
-        .fail([](int code, const QString& error) {
+        .fail([this, endpoint](int code, const QString& error) {
             qWarning() << "[API] upload failed:" << code << error;
+            emit uploadFailed(endpoint, code, error);
+        })
+        .send();
+}
+
+void Api::fetchVideos(Fn<void(QJsonArray)> onOk, Fn<void(int, QString)> onFail) {
+    request("/v1/videos", {}, HttpMethod::kGet)
+        .done([ok = std::move(onOk)](const QJsonObject& json) {
+            const auto arr = json.value("videos").toArray();
+            qDebug() << "[API] fetchVideos =>" << arr.size() << "items";
+            if (ok) ok(arr);
+        })
+        .fail([fail = std::move(onFail)](int code, const QString& error) {
+            qWarning() << "[API] fetchVideos failed:" << code << error;
+            if (fail) fail(code, error);
         })
         .send();
 }

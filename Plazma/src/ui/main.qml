@@ -23,8 +23,12 @@ ApplicationWindow {
 
         function onGoToPage(page) {
             const pagePath = PageController.getPagePath(page);
-
             stackView.push(pagePath, { "objectName": pagePath }, StackView.Immediate);
+        }
+
+        function onReplacePage(page) {
+            const pagePath = PageController.getPagePath(page);
+            stackView.replace(null, pagePath, { "objectName": pagePath }, StackView.Immediate);
         }
     }
 
@@ -33,7 +37,7 @@ ApplicationWindow {
 
         function onSessionChanged() {
             if (Session.valid) {
-                const pagePath = PageController.getPagePath(PageEnum.PageMain);
+                const pagePath = PageController.getPagePath(PageEnum.PageFeed);
                 stackView.replace(null, pagePath, {}, StackView.Immediate);
             }
         }

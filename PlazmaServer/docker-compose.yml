@@ -31,8 +31,8 @@ services:
           cqlsh scylla 9042 -f /migrations/002_add_user_fields.cql
           echo "Migration done."
 
-    minio-init:
-      container_name: minio-init
+    minio:
+      container_name: minio
       image: minio/minio:latest
       ports:
        - 9000:9000
@@ -43,6 +43,17 @@ services:
        - MINIO_ROOT_USER=minioadmin
        - MINIO_ROOT_PASSWORD=minioadmin
        - MINIO_DOMAIN=minio
+      command: server /data --console-address ":9001"
+      networks:
+        scylla:
+          aliases:
+            - plazma-videos.minio
+
+    minio-init:
+      container_name: minio-init
+      image: minio/minio:latest
+      depends_on:
+        - minio
       entrypoint: ["/bin/sh", "-c"]
       command:
       - |
@@ -53,9 +64,7 @@ services:
         mc anonymous set download local/plazma-videos || true
         echo "MinIO bucket ready."
       networks:
-        scylla:
-          aliases:
-            - plazma-videos.minio
+        - scylla
 
     plazma-server:
         container_name: plazma-server
@@ -88,6 +97,7 @@ services:
         command: ["tail", "-f", "/dev/null"]
         depends_on:
           - scylla-init
+          - minio
           - minio-init
           - scylladb
         networks:

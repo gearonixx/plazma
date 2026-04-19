@@ -66,12 +66,15 @@ public:
         const QString& mime,
         const QByteArray& filedata
     );
+    void fetchVideos(Fn<void(QJsonArray)> onOk, Fn<void(int, QString)> onFail = {});
 
     plazma::task_queue::TaskQueue* fileLoader() const { return file_loader_.get(); }
 
 signals:
     void loginSuccess(UserLogin user);
     void loginError(int statusCode, QString error);
+    void uploadFinished(QString endpoint, QString filename);
+    void uploadFailed(QString endpoint, int statusCode, QString error);
 
 private:
     static constexpr auto kBaseUrl = "http://localhost:8080";

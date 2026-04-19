@@ -15,6 +15,7 @@
 
 #include "handlers/user/auth_login.hpp"
 #include "handlers/videos/video_create.hpp"
+#include "handlers/videos/video_list.hpp"
 
 #include "s3/component.hpp"
 
@@ -29,6 +30,7 @@ int main(int argc, char* argv[]) {
                               .Append<userver::components::Scylla>("scylla")
                               .Append<real_medium::handlers::users::auth_login::Handler>()
                               .Append<real_medium::handlers::videos::create::Handler>()
+                              .Append<real_medium::handlers::videos::list::Handler>()
                               .Append<real_medium::s3::S3Component>()
                             //   .Append<userver::server::handlers::TestsControl>()
                               .Append<userver::clients::dns::Component>();
