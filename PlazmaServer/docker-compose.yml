@@ -89,6 +89,8 @@ services:
         depends_on:
           - scylla-init
           - minio-init
+          - scylladb
+        networks:
           - scylla
 
 networks:

@@ -119,6 +119,8 @@ void FileDialog::attachFiles(plazma::task_queue::SendMediaType type) {
             }
 
             if (!result.paths.isEmpty()) {
+                emit pathsPicked(result.paths);
+
                 auto list = storages::prepare::ValidateMediaList(result.paths);
 
                 if (list.error != storages::prepare::PreparedList::Error::None) {

@@ -67,8 +67,7 @@ void dispatch(td_api::object_ptr<T>& obj, Fs&&... handlers) {
 
 void TelegramClient::process_update(td_api::object_ptr<td_api::Object> update) {
     dispatch(update, [this](td_api::updateAuthorizationState& update_authorization_state) {
-        dispatch(
-            update_authorization_state.authorization_state_,
+        td_api::downcast_call(*update_authorization_state.authorization_state_, detail::overloaded(
             [this](td_api::authorizationStateWaitTdlibParameters&) {
                 qDebug() << "[AUTH] WaitTdlibParameters";
                 send(request_builder_->setTdLibParameters());
@@ -80,6 +79,31 @@ void TelegramClient::process_update(td_api::object_ptr<td_api::Object> update) {
             [this](td_api::authorizationStateWaitCode&) {
                 qDebug() << "[AUTH] WaitCode";
                 emit authCodeRequired();
+            },
+            [](td_api::authorizationStateWaitRegistration&) {
+                qWarning() << "[AUTH] WaitRegistration — account has no name yet; "
+                              "app does not handle this state. "
+                              "Register via an official Telegram client first, then retry.";
+            },
+            [](td_api::authorizationStateWaitPassword& s) {
+                qWarning() << "[AUTH] WaitPassword — 2FA required. "
+                              "App does not handle this state yet. Hint:"
+                              << QString::fromStdString(s.password_hint_);
+            },
+            [](td_api::authorizationStateWaitEmailAddress&) {
+                qWarning() << "[AUTH] WaitEmailAddress — app does not handle this state.";
+            },
+            [](td_api::authorizationStateWaitEmailCode&) {
+                qWarning() << "[AUTH] WaitEmailCode — app does not handle this state.";
+            },
+            [](td_api::authorizationStateLoggingOut&) {
+                qDebug() << "[AUTH] LoggingOut";
+            },
+            [](td_api::authorizationStateClosing&) {
+                qDebug() << "[AUTH] Closing";
+            },
+            [](td_api::authorizationStateClosed&) {
+                qDebug() << "[AUTH] Closed";
             },
             [this](td_api::authorizationStateReady&) {
                 qDebug() << "[AUTH] Ready";
@@ -93,8 +117,12 @@ void TelegramClient::process_update(td_api::object_ptr<td_api::Object> update) {
 
                     emit userLoaded(me_);
                 });
+            },
+            [](auto& other) {
+                qWarning() << "[AUTH] Unhandled auth state:"
+                           << QString::fromStdString(td_api::to_string(other));
             }
-        );
+        ));
     });
 }
 

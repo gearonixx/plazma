@@ -48,6 +48,11 @@ public:
     explicit FileDialog(Api* api, QObject* parent = nullptr);
     ~FileDialog();
 
+signals:
+    void pathsPicked(const QStringList& paths);
+
+public:
+
     void GetOpenPaths(
         QPointer<QWidget> parent,
         const QString& caption,

@@ -28,11 +28,14 @@ class Session final : public QObject {
     Q_PROPERTY(QString lastName READ lastName NOTIFY sessionChanged)
     Q_PROPERTY(QString phoneNumber READ phoneNumber NOTIFY sessionChanged)
     Q_PROPERTY(bool premium READ premium NOTIFY sessionChanged)
+    Q_PROPERTY(QString errorMessage READ errorMessage NOTIFY errorChanged)
 
 public:
     explicit Session(QObject* parent = nullptr);
 
     void start(const UserLogin& user);
+    void reportError(int statusCode, const QString& message);
+    QString errorMessage() const { return errorMessage_; }
 
     [[nodiscard]] Api& api() { return *api_; }
 
@@ -46,6 +49,7 @@ public:
 
 signals:
     void sessionChanged();
+    void errorChanged();
 
 private:
     std::unique_ptr<Api> api_;
@@ -57,4 +61,5 @@ private:
     QString lastName_;
     QString phoneNumber_;
     bool premium_ = false;
+    QString errorMessage_;
 };

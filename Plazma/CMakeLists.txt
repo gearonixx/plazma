@@ -10,6 +10,7 @@ find_package(ECM ${ECM_MIN_VERSION} REQUIRED NO_MODULE)
 
 find_package(PkgConfig REQUIRED)
 pkg_check_modules(GTK3 REQUIRED gtk+-3.0)
+pkg_check_modules(MPV REQUIRED mpv)
 
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${ECM_MODULE_PATH})
 include(ECMSetupVersion)
@@ -22,7 +23,7 @@ list(GET VERSION_LIST 0 APP_MAJOR_VERSION)
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
-find_package(Qt6 REQUIRED COMPONENTS Core Widgets Qml Quick LinguistTools)
+find_package(Qt6 REQUIRED COMPONENTS Core Widgets Qml Quick OpenGL LinguistTools)
 
 qt_add_resources(RESOURCES src/resources.qrc)
 
@@ -48,9 +49,9 @@ file(GLOB_RECURSE SOURCES "src/*.cpp" "src/*.h")
 add_executable(plazma ${SOURCES} ${RESOURCES}
         src/models/user_model.cpp)
 
-target_include_directories(plazma PRIVATE ${CMAKE_SOURCE_DIR} ${CMAKE_BINARY_DIR} ${GTK3_INCLUDE_DIRS})
-target_compile_options(plazma PRIVATE ${GTK3_CFLAGS_OTHER})
+target_include_directories(plazma PRIVATE ${CMAKE_SOURCE_DIR} ${CMAKE_BINARY_DIR} ${GTK3_INCLUDE_DIRS} ${MPV_INCLUDE_DIRS})
+target_compile_options(plazma PRIVATE ${GTK3_CFLAGS_OTHER} ${MPV_CFLAGS_OTHER})
 
 target_sources(plazma PRIVATE ${PLAZMA_QM_FILES} ${QRC})
 
-target_link_libraries(plazma Qt6::Widgets Qt6::Core Qt6::Qml Qt6::Quick Td::TdStatic ${GTK3_LIBRARIES})
+target_link_libraries(plazma Qt6::Widgets Qt6::Core Qt6::Qml Qt6::Quick Qt6::OpenGL Td::TdStatic ${GTK3_LIBRARIES} ${MPV_LIBRARIES})

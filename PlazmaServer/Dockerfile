@@ -8,7 +8,7 @@ ENV PATH="/root/.cargo/bin:${PATH}"
 RUN rustup default stable
 
 RUN curl -fsSL https://claude.ai/install.sh | bash
-ENV PATH="/root/.claude/bin:${PATH}"
+ENV PATH="/root/.local/bin:/home/user/.local/bin:${PATH}"
 
 RUN apt-get update && apt-get install -y libuv1-dev
 
@@ -21,7 +21,7 @@ RUN git clone https://github.com/scylladb/cpp-rs-driver.git /opt/cpp-rs-driver \
   && ldconfig \
   && cd / && rm -rf /opt/cpp-rs-driver
 
-RUN git clone https://github.com/gearonixx/userver.git /opt/userver \
+RUN git clone https://github.com/gearonixx/userver-scylla.git /opt/userver \
   && cd /opt/userver \
   && git checkout scylladb-driver \
   && BUILD_OPTIONS=" \
@@ -42,6 +42,10 @@ RUN git clone https://github.com/gearonixx/userver.git /opt/userver \
   && cd / && rm -rf /opt/userver
 
 
-RUN mkdir -p /home/user/.local && ln -sf /root/.local/bin /home/user/.local/bin && ln -sf /root/.local/etc /home/user/.local/etc
+RUN mkdir -p /home/user/.local \
+  && ln -sf /root/.local/bin /home/user/.local/bin \
+  && ln -sf /root/.local/etc /home/user/.local/etc \
+  && chmod 755 /root \
+  && chmod -R a+rX /root/.local
 
 EXPOSE 8080-8100

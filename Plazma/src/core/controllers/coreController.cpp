@@ -13,6 +13,7 @@
 
 #include "../../models/user_model.h"
 #include "../../session.h"
+#include "../../ui/mpv_object.h"
 
 CoreController::CoreController(
     QQmlApplicationEngine* engine,
@@ -50,6 +51,7 @@ void CoreController::initModels(TelegramClient* client) {
     language_model_.reset(new LanguageModel(settings_));
     qmlRegisterSingletonInstance<LanguageModel>(APPLICATION_ID, 1, 0, "LanguageModel", language_model_.data());
 
+    qmlRegisterType<MpvObject>(APPLICATION_ID, 1, 0, "MpvObject");
 };
 
 void CoreController::initControllers() {
@@ -89,6 +91,10 @@ void CoreController::initAuthBindings() {
 
     connect(&session_->api(), &Api::loginSuccess, this, [this](const UserLogin& user) {
         session_->start(user);
+    });
+
+    connect(&session_->api(), &Api::loginError, this, [this](int statusCode, const QString& error) {
+        session_->reportError(statusCode, error);
     });
 }
 

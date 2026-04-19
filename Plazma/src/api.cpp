@@ -77,7 +77,8 @@ void Api::loginUser(const UserLogin& user) {
             }
         })
         .fail([this](int statusCode, const QString& error) {
-            qWarning() << "[API] loginUser failed:" << error;
+            qWarning() << "[API] loginUser failed — POST" << (QString(kBaseUrl) + "/v1/auth/login")
+                       << "status:" << statusCode << "error:" << error;
             emit loginError(statusCode, error);
         })
         .send();

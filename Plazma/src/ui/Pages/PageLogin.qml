@@ -32,6 +32,33 @@ Page {
         }
     }
 
+    // Login error banner (HTTP auth failure, server down, etc.)
+    Rectangle {
+        id: errorBanner
+        visible: Session.errorMessage.length > 0
+        anchors.top: parent.top
+        anchors.left: parent.left
+        anchors.right: parent.right
+        anchors.margins: 8
+        height: visible ? errorText.implicitHeight + 20 : 0
+        radius: 8
+        color: "#F8D7DA"
+        border.color: "#F5C2C7"
+        border.width: 1
+        z: 20
+
+        Text {
+            id: errorText
+            anchors.fill: parent
+            anchors.margins: 10
+            text: qsTr("Login failed: %1").arg(Session.errorMessage)
+            color: "#842029"
+            font.pixelSize: 12
+            wrapMode: Text.WordWrap
+            verticalAlignment: Text.AlignVCenter
+        }
+    }
+
     // Back button
     Rectangle {
         id: backButton
@@ -270,7 +297,7 @@ Page {
                 text: qsTr("Next")
                 font.pixelSize: 16
                 font.weight: Font.DemiBold
-                enabled: codeField.text.length > 0
+                enabled: codeField.text.length > 0 && AuthorizationCodeModel.waitingForAuthCode
 
                 clickedFunc: function() {
                     submitCode()
