@@ -44,6 +44,9 @@ target_link_libraries(${PROJECT_NAME} PRIVATE userver::core userver::scylla user
 find_package(ICU COMPONENTS uc i18n REQUIRED)
 target_link_libraries(${PROJECT_NAME} PRIVATE ICU::uc ICU::i18n)
 
+find_package(OpenSSL REQUIRED)
+target_link_libraries(${PROJECT_NAME} PRIVATE OpenSSL::Crypto)
+
 # Install
 include(GNUInstallDirs)
 if(DEFINED ENV{PREFIX})

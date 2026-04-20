@@ -15,11 +15,18 @@ Page {
     id: root
 
     property bool hasVideo: player.hasMedia
-    property string currentFileName: VideoFeedModel.currentTitle
+    property string currentTitle: VideoFeedModel.currentTitle
+    property string lastError: ""
     property bool mouseIdle: false
     property string lastToast: ""
+    property bool chromeVisible: !root.hasVideo
+                                 || player.paused
+                                 || stageMouse.containsMouse
+                                 || topChromeHover.containsMouse
+                                 || bottomChromeHover.containsMouse
+                                 || controlsTimer.running
 
-    background: Rectangle { color: PlazmaStyle.color.warmWhite }
+    background: Rectangle { color: "#050608" }
 
     Settings {
         id: persisted
@@ -52,6 +59,7 @@ Page {
         player.hwdec = persisted.hwdec
 
         if (VideoFeedModel.currentUrl.length > 0) {
+            root.lastError = ""
             player.source = VideoFeedModel.currentUrl
         }
     }
@@ -60,8 +68,19 @@ Page {
         target: VideoFeedModel
         function onCurrentChanged() {
             if (VideoFeedModel.currentUrl.length > 0) {
+                root.lastError = ""
                 player.source = VideoFeedModel.currentUrl
             }
+        }
+    }
+
+    Connections {
+        target: FileDialogModel
+        function onFileSelected(path) {
+            root.lastError = ""
+            const raw = path.startsWith("file://") ? path.slice(7) : path
+            root.currentTitle = raw.split("/").pop()
+            player.source = "file://" + raw
         }
     }
 
@@ -73,7 +92,7 @@ Page {
         function onLoopChanged()   { persisted.loop = player.loop }
         function onHwdecChanged()  { persisted.hwdec = player.hwdec }
         function onScreenshotSaved(path) { root.showToast(qsTr("Saved: %1").arg(path.split("/").pop())) }
-        function onPlaybackError(msg)    { root.showToast(qsTr("Error: %1").arg(msg)) }
+        function onPlaybackError(msg)    { root.lastError = msg; root.showToast(qsTr("Error: %1").arg(msg)) }
         function onEndReached() { if (!player.loop) root.showToast(qsTr("End of video")) }
         function onFileLoaded() {
             const want = player.hwdec
@@ -105,6 +124,12 @@ Page {
         toastTimer.restart()
     }
 
+    function goBack() {
+        player.stop()
+        VideoFeedModel.clearCurrent()
+        PageController.replacePage(PageEnum.PageFeed)
+    }
+
     Shortcut { sequence: "Space"; enabled: root.hasVideo; onActivated: player.playPause() }
     Shortcut { sequence: "K";     enabled: root.hasVideo; onActivated: player.playPause() }
     Shortcut { sequence: "Right"; enabled: root.hasVideo; onActivated: { player.seekRelative(5);  skipRight.pulse() } }
@@ -115,9 +140,10 @@ Page {
     Shortcut { sequence: "Down";  enabled: root.hasVideo; onActivated: { player.volume = Math.max(0, player.volume - 5); root.showToast(qsTr("Volume %1%").arg(Math.round(player.volume))) } }
     Shortcut { sequence: "M";     enabled: root.hasVideo; onActivated: { player.toggleMute(); root.showToast(player.muted ? qsTr("Muted") : qsTr("Unmuted")) } }
     Shortcut { sequence: "F";     enabled: root.hasVideo; onActivated: root.toggleFullscreen() }
-    Shortcut { sequence: "Escape"; enabled: root.hasVideo; onActivated: {
+    Shortcut { sequence: "Escape"; onActivated: {
         const win = root.Window.window
-        if (win && win.visibility === Window.FullScreen) win.visibility = Window.Windowed
+        if (win && win.visibility === Window.FullScreen) { win.visibility = Window.Windowed; return }
+        root.goBack()
     } }
     Shortcut { sequence: ","; enabled: root.hasVideo; onActivated: player.frameBackStep() }
     Shortcut { sequence: "."; enabled: root.hasVideo; onActivated: player.frameStep() }
@@ -136,71 +162,10 @@ Page {
     Shortcut { sequence: "8"; enabled: root.hasVideo; onActivated: player.seekPercent(80) }
     Shortcut { sequence: "9"; enabled: root.hasVideo; onActivated: player.seekPercent(90) }
 
-    // Header with back button + title
-    Rectangle {
-        id: header
-        anchors.top: parent.top
-        anchors.left: parent.left
-        anchors.right: parent.right
-        height: 56
-        color: PlazmaStyle.color.creamWhite
-        border.color: PlazmaStyle.color.inputBorder
-        border.width: 1
-        z: 10
-
-        RowLayout {
-            anchors.fill: parent
-            anchors.leftMargin: 12
-            anchors.rightMargin: 16
-            spacing: 10
-
-            Rectangle {
-                Layout.preferredWidth: 36
-                Layout.preferredHeight: 36
-                radius: 18
-                color: backMouse.containsMouse ? PlazmaStyle.color.softAmber : "transparent"
-
-                Text {
-                    anchors.centerIn: parent
-                    text: "\u2190"
-                    font.pixelSize: 20
-                    color: PlazmaStyle.color.textPrimary
-                }
-
-                MouseArea {
-                    id: backMouse
-                    anchors.fill: parent
-                    hoverEnabled: true
-                    cursorShape: Qt.PointingHandCursor
-                    onClicked: {
-                        player.stop()
-                        VideoFeedModel.clearCurrent()
-                        PageController.replacePage(PageEnum.PageFeed)
-                    }
-                }
-            }
-
-            Text {
-                Layout.fillWidth: true
-                text: root.currentFileName.length > 0 ? root.currentFileName : qsTr("Player")
-                font.pixelSize: 14
-                font.weight: Font.DemiBold
-                color: PlazmaStyle.color.textPrimary
-                elide: Text.ElideRight
-            }
-        }
-    }
-
-    // Stage
     Rectangle {
         id: stage
-        anchors.top: header.bottom
-        anchors.bottom: parent.bottom
-        anchors.left: parent.left
-        anchors.right: parent.right
-        anchors.margins: 16
-        color: "black"
-        radius: 12
+        anchors.fill: parent
+        color: "#050608"
         clip: true
 
         MpvObject {
@@ -208,45 +173,45 @@ Page {
             anchors.fill: parent
         }
 
-        ColumnLayout {
-            anchors.centerIn: parent
-            visible: !root.hasVideo && !player.loading
-            spacing: 12
-
-            Rectangle {
-                Layout.alignment: Qt.AlignHCenter
-                width: 80; height: 80; radius: 40
-                color: PlazmaStyle.color.translucentWhite
-
-                Text {
-                    anchors.centerIn: parent
-                    text: "\u25B6"
-                    font.pixelSize: 32
-                    color: "#FFFFFF"
+        DropArea {
+            anchors.fill: parent
+            onDropped: function(drop) {
+                if (drop.hasUrls && drop.urls.length > 0) {
+                    const url = drop.urls[0].toString()
+                    const p = url.startsWith("file://") ? url.slice(7) : url
+                    root.currentTitle = p.split("/").pop()
+                    root.lastError = ""
+                    player.source = "file://" + p
+                    drop.accept()
                 }
             }
 
-            Text {
-                Layout.alignment: Qt.AlignHCenter
-                text: qsTr("No video selected")
-                color: "#FFFFFF"
-                font.pixelSize: 16
-                font.weight: Font.DemiBold
-            }
+            Rectangle {
+                anchors.fill: parent
+                visible: parent.containsDrag
+                color: Qt.rgba(0.98, 0.70, 0.42, 0.15)
+                border.color: PlazmaStyle.color.goldenApricot
+                border.width: 3
+                z: 200
 
-            Text {
-                Layout.alignment: Qt.AlignHCenter
-                text: qsTr("Pick a video from the feed")
-                color: PlazmaStyle.color.mistyGray
-                font.pixelSize: 12
+                ColumnLayout {
+                    anchors.centerIn: parent
+                    spacing: 8
+                    Text {
+                        Layout.alignment: Qt.AlignHCenter
+                        text: "\u2B07"
+                        color: PlazmaStyle.color.goldenApricot
+                        font.pixelSize: 56
+                    }
+                    Text {
+                        Layout.alignment: Qt.AlignHCenter
+                        text: qsTr("Drop to play")
+                        color: "#FFFFFF"
+                        font.pixelSize: 22
+                        font.weight: Font.Bold
+                    }
+                }
             }
-        }
-
-        BusyIndicator {
-            anchors.centerIn: parent
-            running: player.loading
-            visible: running
-            width: 48; height: 48
         }
 
         MouseArea {
@@ -277,62 +242,179 @@ Page {
             }
         }
 
-        Timer { id: controlsTimer; interval: 2500; repeat: false; running: root.hasVideo && !player.paused }
-        Timer { id: idleTimer; interval: 3000; repeat: false; onTriggered: if (root.hasVideo && !player.paused) root.mouseIdle = true }
+        Timer { id: controlsTimer; interval: 2800; repeat: false; running: root.hasVideo && !player.paused }
+        Timer { id: idleTimer; interval: 3500; repeat: false; onTriggered: if (root.hasVideo && !player.paused) root.mouseIdle = true }
 
-        SkipIndicator {
-            id: skipLeft
-            direction: -1
-            anchors.left: parent.left
-            anchors.verticalCenter: parent.verticalCenter
-            anchors.leftMargin: 40
-        }
-        SkipIndicator {
-            id: skipRight
-            direction: 1
-            anchors.right: parent.right
-            anchors.verticalCenter: parent.verticalCenter
-            anchors.rightMargin: 40
-        }
+        SkipIndicator { id: skipLeft;  direction: -1; anchors.left:  parent.left;  anchors.verticalCenter: parent.verticalCenter; anchors.leftMargin: 60  }
+        SkipIndicator { id: skipRight; direction:  1; anchors.right: parent.right; anchors.verticalCenter: parent.verticalCenter; anchors.rightMargin: 60 }
 
-        Rectangle {
-            visible: root.hasVideo && root.currentFileName.length > 0
-            anchors.top: parent.top
-            anchors.left: parent.left
-            anchors.margins: 12
-            height: 28
-            width: Math.min(nameText.implicitWidth + 24, stage.width - 40)
-            radius: 14
-            color: PlazmaStyle.color.translucentMidnightBlack
+        // ========================================================= Empty state
+        Item {
+            anchors.fill: parent
+            visible: !root.hasVideo && !player.loading && root.lastError.length === 0
 
-            opacity: (player.paused || stageMouse.containsMouse) ? 1 : 0
-            Behavior on opacity { NumberAnimation { duration: 180 } }
+            Rectangle {
+                anchors.centerIn: parent
+                width: Math.min(parent.width - 64, 460)
+                height: emptyCol.implicitHeight + 56
+                radius: 20
+                color: Qt.rgba(1, 1, 1, 0.04)
+                border.color: Qt.rgba(1, 1, 1, 0.08)
+                border.width: 1
 
-            Text {
-                id: nameText
-                anchors.fill: parent
-                anchors.leftMargin: 12
-                anchors.rightMargin: 12
-                verticalAlignment: Text.AlignVCenter
-                text: {
-                    const res = player.videoWidth > 0 ? "  " + player.videoWidth + "×" + player.videoHeight : ""
-                    return root.currentFileName + res
+                ColumnLayout {
+                    id: emptyCol
+                    anchors.fill: parent
+                    anchors.margins: 28
+                    spacing: 14
+
+                    Rectangle {
+                        Layout.alignment: Qt.AlignHCenter
+                        width: 72; height: 72; radius: 36
+                        color: PlazmaStyle.color.softGoldenApricot
+
+                        Text {
+                            anchors.centerIn: parent
+                            text: "\u25B6"
+                            font.pixelSize: 32
+                            color: PlazmaStyle.color.goldenApricot
+                        }
+                    }
+
+                    Text {
+                        Layout.alignment: Qt.AlignHCenter
+                        text: qsTr("Nothing playing")
+                        color: "#FFFFFF"
+                        font.pixelSize: 20
+                        font.weight: Font.DemiBold
+                    }
+
+                    Text {
+                        Layout.alignment: Qt.AlignHCenter
+                        Layout.fillWidth: true
+                        text: qsTr("Pick a video from the feed, drop a file here, or open one from disk.")
+                        color: PlazmaStyle.color.cloudyGray
+                        font.pixelSize: 13
+                        horizontalAlignment: Text.AlignHCenter
+                        wrapMode: Text.WordWrap
+                        lineHeight: 1.45
+                    }
+
+                    RowLayout {
+                        Layout.alignment: Qt.AlignHCenter
+                        Layout.topMargin: 6
+                        spacing: 10
+
+                        PillButton {
+                            label: qsTr("Back to feed")
+                            primary: false
+                            onTriggered: root.goBack()
+                        }
+
+                        PillButton {
+                            label: qsTr("Open local file")
+                            primary: true
+                            onTriggered: FileDialogModel.openFilePicker()
+                        }
+                    }
                 }
-                color: "#FFFFFF"
-                font.pixelSize: 11
-                elide: Text.ElideMiddle
             }
         }
 
+        // ========================================================= Error state
+        Item {
+            anchors.fill: parent
+            visible: root.lastError.length > 0 && !player.loading
+
+            Rectangle {
+                anchors.centerIn: parent
+                width: Math.min(parent.width - 64, 460)
+                height: errCol.implicitHeight + 48
+                radius: 20
+                color: Qt.rgba(0.85, 0.25, 0.25, 0.10)
+                border.color: Qt.rgba(0.85, 0.25, 0.25, 0.45)
+                border.width: 1
+
+                ColumnLayout {
+                    id: errCol
+                    anchors.fill: parent
+                    anchors.margins: 24
+                    spacing: 12
+
+                    Text {
+                        Layout.alignment: Qt.AlignHCenter
+                        text: "\u26A0"
+                        color: "#FF8E8E"
+                        font.pixelSize: 38
+                    }
+
+                    Text {
+                        Layout.alignment: Qt.AlignHCenter
+                        text: qsTr("Couldn't play this video")
+                        color: "#FFFFFF"
+                        font.pixelSize: 17
+                        font.weight: Font.DemiBold
+                    }
+
+                    Text {
+                        Layout.alignment: Qt.AlignHCenter
+                        Layout.fillWidth: true
+                        text: root.lastError
+                        color: PlazmaStyle.color.cloudyGray
+                        font.pixelSize: 12
+                        horizontalAlignment: Text.AlignHCenter
+                        wrapMode: Text.WordWrap
+                    }
+
+                    RowLayout {
+                        Layout.alignment: Qt.AlignHCenter
+                        Layout.topMargin: 4
+                        spacing: 10
+
+                        PillButton {
+                            label: qsTr("Back to feed")
+                            primary: false
+                            onTriggered: root.goBack()
+                        }
+
+                        PillButton {
+                            label: qsTr("Retry")
+                            primary: true
+                            onTriggered: {
+                                const url = VideoFeedModel.currentUrl.length > 0
+                                            ? VideoFeedModel.currentUrl
+                                            : player.source
+                                root.lastError = ""
+                                if (url && url.length > 0) {
+                                    player.source = ""
+                                    player.source = url
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        BusyIndicator {
+            anchors.centerIn: parent
+            running: player.loading
+            visible: running
+            width: 56; height: 56
+        }
+
+        // ========================================================= Toast
         Rectangle {
             visible: toastTimer.running
             anchors.horizontalCenter: parent.horizontalCenter
             anchors.top: parent.top
-            anchors.topMargin: 50
-            width: Math.min(toastText.implicitWidth + 28, stage.width - 40)
-            height: 34
-            radius: 17
+            anchors.topMargin: 96
+            width: Math.min(toastText.implicitWidth + 32, stage.width - 40)
+            height: 38
+            radius: 19
             color: PlazmaStyle.color.translucentMidnightBlack
+            border.color: Qt.rgba(1, 1, 1, 0.08)
+            border.width: 1
 
             opacity: toastTimer.running ? 1 : 0
             Behavior on opacity { NumberAnimation { duration: 150 } }
@@ -346,32 +428,171 @@ Page {
                 font.weight: Font.DemiBold
             }
 
-            Timer { id: toastTimer; interval: 1400; repeat: false }
+            Timer { id: toastTimer; interval: 1500; repeat: false }
         }
 
-        // Overlay
-        Rectangle {
+        // ========================================================= Top chrome (floating)
+        Item {
+            id: topChrome
+            anchors.left: parent.left
+            anchors.right: parent.right
+            anchors.top: parent.top
+            height: 84
+
+            opacity: root.chromeVisible ? 1 : 0
+            Behavior on opacity { NumberAnimation { duration: 220; easing.type: Easing.OutCubic } }
+
+            Rectangle {
+                anchors.fill: parent
+                gradient: Gradient {
+                    GradientStop { position: 0.0; color: Qt.rgba(0, 0, 0, 0.65) }
+                    GradientStop { position: 1.0; color: "transparent" }
+                }
+            }
+
+            MouseArea {
+                id: topChromeHover
+                anchors.fill: parent
+                hoverEnabled: true
+                acceptedButtons: Qt.NoButton
+                propagateComposedEvents: true
+            }
+
+            RowLayout {
+                anchors.fill: parent
+                anchors.leftMargin: 16
+                anchors.rightMargin: 16
+                anchors.topMargin: 14
+                anchors.bottomMargin: 14
+                spacing: 14
+
+                // Pretty back button — pill, chevron + label, subtle shadow
+                Rectangle {
+                    id: backBtn
+                    Layout.preferredHeight: 40
+                    Layout.preferredWidth: backRow.implicitWidth + 24
+                    radius: 20
+
+                    color: backMouse.pressed
+                           ? Qt.rgba(1, 1, 1, 0.26)
+                           : (backMouse.containsMouse ? Qt.rgba(1, 1, 1, 0.18) : Qt.rgba(1, 1, 1, 0.10))
+                    border.color: Qt.rgba(1, 1, 1, 0.14)
+                    border.width: 1
+
+                    Behavior on color { ColorAnimation { duration: 140 } }
+                    Behavior on scale { NumberAnimation { duration: 140 } }
+                    scale: backMouse.pressed ? 0.96 : 1.0
+
+                    RowLayout {
+                        id: backRow
+                        anchors.centerIn: parent
+                        spacing: 8
+
+                        Text {
+                            text: "\u2039"
+                            color: "#FFFFFF"
+                            font.pixelSize: 22
+                            font.weight: Font.DemiBold
+                        }
+
+                        Text {
+                            text: qsTr("Back")
+                            color: "#FFFFFF"
+                            font.pixelSize: 13
+                            font.weight: Font.DemiBold
+                        }
+                    }
+
+                    ToolTip.visible: backMouse.containsMouse
+                    ToolTip.text: qsTr("Back to feed  (Esc)")
+                    ToolTip.delay: 500
+
+                    MouseArea {
+                        id: backMouse
+                        anchors.fill: parent
+                        hoverEnabled: true
+                        cursorShape: Qt.PointingHandCursor
+                        onClicked: root.goBack()
+                    }
+                }
+
+                ColumnLayout {
+                    Layout.fillWidth: true
+                    Layout.leftMargin: 4
+                    spacing: 2
+
+                    Text {
+                        Layout.fillWidth: true
+                        text: root.currentTitle.length > 0 ? root.currentTitle : qsTr("Player")
+                        color: "#FFFFFF"
+                        font.pixelSize: 15
+                        font.weight: Font.DemiBold
+                        elide: Text.ElideRight
+                    }
+
+                    Text {
+                        Layout.fillWidth: true
+                        visible: player.videoWidth > 0
+                        text: {
+                            const res = player.videoWidth + " × " + player.videoHeight
+                            const codec = player.videoCodec.length > 0 ? "  ·  " + player.videoCodec : ""
+                            const hw = player.hwdecCurrent.length > 0 && player.hwdecCurrent !== "no"
+                                       ? "  ·  " + player.hwdecCurrent.toUpperCase() : ""
+                            return res + codec + hw
+                        }
+                        color: PlazmaStyle.color.cloudyGray
+                        font.pixelSize: 11
+                        elide: Text.ElideRight
+                    }
+                }
+
+                GhostIcon {
+                    glyph: "\u2B06"
+                    tip: qsTr("Open local file")
+                    onTriggered: FileDialogModel.openFilePicker()
+                }
+
+                GhostIcon {
+                    glyph: "\u26F6"
+                    tip: qsTr("Fullscreen  (F)")
+                    onTriggered: root.toggleFullscreen()
+                }
+            }
+        }
+
+        // ========================================================= Bottom chrome
+        Item {
             id: overlay
             visible: root.hasVideo
             anchors.left: parent.left
             anchors.right: parent.right
             anchors.bottom: parent.bottom
-            height: 110
-            radius: 12
+            height: 132
 
-            gradient: Gradient {
-                GradientStop { position: 0.0; color: "transparent" }
-                GradientStop { position: 1.0; color: Qt.rgba(0, 0, 0, 0.8) }
+            opacity: root.chromeVisible ? 1 : 0
+            Behavior on opacity { NumberAnimation { duration: 220; easing.type: Easing.OutCubic } }
+
+            Rectangle {
+                anchors.fill: parent
+                gradient: Gradient {
+                    GradientStop { position: 0.0; color: "transparent" }
+                    GradientStop { position: 1.0; color: Qt.rgba(0, 0, 0, 0.85) }
+                }
             }
 
-            opacity: (player.paused || stageMouse.containsMouse || controlsTimer.running) ? 1 : 0
-            Behavior on opacity { NumberAnimation { duration: 180 } }
+            MouseArea {
+                id: bottomChromeHover
+                anchors.fill: parent
+                hoverEnabled: true
+                acceptedButtons: Qt.NoButton
+                propagateComposedEvents: true
+            }
 
             ColumnLayout {
                 anchors.fill: parent
-                anchors.leftMargin: 14
-                anchors.rightMargin: 14
-                anchors.bottomMargin: 10
+                anchors.leftMargin: 18
+                anchors.rightMargin: 18
+                anchors.bottomMargin: 14
                 spacing: 2
 
                 Slider {
@@ -389,14 +610,14 @@ Page {
                         width: seekBar.availableWidth
                         height: 4
                         radius: 2
-                        color: PlazmaStyle.color.translucentWhite
+                        color: Qt.rgba(1, 1, 1, 0.18)
 
                         Rectangle {
                             visible: player.bufferedPosition > 0 && player.duration > 0
                             width: parent.width * Math.min(1, player.bufferedPosition / player.duration)
                             height: parent.height
                             radius: parent.radius
-                            color: PlazmaStyle.color.mistyGray
+                            color: Qt.rgba(1, 1, 1, 0.35)
                         }
 
                         Rectangle {
@@ -410,19 +631,22 @@ Page {
                     handle: Rectangle {
                         x: seekBar.leftPadding + seekBar.visualPosition * (seekBar.availableWidth - width)
                         y: seekBar.topPadding + seekBar.availableHeight / 2 - height / 2
-                        width: 14; height: 14; radius: 7
+                        width: seekBar.pressed ? 16 : 13
+                        height: width
+                        radius: width / 2
                         color: PlazmaStyle.color.warmGold
                         border.color: "#FFFFFF"
                         border.width: 2
+                        Behavior on width { NumberAnimation { duration: 120 } }
                     }
                 }
 
                 RowLayout {
                     Layout.fillWidth: true
-                    spacing: 8
+                    spacing: 10
 
                     CircleButton {
-                        diameter: 38
+                        diameter: 42
                         glyph: player.paused ? "\u25B6" : "\u275A\u275A"
                         bg: PlazmaStyle.color.goldenApricot
                         bgHover: PlazmaStyle.color.warmGold
@@ -434,33 +658,36 @@ Page {
                         visible: player.paused
                         diameter: 28
                         glyph: "\u23EA"
-                        bg: "transparent"; bgHover: PlazmaStyle.color.translucentWhite
+                        bg: "transparent"; bgHover: Qt.rgba(1, 1, 1, 0.16)
                         onClicked: player.frameBackStep()
                     }
                     CircleButton {
                         visible: player.paused
                         diameter: 28
                         glyph: "\u23E9"
-                        bg: "transparent"; bgHover: PlazmaStyle.color.translucentWhite
+                        bg: "transparent"; bgHover: Qt.rgba(1, 1, 1, 0.16)
                         onClicked: player.frameStep()
                     }
 
                     Text {
-                        text: root.formatTime(player.position) + " / " + root.formatTime(player.duration)
+                        text: root.formatTime(player.position) + "  /  " + root.formatTime(player.duration)
                         color: "#FFFFFF"
                         font.pixelSize: 12
-                        Layout.minimumWidth: 96
+                        font.weight: Font.Medium
+                        Layout.minimumWidth: 108
+                        Layout.leftMargin: 4
                     }
 
                     Item { Layout.fillWidth: true }
 
                     Rectangle {
-                        Layout.preferredHeight: 28
-                        Layout.preferredWidth: speedText.implicitWidth + 20
-                        radius: 14
-                        color: speedMouse.containsMouse ? PlazmaStyle.color.translucentWhite : "transparent"
-                        border.color: PlazmaStyle.color.translucentWhite
+                        Layout.preferredHeight: 30
+                        Layout.preferredWidth: speedText.implicitWidth + 22
+                        radius: 15
+                        color: speedMouse.containsMouse ? Qt.rgba(1, 1, 1, 0.16) : Qt.rgba(1, 1, 1, 0.06)
+                        border.color: Qt.rgba(1, 1, 1, 0.14)
                         border.width: 1
+                        Behavior on color { ColorAnimation { duration: 120 } }
 
                         Text {
                             id: speedText
@@ -497,20 +724,20 @@ Page {
                         diameter: 32
                         glyph: "\u21BB"
                         bg: player.loop ? PlazmaStyle.color.goldenApricot : "transparent"
-                        bgHover: player.loop ? PlazmaStyle.color.warmGold : PlazmaStyle.color.translucentWhite
+                        bgHover: player.loop ? PlazmaStyle.color.warmGold : Qt.rgba(1, 1, 1, 0.16)
                         onClicked: { player.toggleLoop(); root.showToast(player.loop ? qsTr("Loop on") : qsTr("Loop off")) }
                     }
 
                     CircleButton {
                         diameter: 32
                         glyph: (player.muted || player.volume === 0) ? "\uD83D\uDD07" : "\uD83D\uDD0A"
-                        bg: "transparent"; bgHover: PlazmaStyle.color.translucentWhite
+                        bg: "transparent"; bgHover: Qt.rgba(1, 1, 1, 0.16)
                         onClicked: player.toggleMute()
                     }
 
                     Slider {
                         id: volumeSlider
-                        Layout.preferredWidth: 80
+                        Layout.preferredWidth: 90
                         from: 0; to: 100
                         value: player.muted ? 0 : player.volume
                         onMoved: {
@@ -523,7 +750,7 @@ Page {
                             y: volumeSlider.topPadding + volumeSlider.availableHeight / 2 - height / 2
                             width: volumeSlider.availableWidth
                             height: 3; radius: 2
-                            color: PlazmaStyle.color.translucentWhite
+                            color: Qt.rgba(1, 1, 1, 0.18)
 
                             Rectangle {
                                 width: volumeSlider.visualPosition * parent.width
@@ -543,7 +770,7 @@ Page {
                     CircleButton {
                         diameter: 32
                         glyph: "\u22EE"
-                        bg: "transparent"; bgHover: PlazmaStyle.color.translucentWhite
+                        bg: "transparent"; bgHover: Qt.rgba(1, 1, 1, 0.16)
                         onClicked: moreMenu.open()
 
                         Menu {
@@ -561,6 +788,11 @@ Page {
                             }
 
                             MenuSeparator {}
+
+                            MenuItem {
+                                text: qsTr("Open local file")
+                                onTriggered: FileDialogModel.openFilePicker()
+                            }
 
                             MenuItem {
                                 text: qsTr("Take screenshot")
@@ -615,7 +847,7 @@ Page {
                     CircleButton {
                         diameter: 32
                         glyph: "\u26F6"
-                        bg: "transparent"; bgHover: PlazmaStyle.color.translucentWhite
+                        bg: "transparent"; bgHover: Qt.rgba(1, 1, 1, 0.16)
                         onClicked: root.toggleFullscreen()
                     }
                 }
@@ -623,14 +855,14 @@ Page {
         }
     }
 
-    // Reusable components
+    // ==================================================== Reusable components
     component CircleButton : Rectangle {
         id: btn
         property int diameter: 32
         property string glyph: ""
         property color bg: "transparent"
-        property color bgHover: Qt.rgba(1, 1, 1, 0.12)
-        property color bgPressed: Qt.rgba(1, 1, 1, 0.22)
+        property color bgHover: Qt.rgba(1, 1, 1, 0.16)
+        property color bgPressed: Qt.rgba(1, 1, 1, 0.28)
         signal clicked()
 
         Layout.preferredWidth: diameter
@@ -640,6 +872,8 @@ Page {
         color: mouse.pressed ? bgPressed : (mouse.containsMouse ? bgHover : bg)
 
         Behavior on color { ColorAnimation { duration: 120 } }
+        Behavior on scale { NumberAnimation { duration: 120 } }
+        scale: mouse.pressed ? 0.94 : 1.0
 
         Text {
             anchors.centerIn: parent
@@ -657,10 +891,92 @@ Page {
         }
     }
 
+    component PillButton : Rectangle {
+        id: pill
+        property string label: ""
+        property bool primary: false
+        signal triggered()
+
+        Layout.preferredHeight: 40
+        Layout.preferredWidth: pillText.implicitWidth + 36
+        radius: 20
+
+        color: primary
+               ? (mouse.pressed ? PlazmaStyle.color.burntOrange
+                                 : (mouse.containsMouse ? PlazmaStyle.color.warmGold
+                                                        : PlazmaStyle.color.goldenApricot))
+               : (mouse.pressed ? Qt.rgba(1, 1, 1, 0.22)
+                                 : (mouse.containsMouse ? Qt.rgba(1, 1, 1, 0.14)
+                                                        : Qt.rgba(1, 1, 1, 0.08)))
+        border.color: primary ? "transparent" : Qt.rgba(1, 1, 1, 0.16)
+        border.width: 1
+
+        Behavior on color { ColorAnimation { duration: 140 } }
+        scale: mouse.pressed ? 0.96 : 1.0
+        Behavior on scale { NumberAnimation { duration: 120 } }
+
+        Text {
+            id: pillText
+            anchors.centerIn: parent
+            text: pill.label
+            color: "#FFFFFF"
+            font.pixelSize: 13
+            font.weight: Font.DemiBold
+        }
+
+        MouseArea {
+            id: mouse
+            anchors.fill: parent
+            hoverEnabled: true
+            cursorShape: Qt.PointingHandCursor
+            onClicked: pill.triggered()
+        }
+    }
+
+    component GhostIcon : Rectangle {
+        id: gi
+        property string glyph: ""
+        property string tip: ""
+        signal triggered()
+
+        Layout.preferredHeight: 36
+        Layout.preferredWidth: 36
+        radius: 18
+
+        color: mouse.pressed
+               ? Qt.rgba(1, 1, 1, 0.22)
+               : (mouse.containsMouse ? Qt.rgba(1, 1, 1, 0.14) : Qt.rgba(1, 1, 1, 0.06))
+        border.color: Qt.rgba(1, 1, 1, 0.12)
+        border.width: 1
+
+        Behavior on color { ColorAnimation { duration: 140 } }
+        scale: mouse.pressed ? 0.94 : 1.0
+        Behavior on scale { NumberAnimation { duration: 120 } }
+
+        Text {
+            anchors.centerIn: parent
+            text: gi.glyph
+            color: "#FFFFFF"
+            font.pixelSize: 15
+        }
+
+        ToolTip.visible: mouse.containsMouse && gi.tip.length > 0
+        ToolTip.text: gi.tip
+        ToolTip.delay: 500
+
+        MouseArea {
+            id: mouse
+            anchors.fill: parent
+            hoverEnabled: true
+            cursorShape: Qt.PointingHandCursor
+            onClicked: gi.triggered()
+        }
+    }
+
     component SkipIndicator : Item {
         id: si
         property int direction: 1
-        width: 80; height: 80
+        width: 96; height: 96
         visible: opacity > 0
         opacity: 0
 
@@ -675,7 +991,9 @@ Page {
         Rectangle {
             anchors.fill: parent
             radius: width / 2
-            color: PlazmaStyle.color.translucentMidnightBlack
+            color: Qt.rgba(0, 0, 0, 0.55)
+            border.color: Qt.rgba(1, 1, 1, 0.12)
+            border.width: 1
         }
 
         Text {

@@ -2,8 +2,7 @@
 
 #include <userver/server/handlers/http_handler_base.hpp>
 #include <userver/components/component_context.hpp>
-
-#include "../../s3/component.hpp"
+#include <userver/storages/scylla/component.hpp>
 
 namespace real_medium::handlers::videos::list {
 
@@ -20,7 +19,7 @@ public:
     ) const override;
 
 private:
-    s3::S3Component& s3_;
+    userver::storages::scylla::SessionPtr session_;
 };
 
-}
+}  // namespace real_medium::handlers::videos::list

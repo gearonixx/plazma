@@ -29,6 +29,8 @@ services:
           done
           cqlsh scylla 9042 -f /migrations/001_init.cql
           cqlsh scylla 9042 -f /migrations/002_add_user_fields.cql
+          cqlsh scylla 9042 -f /migrations/003_add_auth_fields.cql
+          cqlsh scylla 9042 -f /migrations/004_video_tables.cql
           echo "Migration done."
 
     minio:
@@ -74,6 +76,7 @@ services:
           - POSTGRES_DB=realmedium_db-1
           - POSTGRES_USER=user
           - POSTGRES_PASSWORD=password
+          - JWT_SECRET=${JWT_SECRET:-plazma-jwt-secret-CHANGE-IN-PRODUCTION}
           - PREFIX=${PREFIX:-~/.local}
           - CC
           - CCACHE_DIR=/realmedium/.ccache

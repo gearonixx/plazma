@@ -1,25 +1,25 @@
 components_manager:
   coro_pool:
-    initial_size: 500             # Preallocate 500 coroutines at startup.
-    max_size: 1000                # Do not keep more than 1000 preallocated coroutines.
+    initial_size: 500
+    max_size: 1000
 
-  task_processors:                  # Task processor is an executor for coroutine tasks
-    main-task-processor:          # Make a task processor for CPU-bound couroutine tasks.
-      worker_threads: $worker-threads         # Process tasks in 4 threads.
-      thread_name: main-worker  # OS will show the threads of this task processor with 'main-worker' prefix.
+  task_processors:
+    main-task-processor:
+      worker_threads: $worker-threads
+      thread_name: main-worker
 
-    fs-task-processor:            # Make a separate task processor for filesystem bound tasks.
+    fs-task-processor:
       thread_name: fs-worker
       worker_threads: $worker-fs-threads
 
   default_task_processor: main-task-processor
 
-  components:                       # Configuring components that were registered via component_list
+  components:
     server:
-      listener:                 # configuring the main listening socket...
-        port: $server-port            # ...to listen on this port and...
-        task_processor: main-task-processor    # ...process incoming requests on this task processor.
-      listener-monitor:                          # ← add this
+      listener:
+        port: $server-port
+        task_processor: main-task-processor
+      listener-monitor:
         port: 8086
         task_processor: main-task-processor
 
@@ -29,7 +29,7 @@ components_manager:
         default:
           file_path: '@stderr'
           level: $logger-level
-          overflow_behavior: discard  # Drop logs if the system is too busy to write them down.
+          overflow_behavior: discard
 
     scylla:
       dbconnection: scylladb
@@ -48,16 +48,12 @@ components_manager:
         delay: 100ms
       default_keyspace: plazma
 
-    # Dynamic config options. Cache is disabled, updates are disabled.
     dynamic-config:
-      # For most of userver dynamic configs, defaults are used, some are overridden here.
-      # See userver "dynamic config" docs for what configs exist.
       defaults:
         HTTP_CLIENT_CONNECTION_POOL_SIZE: 1000
         POSTGRES_DEFAULT_COMMAND_CONTROL:
           network_timeout_ms: 750
           statement_timeout_ms: 500
-    # testsuite-support: {}
 
     http-client:
       load-enabled: true
@@ -69,44 +65,63 @@ components_manager:
       fs-task-processor: fs-task-processor
 
     handler-auth-login:
-        path: /v1/auth/login
-        method: POST
-        task_processor: main-task-processor
-        throttling_enabled: false
-        url_trailing_slash: strict-match
+      path: /v1/auth/login
+      method: POST
+      task_processor: main-task-processor
+      throttling_enabled: false
+      url_trailing_slash: strict-match
 
+    # POST /v1/videos/upload — legacy path kept for compatibility
     handler-videos-create:
-        path: /v1/videos/upload
-        method: POST
-        task_processor: main-task-processor
-        throttling_enabled: false
-        url_trailing_slash: strict-match
-        max_request_size: 104857600
+      path: /v1/videos/upload
+      method: POST
+      task_processor: main-task-processor
+      throttling_enabled: false
+      url_trailing_slash: strict-match
+      max_request_size: 104857600
+
+    # POST /v1/videos — canonical REST path
+    handler-videos-create-v2:
+      path: /v1/videos
+      method: POST
+      task_processor: main-task-processor
+      throttling_enabled: false
+      url_trailing_slash: strict-match
+      max_request_size: 104857600
 
     handler-videos-list:
-        path: /v1/videos
-        method: GET
-        task_processor: main-task-processor
-        throttling_enabled: false
-        url_trailing_slash: strict-match
+      path: /v1/videos
+      method: GET
+      task_processor: main-task-processor
+      throttling_enabled: false
+      url_trailing_slash: strict-match
+
+    handler-videos-get:
+      path: /v1/videos/{id}
+      method: GET
+      task_processor: main-task-processor
+      throttling_enabled: false
+      url_trailing_slash: strict-match
+
+    handler-videos-delete:
+      path: /v1/videos/{id}
+      method: DELETE
+      task_processor: main-task-processor
+      throttling_enabled: false
+      url_trailing_slash: strict-match
+
+    handler-videos-view:
+      path: /v1/videos/{id}/view
+      method: POST
+      task_processor: main-task-processor
+      throttling_enabled: false
+      url_trailing_slash: strict-match
+
+    handler-my-videos:
+      path: /v1/users/me/videos
+      method: GET
+      task_processor: main-task-processor
+      throttling_enabled: false
+      url_trailing_slash: strict-match
 
     s3-client: {}
-    # tests-control:
-    #   load-enabled: $is_testing
-    #   path: /tests/{action}
-    #   method: POST
-    #   task_processor: main-task-processor
-    # handler-ping:
-    #     path: /ping
-    #     method: GET
-    #     task_processor: main-task-processor
-    #     throttling_enabled: false
-    #     url_trailing_slash: strict-match
-
-#        realmedium-database:
-#            dbconnection: $dbconnection
-#            dbconnection#env: DB_CONNECTION
-#            blocking_task_processor: fs-task-processor
-#            dns_resolver: async
-#            sync-start: true
-#            connlimit_mode: manual

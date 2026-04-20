@@ -48,7 +48,7 @@ class MpvRenderer final : public QQuickFramebufferObject::Renderer {
 public:
     explicit MpvRenderer(MpvObject* owner) : owner_(owner) {
         mpv_opengl_init_params gl_init_params{getProcAddress, nullptr};
-        int advanced_control = 1;
+        int advanced_control = 0;
         mpv_render_param params[] = {
             {MPV_RENDER_PARAM_API_TYPE, const_cast<char*>(MPV_RENDER_API_TYPE_OPENGL)},
             {MPV_RENDER_PARAM_OPENGL_INIT_PARAMS, &gl_init_params},
@@ -105,17 +105,23 @@ MpvObject::MpvObject(QQuickItem* parent) : QQuickFramebufferObject(parent) {
     mpv_ = mpv_create();
     if (!mpv_) throw std::runtime_error("mpv_create failed");
 
-    mpv_set_option_string(mpv_, "terminal", "no");
-    mpv_set_option_string(mpv_, "msg-level", "all=warn");
+    mpv_set_option_string(mpv_, "terminal", "yes");
+    mpv_set_option_string(mpv_, "msg-level", "all=v");
     mpv_set_option_string(mpv_, "vo", "libmpv");
     mpv_set_option_string(mpv_, "hwdec", hwdec_.toUtf8().constData());
     mpv_set_option_string(mpv_, "keep-open", "yes");
     mpv_set_option_string(mpv_, "idle", "yes");
     mpv_set_option_string(mpv_, "force-seekable", "yes");
+    mpv_set_option_string(mpv_, "cache", "yes");
+    mpv_set_option_string(mpv_, "demuxer-max-bytes", "150MiB");
+    mpv_set_option_string(mpv_, "stream-lavf-o",
+        "reconnect=1,reconnect_streamed=1,multiple_requests=1");
 
     if (mpv_initialize(mpv_) < 0) {
         throw std::runtime_error("mpv_initialize failed");
     }
+
+    mpv_request_log_messages(mpv_, "v");
 
     mpv_observe_property(mpv_, 0, "pause",              MPV_FORMAT_FLAG);
     mpv_observe_property(mpv_, 0, "duration",           MPV_FORMAT_DOUBLE);
@@ -152,6 +158,7 @@ void MpvObject::setSource(const QString& source) {
 }
 
 void MpvObject::load(const QString& path) {
+    qDebug() << "[mpv] loadfile" << path;
     loading_ = true;
     emit loadingChanged();
 
@@ -301,6 +308,14 @@ void MpvObject::handleMpvEvents() {
         if (ev->event_id == MPV_EVENT_NONE) break;
 
         switch (ev->event_id) {
+            case MPV_EVENT_LOG_MESSAGE: {
+                auto* msg = static_cast<mpv_event_log_message*>(ev->data);
+                if (msg) {
+                    qDebug().nospace() << "[mpv/" << msg->prefix << "/" << msg->level << "] "
+                                       << QString::fromUtf8(msg->text).trimmed();
+                }
+                break;
+            }
             case MPV_EVENT_FILE_LOADED: {
                 if (!hasMedia_) { hasMedia_ = true; emit hasMediaChanged(); }
                 if (loading_)   { loading_  = false; emit loadingChanged(); }

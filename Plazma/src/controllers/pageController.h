@@ -10,7 +10,6 @@ Q_NAMESPACE
 enum class PageEnum {
     PageStart = 0,
     PageLogin,
-    PageMain,
     PageFeed,
     PageUpload,
     PagePlayer,
