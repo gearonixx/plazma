@@ -12,7 +12,7 @@ Rectangle {
 
     property int activePage: PageEnum.PageFeed
 
-    implicitHeight: 64
+    implicitHeight: 52
     color: PlazmaStyle.color.creamWhite
     border.color: PlazmaStyle.color.inputBorder
     border.width: 1
@@ -58,6 +58,34 @@ Rectangle {
                 color: PlazmaStyle.color.textSecondary
                 elide: Text.ElideRight
                 Layout.fillWidth: true
+            }
+        }
+
+        // TODO: remove reload button once background refresh is implemented
+        Rectangle {
+            Layout.preferredWidth: 32
+            Layout.preferredHeight: 32
+            radius: 16
+            color: reloadMouse.containsMouse ? PlazmaStyle.color.softAmber : "transparent"
+
+            Behavior on color { ColorAnimation { duration: 120 } }
+
+            Text {
+                anchors.centerIn: parent
+                text: "↻"
+                font.pixelSize: 17
+                color: VideoFeedModel.loading
+                       ? PlazmaStyle.color.textHint
+                       : PlazmaStyle.color.textSecondary
+            }
+
+            MouseArea {
+                id: reloadMouse
+                anchors.fill: parent
+                hoverEnabled: true
+                cursorShape: Qt.PointingHandCursor
+                enabled: !VideoFeedModel.loading
+                onClicked: VideoFeedModel.refresh()
             }
         }
 

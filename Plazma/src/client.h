@@ -9,6 +9,9 @@
 #include <QObject>
 #include <QThread>
 
+#include <atomic>
+#include <mutex>
+
 #include "basic_types.h"
 #include "detail.h"
 
@@ -62,13 +65,14 @@ private:
 
     template <typename T>
     void send_request(td::td_api::object_ptr<T> request, ResponseHandler response_handler = [](ResponsePtr) {}) {
-        auto request_id = update_request_id();
+        const auto request_id = update_request_id();
 
         if (response_handler) {
-            response_handlers_.emplace(request_id, response_handler);
+            std::lock_guard<std::mutex> lock(response_handlers_mu_);
+            response_handlers_.emplace(request_id, std::move(response_handler));
         }
 
-        client_manager_->send(client_id_, current_request_id_, std::move(request));
+        client_manager_->send(client_id_, request_id, std::move(request));
     }
 
     template <typename T>
@@ -88,11 +92,11 @@ private:
     td::ClientManager::RequestId update_request_id();
 
     std::unique_ptr<td::ClientManager> client_manager_;
-    std::unique_ptr<TelegramRequestBuilder> request_builder_;
     td::ClientManager::ClientId client_id_{0};
-    td::ClientManager::RequestId current_request_id_{0};
+    std::atomic<td::ClientManager::RequestId> current_request_id_{0};
     std::unique_ptr<QThread> polling_thread_;
 
+    std::mutex response_handlers_mu_;
     std::map<RequestId, ResponseHandler> response_handlers_;
 
     bool is_authorized_{false};

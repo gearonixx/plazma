@@ -9,12 +9,12 @@
         <translation type="unfinished">Plazma</translation>
     </message>
     <message>
-        <location filename="../ui/Controls/NavBar.qml" line="65"/>
+        <location filename="../ui/Controls/NavBar.qml" line="93"/>
         <source>Feed</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/Controls/NavBar.qml" line="73"/>
+        <location filename="../ui/Controls/NavBar.qml" line="101"/>
         <source>Upload</source>
         <translation type="unfinished"></translation>
     </message>
@@ -22,85 +22,143 @@
 <context>
     <name>PageFeed</name>
     <message>
-        <location filename="../ui/Pages/PageFeed.qml" line="56"/>
-        <source>Failed to load videos: %1</source>
+        <location filename="../ui/Pages/PageFeed.qml" line="82"/>
+        <source>Failed to load: %1</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/Pages/PageFeed.qml" line="57"/>
-        <source>Loading feed…</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../ui/Pages/PageFeed.qml" line="67"/>
+        <location filename="../ui/Pages/PageFeed.qml" line="90"/>
         <source>Retry</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/Pages/PageFeed.qml" line="103"/>
+        <location filename="../ui/Pages/PageFeed.qml" line="201"/>
         <source>No videos yet</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/Pages/PageFeed.qml" line="111"/>
+        <location filename="../ui/Pages/PageFeed.qml" line="209"/>
         <source>Upload one to get the feed started</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/Pages/PageFeed.qml" line="126"/>
+        <location filename="../ui/Pages/PageFeed.qml" line="224"/>
         <source>Upload video</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/Pages/PageFeed.qml" line="228"/>
+        <location filename="../ui/Pages/PageFeed.qml" line="326"/>
         <source>Untitled</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/Pages/PageFeed.qml" line="379"/>
+        <source>Just now</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/Pages/PageFeed.qml" line="384"/>
+        <source>1 minute ago</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/Pages/PageFeed.qml" line="384"/>
+        <source>%1 minutes ago</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/Pages/PageFeed.qml" line="390"/>
+        <source>1 hour ago</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/Pages/PageFeed.qml" line="390"/>
+        <source>%1 hours ago</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/Pages/PageFeed.qml" line="394"/>
+        <source>Yesterday</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/Pages/PageFeed.qml" line="395"/>
+        <source>%1 days ago</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/Pages/PageFeed.qml" line="400"/>
+        <source>1 week ago</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/Pages/PageFeed.qml" line="400"/>
+        <source>%1 weeks ago</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/Pages/PageFeed.qml" line="406"/>
+        <source>1 month ago</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/Pages/PageFeed.qml" line="406"/>
+        <source>%1 months ago</source>
         <translation type="unfinished"></translation>
     </message>
 </context>
 <context>
     <name>PageLogin</name>
     <message>
-        <location filename="../ui/Pages/PageLogin.qml" line="50"/>
+        <location filename="../ui/Pages/PageLogin.qml" line="44"/>
         <source>Login failed: %1</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/Pages/PageLogin.qml" line="120"/>
+        <location filename="../ui/Pages/PageLogin.qml" line="110"/>
         <source>Your Phone Number</source>
         <translation>Ваш номер телефона</translation>
     </message>
     <message>
-        <location filename="../ui/Pages/PageLogin.qml" line="132"/>
         <source>Please confirm your country code
 and enter your phone number</source>
-        <translation>Подтвердите код страны
+        <translation type="vanished">Подтвердите код страны
 и введите номер телефона</translation>
     </message>
     <message>
-        <location filename="../ui/Pages/PageLogin.qml" line="147"/>
+        <location filename="../ui/Pages/PageLogin.qml" line="119"/>
+        <source>Enter your number with country code</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/Pages/PageLogin.qml" line="131"/>
         <source>+1 234 567 8900</source>
         <translation>+7 999 123 4567</translation>
     </message>
     <message>
-        <location filename="../ui/Pages/PageLogin.qml" line="184"/>
-        <location filename="../ui/Pages/PageLogin.qml" line="293"/>
+        <location filename="../ui/Pages/PageLogin.qml" line="163"/>
+        <location filename="../ui/Pages/PageLogin.qml" line="252"/>
         <source>Next</source>
         <translation>Далее</translation>
     </message>
     <message>
-        <location filename="../ui/Pages/PageLogin.qml" line="227"/>
+        <location filename="../ui/Pages/PageLogin.qml" line="197"/>
         <source>Enter The Code</source>
         <translation>Введите код</translation>
     </message>
     <message>
-        <location filename="../ui/Pages/PageLogin.qml" line="239"/>
+        <location filename="../ui/Pages/PageLogin.qml" line="206"/>
+        <source>We&apos;ve sent the code to your Telegram app</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
         <source>We&apos;ve sent the code to your
 Telegram app</source>
-        <translation>Мы отправили код в ваше
+        <translation type="vanished">Мы отправили код в ваше
 приложение Telegram</translation>
     </message>
     <message>
-        <location filename="../ui/Pages/PageLogin.qml" line="254"/>
+        <location filename="../ui/Pages/PageLogin.qml" line="218"/>
         <source>Your code</source>
         <translation>Ваш код</translation>
     </message>
@@ -276,26 +334,41 @@ Telegram app</source>
 <context>
     <name>PageStart</name>
     <message>
-        <location filename="../ui/Pages/PageStart.qml" line="46"/>
+        <location filename="../ui/Pages/PageStart.qml" line="87"/>
         <source>Plazma</source>
         <translation>Plazma</translation>
     </message>
     <message>
-        <location filename="../ui/Pages/PageStart.qml" line="57"/>
+        <location filename="../ui/Pages/PageStart.qml" line="95"/>
+        <source>Your private video feed,
+powered by Telegram</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/Pages/PageStart.qml" line="126"/>
+        <source>Get started</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/Pages/PageStart.qml" line="135"/>
+        <source>Connect with your Telegram
+account to start watching</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
         <source>Connect with your Telegram account
 to start watching</source>
-        <translation>Подключите свой аккаунт Telegram,
+        <translation type="vanished">Подключите свой аккаунт Telegram,
 чтобы начать смотреть</translation>
     </message>
     <message>
-        <location filename="../ui/Pages/PageStart.qml" line="75"/>
+        <location filename="../ui/Pages/PageStart.qml" line="151"/>
         <source>Start Watching</source>
         <translation>Погнали</translation>
     </message>
     <message>
-        <location filename="../ui/Pages/PageStart.qml" line="96"/>
         <source>Upload Video</source>
-        <translation>Загрузить видео</translation>
+        <translation type="vanished">Загрузить видео</translation>
     </message>
 </context>
 <context>
@@ -339,6 +412,19 @@ We&apos;ll push it to the server and add it to the feed.</source>
     <message>
         <location filename="../ui/Pages/PageUpload.qml" line="148"/>
         <source>Back to feed</source>
+        <translation type="unfinished"></translation>
+    </message>
+</context>
+<context>
+    <name>QObject</name>
+    <message>
+        <location filename="../platform/file_dialog.h" line="85"/>
+        <source>Video files</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../platform/file_dialog.h" line="86"/>
+        <source>All files</source>
         <translation type="unfinished"></translation>
     </message>
 </context>

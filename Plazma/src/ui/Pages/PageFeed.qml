@@ -16,6 +16,38 @@ Page {
 
     Component.onCompleted: VideoFeedModel.refresh()
 
+    // Reusable shimmer skeleton rectangle
+    component SkeletonRect : Rectangle {
+        id: skelRoot
+        color: "#EDE6DF"
+        clip: true
+
+        Rectangle {
+            id: shimmer
+            width: skelRoot.width * 0.55
+            height: skelRoot.height
+
+            gradient: Gradient {
+                orientation: Gradient.Horizontal
+                GradientStop { position: 0.0; color: "transparent" }
+                GradientStop { position: 0.5; color: Qt.rgba(1, 1, 1, 0.42) }
+                GradientStop { position: 1.0; color: "transparent" }
+            }
+
+            SequentialAnimation on x {
+                loops: Animation.Infinite
+                running: skelRoot.visible
+
+                NumberAnimation {
+                    from: -shimmer.width
+                    to: skelRoot.width
+                    duration: 1400
+                    easing.type: Easing.Linear
+                }
+            }
+        }
+    }
+
     NavBar {
         id: nav
         activePage: PageEnum.PageFeed
@@ -24,51 +56,41 @@ Page {
         anchors.right: parent.right
     }
 
-    // Status strip (loading / error)
+    // Error banner
     Rectangle {
-        id: statusStrip
+        id: errorBanner
+        visible: VideoFeedModel.errorMessage.length > 0
         anchors.top: nav.bottom
         anchors.left: parent.left
         anchors.right: parent.right
-        height: visible ? 28 : 0
-        visible: VideoFeedModel.loading || VideoFeedModel.errorMessage.length > 0
-        color: VideoFeedModel.errorMessage.length > 0
-               ? "#F8D7DA"
-               : PlazmaStyle.color.softAmber
+        anchors.margins: 8
+        height: visible ? errText.implicitHeight + 18 : 0
+        radius: 8
+        color: "#F8D7DA"
+        border.color: "#F5C2C7"
+        border.width: 1
         z: 5
 
         RowLayout {
             anchors.fill: parent
-            anchors.leftMargin: 14
-            anchors.rightMargin: 14
-            spacing: 10
-
-            BusyIndicator {
-                visible: VideoFeedModel.loading
-                running: visible
-                Layout.preferredWidth: 18
-                Layout.preferredHeight: 18
-            }
+            anchors.leftMargin: 12
+            anchors.rightMargin: 12
 
             Text {
+                id: errText
                 Layout.fillWidth: true
-                text: VideoFeedModel.errorMessage.length > 0
-                      ? qsTr("Failed to load videos: %1").arg(VideoFeedModel.errorMessage)
-                      : qsTr("Loading feed…")
-                font.pixelSize: 11
-                color: VideoFeedModel.errorMessage.length > 0
-                       ? "#842029"
-                       : PlazmaStyle.color.textPrimary
-                elide: Text.ElideRight
+                text: qsTr("Failed to load: %1").arg(VideoFeedModel.errorMessage)
+                color: "#842029"
+                font.pixelSize: 12
+                wrapMode: Text.WordWrap
+                verticalAlignment: Text.AlignVCenter
             }
 
             Text {
-                visible: VideoFeedModel.errorMessage.length > 0
                 text: qsTr("Retry")
-                font.pixelSize: 11
+                font.pixelSize: 12
                 font.weight: Font.DemiBold
                 color: PlazmaStyle.color.burntOrange
-
                 MouseArea {
                     anchors.fill: parent
                     cursorShape: Qt.PointingHandCursor
@@ -78,7 +100,83 @@ Page {
         }
     }
 
-    // Empty state
+    property int contentTop: errorBanner.visible
+                              ? errorBanner.y + errorBanner.height + 4
+                              : nav.height
+
+    // ── Skeleton loading grid (first load only) ──────────────────────────────
+    GridView {
+        id: skeletonGrid
+        anchors.top: parent.top
+        anchors.topMargin: root.contentTop + 16
+        anchors.bottom: parent.bottom
+        anchors.left: parent.left
+        anchors.right: parent.right
+        anchors.leftMargin: 16
+        anchors.rightMargin: 16
+        anchors.bottomMargin: 16
+
+        visible: VideoFeedModel.loading && VideoFeedModel.count === 0
+        interactive: false
+        clip: true
+        model: 6
+
+        readonly property int columns: Math.max(1, Math.floor(width / 240))
+        cellWidth: width / columns
+        cellHeight: cellWidth * 9 / 16 + 72
+
+        delegate: Item {
+            width: skeletonGrid.cellWidth
+            height: skeletonGrid.cellHeight
+
+            Rectangle {
+                anchors.fill: parent
+                anchors.margins: 10
+                radius: 10
+                color: PlazmaStyle.color.creamWhite
+                border.color: PlazmaStyle.color.inputBorder
+                border.width: 1
+                clip: true
+
+                ColumnLayout {
+                    anchors.fill: parent
+                    spacing: 0
+
+                    // Thumbnail skeleton
+                    SkeletonRect {
+                        Layout.fillWidth: true
+                        Layout.preferredHeight: width * 9 / 16
+                        radius: 10
+                    }
+
+                    // Text lines skeleton
+                    ColumnLayout {
+                        Layout.fillWidth: true
+                        Layout.leftMargin: 10
+                        Layout.rightMargin: 10
+                        Layout.topMargin: 10
+                        Layout.bottomMargin: 10
+                        spacing: 6
+
+                        SkeletonRect {
+                            Layout.fillWidth: true
+                            Layout.rightMargin: 24
+                            height: 12
+                            radius: 6
+                        }
+
+                        SkeletonRect {
+                            width: parent.width * 0.45
+                            height: 10
+                            radius: 5
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    // ── Empty state ───────────────────────────────────────────────────────────
     ColumnLayout {
         visible: !VideoFeedModel.loading
                  && VideoFeedModel.count === 0
@@ -93,7 +191,7 @@ Page {
 
             Text {
                 anchors.centerIn: parent
-                text: "\uD83C\uDFAC"
+                text: "🎬"
                 font.pixelSize: 40
             }
         }
@@ -131,24 +229,25 @@ Page {
         }
     }
 
-    // Grid of videos
+    // ── Real video grid ───────────────────────────────────────────────────────
     GridView {
         id: grid
-        anchors.top: statusStrip.bottom
+        anchors.top: parent.top
+        anchors.topMargin: root.contentTop + 16
         anchors.bottom: parent.bottom
         anchors.left: parent.left
         anchors.right: parent.right
-        anchors.margins: 12
+        anchors.leftMargin: 16
+        anchors.rightMargin: 16
+        anchors.bottomMargin: 16
+
         visible: VideoFeedModel.count > 0
-
-        readonly property int cardMinWidth: 240
-        readonly property int columns: Math.max(1, Math.floor(width / cardMinWidth))
-
-        cellWidth: width / columns
-        cellHeight: cellWidth * 9 / 16 + 64
-
         clip: true
         model: VideoFeedModel
+
+        readonly property int columns: Math.max(1, Math.floor(width / 240))
+        cellWidth: width / columns
+        cellHeight: cellWidth * 9 / 16 + 72
 
         delegate: Item {
             width: grid.cellWidth
@@ -156,7 +255,7 @@ Page {
 
             Rectangle {
                 anchors.fill: parent
-                anchors.margins: 6
+                anchors.margins: 10
                 radius: 10
                 color: PlazmaStyle.color.creamWhite
                 border.color: PlazmaStyle.color.inputBorder
@@ -170,7 +269,7 @@ Page {
                     Rectangle {
                         Layout.fillWidth: true
                         Layout.preferredHeight: width * 9 / 16
-                        color: "#000000"
+                        color: "#1A1A1A"
                         radius: 10
                         clip: true
 
@@ -186,24 +285,25 @@ Page {
                         Text {
                             anchors.centerIn: parent
                             visible: !model.thumbnail || model.thumbnail.length === 0
-                            text: "\u25B6"
+                            text: "▶"
                             color: "#FFFFFF"
-                            font.pixelSize: 40
-                            opacity: 0.7
+                            font.pixelSize: 36
+                            opacity: 0.6
                         }
 
+                        // Size badge
                         Rectangle {
                             visible: model.size > 0
                             anchors.right: parent.right
                             anchors.bottom: parent.bottom
-                            anchors.margins: 8
+                            anchors.margins: 6
                             height: 18
-                            width: sizeText.implicitWidth + 12
+                            width: sizeLabel.implicitWidth + 10
                             radius: 9
-                            color: PlazmaStyle.color.translucentMidnightBlack
+                            color: Qt.rgba(0, 0, 0, 0.72)
 
                             Text {
-                                id: sizeText
+                                id: sizeLabel
                                 anchors.centerIn: parent
                                 text: root.formatSize(model.size)
                                 color: "#FFFFFF"
@@ -212,20 +312,18 @@ Page {
                         }
                     }
 
-                    // Title + author
+                    // Title + meta
                     ColumnLayout {
                         Layout.fillWidth: true
                         Layout.leftMargin: 10
                         Layout.rightMargin: 10
                         Layout.topMargin: 8
-                        Layout.bottomMargin: 10
-                        spacing: 2
+                        Layout.bottomMargin: 8
+                        spacing: 3
 
                         Text {
                             Layout.fillWidth: true
-                            text: model.title && model.title.length > 0
-                                  ? model.title
-                                  : qsTr("Untitled")
+                            text: model.title && model.title.length > 0 ? model.title : qsTr("Untitled")
                             font.pixelSize: 13
                             font.weight: Font.DemiBold
                             color: PlazmaStyle.color.textPrimary
@@ -236,9 +334,7 @@ Page {
 
                         Text {
                             Layout.fillWidth: true
-                            text: model.author && model.author.length > 0
-                                  ? model.author
-                                  : (model.createdAt || "")
+                            text: root.formatMeta(model.author, model.createdAt)
                             font.pixelSize: 11
                             color: PlazmaStyle.color.textSecondary
                             elide: Text.ElideRight
@@ -251,6 +347,14 @@ Page {
                     anchors.fill: parent
                     hoverEnabled: true
                     cursorShape: Qt.PointingHandCursor
+
+                    Rectangle {
+                        anchors.fill: parent
+                        radius: 10
+                        color: parent.containsMouse ? Qt.rgba(0, 0, 0, 0.04) : "transparent"
+                        Behavior on color { ColorAnimation { duration: 100 } }
+                    }
+
                     onClicked: {
                         if (!model.url || model.url.length === 0) return
                         VideoFeedModel.setCurrent(model.url, model.title || "")
@@ -261,11 +365,64 @@ Page {
         }
     }
 
+    // ── Helpers ───────────────────────────────────────────────────────────────
+
+    function formatDate(dateStr) {
+        if (!dateStr || dateStr.length === 0) return ""
+
+        var d = new Date(dateStr.replace(" ", "T"))
+        if (isNaN(d.getTime())) return dateStr
+
+        var now = new Date()
+        var secs = (now - d) / 1000
+
+        if (secs < 60)   return qsTr("Just now")
+
+        var mins = secs / 60
+        if (mins < 60) {
+            var m = Math.floor(mins)
+            return m === 1 ? qsTr("1 minute ago") : qsTr("%1 minutes ago").arg(m)
+        }
+
+        var hours = mins / 60
+        if (hours < 24) {
+            var h = Math.floor(hours)
+            return h === 1 ? qsTr("1 hour ago") : qsTr("%1 hours ago").arg(h)
+        }
+
+        var days = hours / 24
+        if (days < 2)  return qsTr("Yesterday")
+        if (days < 7)  return qsTr("%1 days ago").arg(Math.floor(days))
+
+        var weeks = days / 7
+        if (weeks < 5) {
+            var w = Math.floor(weeks)
+            return w === 1 ? qsTr("1 week ago") : qsTr("%1 weeks ago").arg(w)
+        }
+
+        var months = days / 30.44
+        if (months < 12) {
+            var mo = Math.floor(months)
+            return mo === 1 ? qsTr("1 month ago") : qsTr("%1 months ago").arg(mo)
+        }
+
+        var monthNames = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"]
+        return monthNames[d.getMonth()] + " " + d.getDate() + ", " + d.getFullYear()
+    }
+
+    function formatMeta(author, createdAt) {
+        var parts = []
+        if (author && author.length > 0) parts.push(author)
+        var date = formatDate(createdAt)
+        if (date.length > 0) parts.push(date)
+        return parts.join(" · ")
+    }
+
     function formatSize(bytes) {
         if (!bytes || bytes <= 0) return ""
-        const kb = bytes / 1024
+        var kb = bytes / 1024
         if (kb < 1024) return kb.toFixed(0) + " KB"
-        const mb = kb / 1024
+        var mb = kb / 1024
         if (mb < 1024) return mb.toFixed(1) + " MB"
         return (mb / 1024).toFixed(2) + " GB"
     }

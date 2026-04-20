@@ -3,8 +3,22 @@
 #include <QVariantList>
 #include <QtQuick/QQuickFramebufferObject>
 
+#include <memory>
+#include <mutex>
+
 #include <mpv/client.h>
 #include <mpv/render_gl.h>
+
+class MpvObject;
+
+// Shared between MpvObject (GUI thread) and MpvRenderer (scenegraph thread).
+// mpv dispatches callbacks from internal threads; both sides acquire `m`
+// before touching `obj`, so ~MpvObject can null it out without racing
+// against a callback already in flight.
+struct MpvCallbackGuard {
+    std::mutex m;
+    MpvObject* obj = nullptr;
+};
 
 class MpvObject : public QQuickFramebufferObject {
     Q_OBJECT
@@ -67,7 +81,9 @@ public:
     QString hwdecCurrent() const { return hwdecCurrent_; }
     QString videoCodec() const { return videoCodec_; }
 
-    mpv_handle* handle() const { return mpv_; }
+    mpv_handle* handle() const { return mpv_.get(); }
+    std::shared_ptr<mpv_handle> mpvHandle() const { return mpv_; }
+    std::shared_ptr<MpvCallbackGuard> callbackGuard() const { return callback_guard_; }
 
 public slots:
     void load(const QString& path);
@@ -117,7 +133,8 @@ private:
     void setPausedState(bool paused);
     void refreshTrackList();
 
-    mpv_handle* mpv_ = nullptr;
+    std::shared_ptr<mpv_handle> mpv_;
+    std::shared_ptr<MpvCallbackGuard> callback_guard_;
     QString source_;
     bool paused_ = true;
     double duration_ = 0.0;

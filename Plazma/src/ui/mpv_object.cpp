@@ -46,7 +46,10 @@ QVariant mpvNodeToVariant(const mpv_node& node) {
 
 class MpvRenderer final : public QQuickFramebufferObject::Renderer {
 public:
-    explicit MpvRenderer(MpvObject* owner) : owner_(owner) {
+    explicit MpvRenderer(MpvObject* owner)
+        : mpv_(owner->mpvHandle())
+        , guard_(owner->callbackGuard())
+    {
         mpv_opengl_init_params gl_init_params{getProcAddress, nullptr};
         int advanced_control = 0;
         mpv_render_param params[] = {
@@ -55,14 +58,24 @@ public:
             {MPV_RENDER_PARAM_ADVANCED_CONTROL, &advanced_control},
             {MPV_RENDER_PARAM_INVALID, nullptr},
         };
-        if (mpv_render_context_create(&render_ctx_, owner_->handle(), params) < 0) {
+        if (mpv_render_context_create(&render_ctx_, mpv_.get(), params) < 0) {
             throw std::runtime_error("failed to initialize mpv render context");
         }
-        mpv_render_context_set_update_callback(render_ctx_, MpvRenderer::onUpdate, owner_);
+        mpv_render_context_set_update_callback(render_ctx_, MpvRenderer::onUpdate, guard_.get());
     }
 
+    // Must tear down in this exact order:
+    //   1. detach the update callback so the render thread stops poking the guard
+    //   2. free the render context (satisfies mpv's contract before handle dies)
+    //   3. release the shared_ptrs (member destruction order: guard_, mpv_, then
+    //      the implicit release — mpv_terminate_destroy runs via the shared_ptr
+    //      deleter iff this was the last reference).
     ~MpvRenderer() override {
-        if (render_ctx_) mpv_render_context_free(render_ctx_);
+        if (render_ctx_) {
+            mpv_render_context_set_update_callback(render_ctx_, nullptr, nullptr);
+            mpv_render_context_free(render_ctx_);
+            render_ctx_ = nullptr;
+        }
     }
 
     QOpenGLFramebufferObject* createFramebufferObject(const QSize& size) override {
@@ -90,60 +103,85 @@ public:
 
 private:
     static void onUpdate(void* ctx) {
-        QMetaObject::invokeMethod(
-            static_cast<MpvObject*>(ctx), "update", Qt::QueuedConnection
-        );
+        auto* guard = static_cast<MpvCallbackGuard*>(ctx);
+        std::lock_guard<std::mutex> lock(guard->m);
+        if (guard->obj) {
+            QMetaObject::invokeMethod(guard->obj, "update", Qt::QueuedConnection);
+        }
     }
 
-    MpvObject* owner_;
+    std::shared_ptr<mpv_handle> mpv_;
+    std::shared_ptr<MpvCallbackGuard> guard_;
     mpv_render_context* render_ctx_ = nullptr;
 };
 
 }  // namespace
 
 MpvObject::MpvObject(QQuickItem* parent) : QQuickFramebufferObject(parent) {
-    mpv_ = mpv_create();
-    if (!mpv_) throw std::runtime_error("mpv_create failed");
+    callback_guard_ = std::make_shared<MpvCallbackGuard>();
+    callback_guard_->obj = this;
 
-    mpv_set_option_string(mpv_, "terminal", "yes");
-    mpv_set_option_string(mpv_, "msg-level", "all=v");
-    mpv_set_option_string(mpv_, "vo", "libmpv");
-    mpv_set_option_string(mpv_, "hwdec", hwdec_.toUtf8().constData());
-    mpv_set_option_string(mpv_, "keep-open", "yes");
-    mpv_set_option_string(mpv_, "idle", "yes");
-    mpv_set_option_string(mpv_, "force-seekable", "yes");
-    mpv_set_option_string(mpv_, "cache", "yes");
-    mpv_set_option_string(mpv_, "demuxer-max-bytes", "150MiB");
-    mpv_set_option_string(mpv_, "stream-lavf-o",
+    mpv_handle* raw = mpv_create();
+    if (!raw) throw std::runtime_error("mpv_create failed");
+    mpv_ = std::shared_ptr<mpv_handle>(raw, [](mpv_handle* h) {
+        if (h) mpv_terminate_destroy(h);
+    });
+
+    mpv_set_option_string(mpv_.get(), "terminal", "yes");
+    mpv_set_option_string(mpv_.get(), "msg-level", "all=v");
+    mpv_set_option_string(mpv_.get(), "vo", "libmpv");
+    mpv_set_option_string(mpv_.get(), "hwdec", hwdec_.toUtf8().constData());
+    mpv_set_option_string(mpv_.get(), "keep-open", "yes");
+    mpv_set_option_string(mpv_.get(), "idle", "yes");
+    mpv_set_option_string(mpv_.get(), "force-seekable", "yes");
+    mpv_set_option_string(mpv_.get(), "cache", "yes");
+    mpv_set_option_string(mpv_.get(), "demuxer-max-bytes", "150MiB");
+    mpv_set_option_string(mpv_.get(), "stream-lavf-o",
         "reconnect=1,reconnect_streamed=1,multiple_requests=1");
 
-    if (mpv_initialize(mpv_) < 0) {
+    if (mpv_initialize(mpv_.get()) < 0) {
         throw std::runtime_error("mpv_initialize failed");
     }
 
-    mpv_request_log_messages(mpv_, "v");
+    mpv_request_log_messages(mpv_.get(), "v");
 
-    mpv_observe_property(mpv_, 0, "pause",              MPV_FORMAT_FLAG);
-    mpv_observe_property(mpv_, 0, "duration",           MPV_FORMAT_DOUBLE);
-    mpv_observe_property(mpv_, 0, "time-pos",           MPV_FORMAT_DOUBLE);
-    mpv_observe_property(mpv_, 0, "demuxer-cache-time", MPV_FORMAT_DOUBLE);
-    mpv_observe_property(mpv_, 0, "volume",             MPV_FORMAT_DOUBLE);
-    mpv_observe_property(mpv_, 0, "mute",               MPV_FORMAT_FLAG);
-    mpv_observe_property(mpv_, 0, "speed",              MPV_FORMAT_DOUBLE);
-    mpv_observe_property(mpv_, 0, "core-idle",          MPV_FORMAT_FLAG);
-    mpv_observe_property(mpv_, 0, "seeking",            MPV_FORMAT_FLAG);
-    mpv_observe_property(mpv_, 0, "eof-reached",        MPV_FORMAT_FLAG);
-    mpv_observe_property(mpv_, 0, "width",              MPV_FORMAT_INT64);
-    mpv_observe_property(mpv_, 0, "height",             MPV_FORMAT_INT64);
-    mpv_observe_property(mpv_, 0, "hwdec-current",      MPV_FORMAT_STRING);
-    mpv_observe_property(mpv_, 0, "video-codec",        MPV_FORMAT_STRING);
+    mpv_observe_property(mpv_.get(), 0, "pause",              MPV_FORMAT_FLAG);
+    mpv_observe_property(mpv_.get(), 0, "duration",           MPV_FORMAT_DOUBLE);
+    mpv_observe_property(mpv_.get(), 0, "time-pos",           MPV_FORMAT_DOUBLE);
+    mpv_observe_property(mpv_.get(), 0, "demuxer-cache-time", MPV_FORMAT_DOUBLE);
+    mpv_observe_property(mpv_.get(), 0, "volume",             MPV_FORMAT_DOUBLE);
+    mpv_observe_property(mpv_.get(), 0, "mute",               MPV_FORMAT_FLAG);
+    mpv_observe_property(mpv_.get(), 0, "speed",              MPV_FORMAT_DOUBLE);
+    mpv_observe_property(mpv_.get(), 0, "core-idle",          MPV_FORMAT_FLAG);
+    mpv_observe_property(mpv_.get(), 0, "seeking",            MPV_FORMAT_FLAG);
+    mpv_observe_property(mpv_.get(), 0, "eof-reached",        MPV_FORMAT_FLAG);
+    mpv_observe_property(mpv_.get(), 0, "width",              MPV_FORMAT_INT64);
+    mpv_observe_property(mpv_.get(), 0, "height",             MPV_FORMAT_INT64);
+    mpv_observe_property(mpv_.get(), 0, "hwdec-current",      MPV_FORMAT_STRING);
+    mpv_observe_property(mpv_.get(), 0, "video-codec",        MPV_FORMAT_STRING);
 
     connect(this, &MpvObject::onMpvEvents, this, &MpvObject::handleMpvEvents, Qt::QueuedConnection);
-    mpv_set_wakeup_callback(mpv_, &MpvObject::onMpvWakeup, this);
+    mpv_set_wakeup_callback(mpv_.get(), &MpvObject::onMpvWakeup, callback_guard_.get());
 }
 
 MpvObject::~MpvObject() {
-    if (mpv_) mpv_terminate_destroy(mpv_);
+    // Stop future wakeup callbacks. Note: this is racy by itself (an in-flight
+    // callback may already have entered onMpvWakeup); the guard's mutex below
+    // is what actually serializes that case.
+    if (mpv_) {
+        mpv_set_wakeup_callback(mpv_.get(), nullptr, nullptr);
+    }
+    // Null the guard pointer under its mutex: any callback currently inside
+    // onMpvWakeup / MpvRenderer::onUpdate will either finish before we take
+    // the lock, or see obj == nullptr after and no-op.
+    {
+        std::lock_guard<std::mutex> lock(callback_guard_->m);
+        callback_guard_->obj = nullptr;
+    }
+    // mpv_ shared_ptr ref drops here. If the renderer is still alive (common:
+    // destroyed later on the scenegraph thread), the handle stays valid until
+    // the renderer's destructor frees render_ctx_ and drops its own ref —
+    // only then does the deleter run mpv_terminate_destroy.
 }
 
 QQuickFramebufferObject::Renderer* MpvObject::createRenderer() const {
@@ -164,12 +202,12 @@ void MpvObject::load(const QString& path) {
 
     const QByteArray utf8 = path.toUtf8();
     const char* cmd[] = {"loadfile", utf8.constData(), nullptr};
-    mpv_command_async(mpv_, 0, cmd);
+    mpv_command_async(mpv_.get(), 0, cmd);
 }
 
 void MpvObject::stop() {
     const char* cmd[] = {"stop", nullptr};
-    mpv_command_async(mpv_, 0, cmd);
+    mpv_command_async(mpv_.get(), 0, cmd);
     if (hasMedia_) {
         hasMedia_ = false;
         emit hasMediaChanged();
@@ -182,54 +220,54 @@ void MpvObject::pause() { setPausedState(true); }
 
 void MpvObject::setPausedState(bool paused) {
     int flag = paused ? 1 : 0;
-    mpv_set_property_async(mpv_, 0, "pause", MPV_FORMAT_FLAG, &flag);
+    mpv_set_property_async(mpv_.get(), 0, "pause", MPV_FORMAT_FLAG, &flag);
 }
 
 void MpvObject::seek(double seconds) {
     const QByteArray s = QByteArray::number(seconds);
     const char* cmd[] = {"seek", s.constData(), "absolute", nullptr};
-    mpv_command_async(mpv_, 0, cmd);
+    mpv_command_async(mpv_.get(), 0, cmd);
 }
 
 void MpvObject::seekRelative(double deltaSeconds) {
     const QByteArray s = QByteArray::number(deltaSeconds);
     const char* cmd[] = {"seek", s.constData(), "relative", nullptr};
-    mpv_command_async(mpv_, 0, cmd);
+    mpv_command_async(mpv_.get(), 0, cmd);
 }
 
 void MpvObject::seekPercent(double percent) {
     const QByteArray s = QByteArray::number(qBound(0.0, percent, 100.0));
     const char* cmd[] = {"seek", s.constData(), "absolute-percent", nullptr};
-    mpv_command_async(mpv_, 0, cmd);
+    mpv_command_async(mpv_.get(), 0, cmd);
 }
 
 void MpvObject::setVolume(double v) {
     v = qBound(0.0, v, 100.0);
-    mpv_set_property_async(mpv_, 0, "volume", MPV_FORMAT_DOUBLE, &v);
+    mpv_set_property_async(mpv_.get(), 0, "volume", MPV_FORMAT_DOUBLE, &v);
 }
 
 void MpvObject::setMuted(bool m) {
     int flag = m ? 1 : 0;
-    mpv_set_property_async(mpv_, 0, "mute", MPV_FORMAT_FLAG, &flag);
+    mpv_set_property_async(mpv_.get(), 0, "mute", MPV_FORMAT_FLAG, &flag);
 }
 
 void MpvObject::toggleMute() { setMuted(!muted_); }
 
 void MpvObject::setSpeed(double s) {
     s = qBound(0.25, s, 4.0);
-    mpv_set_property_async(mpv_, 0, "speed", MPV_FORMAT_DOUBLE, &s);
+    mpv_set_property_async(mpv_.get(), 0, "speed", MPV_FORMAT_DOUBLE, &s);
 }
 
 void MpvObject::setLoop(bool l) {
     loop_ = l;
-    mpv_set_property_string(mpv_, "loop-file", l ? "inf" : "no");
+    mpv_set_property_string(mpv_.get(), "loop-file", l ? "inf" : "no");
     emit loopChanged();
 }
 
 void MpvObject::setHwdec(const QString& mode) {
     if (mode == hwdec_) return;
     hwdec_ = mode;
-    mpv_set_property_string(mpv_, "hwdec", mode.toUtf8().constData());
+    mpv_set_property_string(mpv_.get(), "hwdec", mode.toUtf8().constData());
     emit hwdecChanged();
 }
 
@@ -237,22 +275,22 @@ void MpvObject::toggleLoop() { setLoop(!loop_); }
 
 void MpvObject::setAudioTrack(int id) {
     const QByteArray s = id > 0 ? QByteArray::number(id) : QByteArray("no");
-    mpv_set_property_string(mpv_, "aid", s.constData());
+    mpv_set_property_string(mpv_.get(), "aid", s.constData());
 }
 
 void MpvObject::setSubtitleTrack(int id) {
     const QByteArray s = id > 0 ? QByteArray::number(id) : QByteArray("no");
-    mpv_set_property_string(mpv_, "sid", s.constData());
+    mpv_set_property_string(mpv_.get(), "sid", s.constData());
 }
 
 void MpvObject::frameStep() {
     const char* cmd[] = {"frame-step", nullptr};
-    mpv_command_async(mpv_, 0, cmd);
+    mpv_command_async(mpv_.get(), 0, cmd);
 }
 
 void MpvObject::frameBackStep() {
     const char* cmd[] = {"frame-back-step", nullptr};
-    mpv_command_async(mpv_, 0, cmd);
+    mpv_command_async(mpv_.get(), 0, cmd);
 }
 
 QString MpvObject::takeScreenshot() {
@@ -260,13 +298,13 @@ QString MpvObject::takeScreenshot() {
 
     const QString dir = QStandardPaths::writableLocation(QStandardPaths::PicturesLocation);
     QDir().mkpath(dir);
-    const QString path = QDir(dir).filePath(
+    QString path = QDir(dir).filePath(
         QStringLiteral("plazma-%1.png").arg(QDateTime::currentDateTime().toString("yyyyMMdd-HHmmss"))
     );
 
     const QByteArray utf8 = path.toUtf8();
     const char* cmd[] = {"screenshot-to-file", utf8.constData(), "video", nullptr};
-    if (mpv_command(mpv_, cmd) >= 0) {
+    if (mpv_command(mpv_.get(), cmd) >= 0) {
         emit screenshotSaved(path);
         return path;
     }
@@ -275,7 +313,7 @@ QString MpvObject::takeScreenshot() {
 
 void MpvObject::refreshTrackList() {
     mpv_node node;
-    if (mpv_get_property(mpv_, "track-list", MPV_FORMAT_NODE, &node) < 0) return;
+    if (mpv_get_property(mpv_.get(), "track-list", MPV_FORMAT_NODE, &node) < 0) return;
 
     QVariantList tracks = mpvNodeToVariant(node).toList();
     mpv_free_node_contents(&node);
@@ -299,12 +337,16 @@ void MpvObject::refreshTrackList() {
 }
 
 void MpvObject::onMpvWakeup(void* ctx) {
-    emit static_cast<MpvObject*>(ctx)->onMpvEvents();
+    auto* guard = static_cast<MpvCallbackGuard*>(ctx);
+    std::lock_guard<std::mutex> lock(guard->m);
+    if (guard->obj) {
+        emit guard->obj->onMpvEvents();
+    }
 }
 
 void MpvObject::handleMpvEvents() {
     while (mpv_) {
-        mpv_event* ev = mpv_wait_event(mpv_, 0);
+        mpv_event* ev = mpv_wait_event(mpv_.get(), 0);
         if (ev->event_id == MPV_EVENT_NONE) break;
 
         switch (ev->event_id) {

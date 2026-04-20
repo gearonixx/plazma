@@ -13,116 +13,149 @@ import Style 1.0
 Page {
     id: root
 
-    background: Rectangle {
-        color: PlazmaStyle.color.warmWhite
-    }
+    background: Rectangle { color: PlazmaStyle.color.warmWhite }
 
-    ColumnLayout {
-        anchors.centerIn: parent
-        width: parent.width
-        spacing: 0
+    // Language icon — top-left
+    Rectangle {
+        id: langButton
+        anchors.top: parent.top
+        anchors.left: parent.left
+        anchors.topMargin: 14
+        anchors.leftMargin: 14
+        width: 36
+        height: 36
+        radius: 18
+        color: langMouse.containsMouse ? PlazmaStyle.color.softAmber : "transparent"
+        z: 10
 
-
-        Rectangle {
-            Layout.alignment: Qt.AlignHCenter
-            Layout.bottomMargin: 32
-            width: 120
-            height: 120
-            radius: 60
-            color: PlazmaStyle.color.softAmber
-
-            Text {
-                anchors.centerIn: parent
-                text: "P"
-                font.pixelSize: 52
-                font.weight: Font.Bold
-                color: PlazmaStyle.color.warmGold
-            }
-        }
+        Behavior on color { ColorAnimation { duration: 150 } }
 
         Text {
-            Layout.alignment: Qt.AlignHCenter
-            Layout.bottomMargin: 12
-            text: qsTr("Plazma")
-            font.pixelSize: 28
-            font.weight: Font.Bold
-            color: PlazmaStyle.color.textPrimary
+            anchors.centerIn: parent
+            text: "🌐"
+            font.pixelSize: 18
         }
 
-        Text {
-            Layout.alignment: Qt.AlignHCenter
-            Layout.leftMargin: 40
-            Layout.rightMargin: 40
-            Layout.bottomMargin: 48
-            text: qsTr("Connect with your Telegram account\nto start watching")
-            font.pixelSize: 15
-            color: PlazmaStyle.color.textSecondary
-            horizontalAlignment: Text.AlignHCenter
-            lineHeight: 1.4
-        }
-
-        BasicButtonType {
-            Layout.fillWidth: true
-            Layout.leftMargin: 40
-            Layout.rightMargin: 40
-            Layout.preferredHeight: 50
-
-            defaultColor: PlazmaStyle.color.goldenApricot
-            hoveredColor: PlazmaStyle.color.warmGold
-            pressedColor: PlazmaStyle.color.burntOrange
-            textColor: "#FFFFFF"
-
-            text: qsTr("Start Watching")
-            font.pixelSize: 16
-            font.weight: Font.DemiBold
-
-            clickedFunc: function() {
-                PageController.goToPage(PageEnum.PageLogin)
-            }
-        }
-
-        BasicButtonType {
-            Layout.fillWidth: true
-            Layout.leftMargin: 40
-            Layout.rightMargin: 40
-            Layout.topMargin: 12
-            Layout.preferredHeight: 50
-
-            defaultColor: PlazmaStyle.color.softAmber
-            hoveredColor: PlazmaStyle.color.warmGold
-            pressedColor: PlazmaStyle.color.burntOrange
-            textColor: PlazmaStyle.color.textPrimary
-
-            text: qsTr("Upload Video")
-            font.pixelSize: 16
-            font.weight: Font.DemiBold
-
-            clickedFunc: function() {
-                FileDialogModel.openFilePicker()
-            }
-        }
-
-        BasicButtonType {
-            Layout.fillWidth: true
-            Layout.leftMargin: 40
-            Layout.rightMargin: 40
-            Layout.topMargin: 12
-            Layout.preferredHeight: 50
-
-            defaultColor: "transparent"
-            hoveredColor: PlazmaStyle.color.softAmber
-            pressedColor: PlazmaStyle.color.warmGold
-            textColor: PlazmaStyle.color.textSecondary
-
-            text: LanguageModel.currentLanguageName
-            font.pixelSize: 14
-            font.weight: Font.Medium
-
-            clickedFunc: function() {
+        MouseArea {
+            id: langMouse
+            anchors.fill: parent
+            hoverEnabled: true
+            cursorShape: Qt.PointingHandCursor
+            onClicked: {
                 var next = LanguageModel.currentLanguageIndex === 0
                     ? AvailablePageEnum.Russian
                     : AvailablePageEnum.English
                 LanguageModel.changeLanguage(next)
+            }
+        }
+    }
+
+    // Two-column layout
+    RowLayout {
+        anchors.fill: parent
+        spacing: 0
+
+        // Left — branding
+        Item {
+            Layout.fillHeight: true
+            Layout.preferredWidth: parent.width * 0.42
+
+            ColumnLayout {
+                anchors.centerIn: parent
+                spacing: 0
+
+                Rectangle {
+                    Layout.alignment: Qt.AlignHCenter
+                    Layout.bottomMargin: 20
+                    width: 88
+                    height: 88
+                    radius: 44
+                    color: PlazmaStyle.color.softAmber
+
+                    Text {
+                        anchors.centerIn: parent
+                        text: "P"
+                        font.pixelSize: 38
+                        font.weight: Font.Bold
+                        color: PlazmaStyle.color.warmGold
+                    }
+                }
+
+                Text {
+                    Layout.alignment: Qt.AlignHCenter
+                    Layout.bottomMargin: 10
+                    text: qsTr("Plazma")
+                    font.pixelSize: 26
+                    font.weight: Font.Bold
+                    color: PlazmaStyle.color.textPrimary
+                }
+
+                Text {
+                    Layout.alignment: Qt.AlignHCenter
+                    text: qsTr("Your private video feed,\npowered by Telegram")
+                    font.pixelSize: 13
+                    color: PlazmaStyle.color.textSecondary
+                    horizontalAlignment: Text.AlignHCenter
+                    lineHeight: 1.5
+                }
+            }
+        }
+
+        // Divider
+        Rectangle {
+            Layout.fillHeight: true
+            Layout.topMargin: 48
+            Layout.bottomMargin: 48
+            width: 1
+            color: PlazmaStyle.color.inputBorder
+        }
+
+        // Right — action
+        Item {
+            Layout.fillHeight: true
+            Layout.fillWidth: true
+
+            ColumnLayout {
+                anchors.centerIn: parent
+                width: Math.min(parent.width - 64, 300)
+                spacing: 0
+
+                Text {
+                    Layout.alignment: Qt.AlignHCenter
+                    Layout.bottomMargin: 6
+                    text: qsTr("Get started")
+                    font.pixelSize: 20
+                    font.weight: Font.Bold
+                    color: PlazmaStyle.color.textPrimary
+                }
+
+                Text {
+                    Layout.alignment: Qt.AlignHCenter
+                    Layout.bottomMargin: 28
+                    text: qsTr("Connect with your Telegram\naccount to start watching")
+                    font.pixelSize: 13
+                    color: PlazmaStyle.color.textSecondary
+                    horizontalAlignment: Text.AlignHCenter
+                    lineHeight: 1.5
+                }
+
+                BasicButtonType {
+                    Layout.fillWidth: true
+                    Layout.preferredHeight: 46
+
+                    defaultColor: PlazmaStyle.color.goldenApricot
+                    hoveredColor: PlazmaStyle.color.warmGold
+                    pressedColor: PlazmaStyle.color.burntOrange
+                    textColor: "#FFFFFF"
+
+                    text: qsTr("Start Watching")
+                    font.pixelSize: 15
+                    font.weight: Font.DemiBold
+
+                    clickedFunc: function() {
+                        PageController.goToPage(PageEnum.PageLogin)
+                    }
+                }
             }
         }
     }

@@ -1,4 +1,6 @@
 #include <QDebug>
+#include <QDir>
+#include <QStandardPaths>
 
 #include <qdebug.h>
 #include <qobject.h>
@@ -16,7 +18,9 @@
 
 RequestPtr TelegramRequestBuilder::setTdLibParameters() {
     auto request = td_api::make_object<td::td_api::setTdlibParameters>();
-    request->database_directory_ = "tdlib";
+    const QString dbPath = QStandardPaths::writableLocation(QStandardPaths::AppDataLocation) + "/tdlib";
+    QDir().mkpath(dbPath);
+    request->database_directory_ = dbPath.toStdString();
     request->use_message_database_ = true;
     request->use_secret_chats_ = true;
     request->api_id_ = 94575;
@@ -57,7 +61,7 @@ void TelegramClient::createInstance() {
     client_manager_ = std::make_unique<td::ClientManager>();
     client_id_ = client_manager_->create_client_id();
 
-    send(request_builder_->getVersion());
+    send(TelegramRequestBuilder::getVersion());
 }
 
 template <std::derived_from<td_api::Object> T, typename... Fs>
@@ -70,7 +74,7 @@ void TelegramClient::process_update(td_api::object_ptr<td_api::Object> update) {
         td_api::downcast_call(*update_authorization_state.authorization_state_, detail::overloaded(
             [this](td_api::authorizationStateWaitTdlibParameters&) {
                 qDebug() << "[AUTH] WaitTdlibParameters";
-                send(request_builder_->setTdLibParameters());
+                send(TelegramRequestBuilder::setTdLibParameters());
             },
             [this](td_api::authorizationStateWaitPhoneNumber&) {
                 qDebug() << "[AUTH] WaitPhoneNumber";
@@ -108,7 +112,7 @@ void TelegramClient::process_update(td_api::object_ptr<td_api::Object> update) {
             [this](td_api::authorizationStateReady&) {
                 qDebug() << "[AUTH] Ready";
                 is_authorized_ = true;
-                send(request_builder_->getMe(), [this](ResponsePtr response) {
+                send(TelegramRequestBuilder::getMe(), [this](ResponsePtr response) {
                     auto raw = td::td_api::move_object_as<td_api::user>(response);
 
                     qDebug() << raw->first_name_ << " " << raw->last_name_;
@@ -137,11 +141,18 @@ void TelegramClient::pollForUpdates() {
         } else {
             qDebug() << "Response for request" << response.request_id << ":" << td_api::to_string(response.object);
 
-            auto match = response_handlers_.find(response.request_id);
+            ResponseHandler handler;
+            {
+                std::lock_guard<std::mutex> lock(response_handlers_mu_);
+                auto match = response_handlers_.find(response.request_id);
+                if (match != response_handlers_.end()) {
+                    handler = std::move(match->second);
+                    response_handlers_.erase(match);
+                }
+            }
 
-            if (match != response_handlers_.end()) {
-                match->second(std::move(response.object));
-                response_handlers_.erase(match);
+            if (handler) {
+                handler(std::move(response.object));
             }
         }
     }
@@ -157,14 +168,14 @@ bool TelegramClient::isUnsolicitedUpdate(const td::ClientManager::Response& resp
     return response.request_id == 0;
 }
 
-RequestId TelegramClient::update_request_id() { return ++current_request_id_; }
+RequestId TelegramClient::update_request_id() { return current_request_id_.fetch_add(1, std::memory_order_relaxed) + 1; }
 
 bool TelegramClient::IsAuthorized() const { return is_authorized_; }
 
 void TelegramClient::phoneNumberReceived(const QString& phone_number) {
-    send(request_builder_->setPhoneNumber(phone_number.toStdString()));
+    send(TelegramRequestBuilder::setPhoneNumber(phone_number.toStdString()));
 }
 
 void TelegramClient::authCodeReceived(const QString& code) {
-    send(request_builder_->checkAuthCode(code.toStdString()));
+    send(TelegramRequestBuilder::checkAuthCode(code.toStdString()));
 }

@@ -11,14 +11,9 @@ import Style 1.0
 Page {
     id: root
 
-    anchors.fill: parent
+    background: Rectangle { color: PlazmaStyle.color.warmWhite }
 
-    background: Rectangle {
-        color: PlazmaStyle.color.warmWhite
-    }
-
-    // Tracks which step the user has reached (survives model flag resets)
-    property int authStep: 0  // 0 = phone, 1 = code, 2 = done
+    property int authStep: 0
 
     Connections {
         target: AuthorizationCodeModel
@@ -28,9 +23,8 @@ Page {
         }
     }
 
-    // Login error banner (HTTP auth failure, server down, etc.)
+    // Error banner
     Rectangle {
-        id: errorBanner
         visible: Session.errorMessage.length > 0
         anchors.top: parent.top
         anchors.left: parent.left
@@ -57,103 +51,93 @@ Page {
 
     // Back button
     Rectangle {
-        id: backButton
         anchors.left: parent.left
         anchors.top: parent.top
-        anchors.margins: 16
-        width: 40
-        height: 40
-        radius: 20
-        color: backMouseArea.containsMouse ? PlazmaStyle.color.softAmber : "transparent"
-        visible: true
+        anchors.margins: 14
+        width: 36
+        height: 36
+        radius: 18
+        color: backMouse.containsMouse ? PlazmaStyle.color.softAmber : "transparent"
         z: 10
+
+        Behavior on color { ColorAnimation { duration: 150 } }
 
         Text {
             anchors.centerIn: parent
-            text: "\u2190"
-            font.pixelSize: 20
+            text: "←"
+            font.pixelSize: 18
             color: PlazmaStyle.color.textPrimary
         }
 
         MouseArea {
-            id: backMouseArea
+            id: backMouse
             anchors.fill: parent
             hoverEnabled: true
             cursorShape: Qt.PointingHandCursor
-            onClicked: {
-                stackView.pop()
-            }
+            onClicked: stackView.pop()
         }
     }
 
-    // Phone number step
+    // Centered card
     Item {
-        id: phoneStep
         anchors.fill: parent
-        visible: root.authStep === 0
 
+        // Phone step
         ColumnLayout {
+            visible: root.authStep === 0
             anchors.centerIn: parent
-            width: parent.width
+            width: Math.min(parent.width - 80, 340)
             spacing: 0
 
-            // Icon
             Rectangle {
                 Layout.alignment: Qt.AlignHCenter
-                Layout.bottomMargin: 24
-                width: 100
-                height: 100
-                radius: 50
+                Layout.bottomMargin: 18
+                width: 72
+                height: 72
+                radius: 36
                 color: PlazmaStyle.color.softAmber
 
                 Text {
                     anchors.centerIn: parent
-                    text: "\uD83D\uDCF1"
-                    font.pixelSize: 40
+                    text: "📱"
+                    font.pixelSize: 30
                 }
             }
 
-            // Title
             Text {
                 Layout.alignment: Qt.AlignHCenter
-                Layout.bottomMargin: 10
+                Layout.bottomMargin: 6
                 text: qsTr("Your Phone Number")
-                font.pixelSize: 24
+                font.pixelSize: 22
                 font.weight: Font.Bold
                 color: PlazmaStyle.color.textPrimary
             }
 
-            // Description
             Text {
                 Layout.alignment: Qt.AlignHCenter
-                Layout.leftMargin: 40
-                Layout.rightMargin: 40
-                Layout.bottomMargin: 32
-                text: qsTr("Please confirm your country code\nand enter your phone number")
-                font.pixelSize: 14
+                Layout.bottomMargin: 24
+                text: qsTr("Enter your number with country code")
+                font.pixelSize: 13
                 color: PlazmaStyle.color.textSecondary
                 horizontalAlignment: Text.AlignHCenter
-                lineHeight: 1.4
             }
 
-            // Phone input
             TextField {
                 id: phoneField
                 Layout.fillWidth: true
-                Layout.leftMargin: 40
-                Layout.rightMargin: 40
-                Layout.preferredHeight: 50
+                Layout.preferredHeight: 46
+                Layout.bottomMargin: 14
 
                 placeholderText: qsTr("+1 234 567 8900")
                 placeholderTextColor: PlazmaStyle.color.textHint
                 font.pixelSize: 16
                 color: PlazmaStyle.color.textPrimary
-                leftPadding: 16
-                rightPadding: 16
+                leftPadding: 14
+                rightPadding: 14
                 verticalAlignment: TextInput.AlignVCenter
 
                 background: Rectangle {
-                    radius: 12
+                    radius: 10
                     color: PlazmaStyle.color.inputBackground
                     border.width: phoneField.activeFocus ? 2 : 1
                     border.color: phoneField.activeFocus
@@ -162,18 +146,13 @@ Page {
                 }
 
                 Keys.onReturnPressed: {
-                    if (phoneField.text.length > 0)
-                        submitPhone()
+                    if (phoneField.text.length > 0) submitPhone()
                 }
             }
 
-            // Next button
             BasicButtonType {
                 Layout.fillWidth: true
-                Layout.leftMargin: 40
-                Layout.rightMargin: 40
-                Layout.topMargin: 20
-                Layout.preferredHeight: 50
+                Layout.preferredHeight: 46
 
                 defaultColor: PlazmaStyle.color.goldenApricot
                 hoveredColor: PlazmaStyle.color.warmGold
@@ -182,74 +161,59 @@ Page {
                 textColor: "#FFFFFF"
 
                 text: qsTr("Next")
-                font.pixelSize: 16
+                font.pixelSize: 15
                 font.weight: Font.DemiBold
-                enabled: phoneField.text.length > 0 && PhoneNumberModel.waitingForPhone
+                enabled: phoneField.text.length > 0
 
-                clickedFunc: function() {
-                    submitPhone()
-                }
+                clickedFunc: function() { submitPhone() }
             }
         }
-    }
 
-    // Auth code step
-    Item {
-        id: codeStep
-        anchors.fill: parent
-        visible: root.authStep === 1
-
+        // Code step
         ColumnLayout {
+            visible: root.authStep === 1
             anchors.centerIn: parent
-            width: parent.width
+            width: Math.min(parent.width - 80, 340)
             spacing: 0
 
-            // Icon
             Rectangle {
                 Layout.alignment: Qt.AlignHCenter
-                Layout.bottomMargin: 24
-                width: 100
-                height: 100
-                radius: 50
+                Layout.bottomMargin: 18
+                width: 72
+                height: 72
+                radius: 36
                 color: PlazmaStyle.color.softAmber
 
                 Text {
                     anchors.centerIn: parent
-                    text: "\uD83D\uDD12"
-                    font.pixelSize: 40
+                    text: "🔒"
+                    font.pixelSize: 30
                 }
             }
 
-            // Title
             Text {
                 Layout.alignment: Qt.AlignHCenter
-                Layout.bottomMargin: 10
+                Layout.bottomMargin: 6
                 text: qsTr("Enter The Code")
-                font.pixelSize: 24
+                font.pixelSize: 22
                 font.weight: Font.Bold
                 color: PlazmaStyle.color.textPrimary
             }
 
-            // Description
             Text {
                 Layout.alignment: Qt.AlignHCenter
-                Layout.leftMargin: 40
-                Layout.rightMargin: 40
-                Layout.bottomMargin: 32
-                text: qsTr("We've sent the code to your\nTelegram app")
-                font.pixelSize: 14
+                Layout.bottomMargin: 24
+                text: qsTr("We've sent the code to your Telegram app")
+                font.pixelSize: 13
                 color: PlazmaStyle.color.textSecondary
                 horizontalAlignment: Text.AlignHCenter
-                lineHeight: 1.4
             }
 
-            // Code input
             TextField {
                 id: codeField
                 Layout.fillWidth: true
-                Layout.leftMargin: 40
-                Layout.rightMargin: 40
-                Layout.preferredHeight: 50
+                Layout.preferredHeight: 46
+                Layout.bottomMargin: 14
 
                 placeholderText: qsTr("Your code")
                 placeholderTextColor: PlazmaStyle.color.textHint
@@ -262,7 +226,7 @@ Page {
                 maximumLength: 6
 
                 background: Rectangle {
-                    radius: 12
+                    radius: 10
                     color: PlazmaStyle.color.inputBackground
                     border.width: codeField.activeFocus ? 2 : 1
                     border.color: codeField.activeFocus
@@ -271,18 +235,13 @@ Page {
                 }
 
                 Keys.onReturnPressed: {
-                    if (codeField.text.length > 0)
-                        submitCode()
+                    if (codeField.text.length > 0) submitCode()
                 }
             }
 
-            // Next button
             BasicButtonType {
                 Layout.fillWidth: true
-                Layout.leftMargin: 40
-                Layout.rightMargin: 40
-                Layout.topMargin: 20
-                Layout.preferredHeight: 50
+                Layout.preferredHeight: 46
 
                 defaultColor: PlazmaStyle.color.goldenApricot
                 hoveredColor: PlazmaStyle.color.warmGold
@@ -291,13 +250,11 @@ Page {
                 textColor: "#FFFFFF"
 
                 text: qsTr("Next")
-                font.pixelSize: 16
+                font.pixelSize: 15
                 font.weight: Font.DemiBold
-                enabled: codeField.text.length > 0 && AuthorizationCodeModel.waitingForAuthCode
+                enabled: codeField.text.length > 0
 
-                clickedFunc: function() {
-                    submitCode()
-                }
+                clickedFunc: function() { submitCode() }
             }
         }
     }

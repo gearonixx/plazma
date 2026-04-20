@@ -55,7 +55,6 @@ void PlazmaApplication::init() {
 
     coreController_->setQmlRoot();
 
-    // TODO
     coreController_->pageController()->showOnStartup();
 };
 

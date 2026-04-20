@@ -1,6 +1,9 @@
 #include <clocale>
 
 #include <QApplication>
+#ifdef Q_OS_WIN
+#  include <windows.h>
+#endif
 
 #include <qcoreapplication.h>
 #include <qguiapplication.h>
@@ -16,6 +19,10 @@
 
 Q_DECL_EXPORT int main(int argc, char* argv[]) {
     std::setlocale(LC_NUMERIC, "C");
+#ifdef Q_OS_WIN
+    SetConsoleCP(CP_UTF8);
+    SetConsoleOutputCP(CP_UTF8);
+#endif
 
     PlazmaApplication app(argc, argv);
 
@@ -28,6 +35,8 @@ Q_DECL_EXPORT int main(int argc, char* argv[]) {
     app.setApplicationVersion(APP_VERSION);
 
     qDebug() << app.organizationName();
+
+    qRegisterMetaType<UserPtr>("UserPtr");
 
     app.registerTypes();
 

@@ -28,12 +28,42 @@ class PageController : public QObject {
 public:
     explicit PageController(QObject* parent = nullptr);
 
+public slots:
+    Q_INVOKABLE QString getPagePath(PageLoader::PageEnum page);
+
+    Q_INVOKABLE void goToPage(PageLoader::PageEnum page) { emit goToPageRequested(page); }
+    Q_INVOKABLE void replacePage(PageLoader::PageEnum page) { emit replacePageRequested(page); }
+
     void showOnStartup();
 
-public slots:
-    QString getPagePath(PageLoader::PageEnum page);
+    void closeWindow();
+    void hideWindow();
+    void closeApplication();
+
+    void keyPressEvent(Qt::Key key);
+
+    void setDrawerDepth(int depth);
+    int getDrawerDepth() const;
+    int incrementDrawerDepth();
+    int decrementDrawerDepth();
 
 signals:
-    void goToPage(PageLoader::PageEnum page);
-    void replacePage(PageLoader::PageEnum page);
+    void goToPageRequested(PageLoader::PageEnum page);
+    void replacePageRequested(PageLoader::PageEnum page);
+
+    void closePage();
+    void escapePressed();
+    void closeTopDrawer();
+
+    void hideMainWindow();
+    void raiseMainWindow();
+
+    void showErrorMessage(const QString& errorMessage);
+    void showNotificationMessage(const QString& message);
+
+    void showBusyIndicator(bool visible);
+    void disableControls(bool disabled);
+
+private:
+    int m_drawerDepth = 0;
 };

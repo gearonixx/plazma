@@ -1,15 +1,11 @@
 #pragma once
 
-#undef signals
-#include <gtk/gtk.h>
-#define signals Q_SIGNALS
-
 #include <QByteArray>
+#include <QFileDialog>
 #include <QObject>
 #include <QPointer>
 #include <QStringList>
 #include <QWidget>
-#include <memory>
 
 #include "../core/file_utilities.h"
 #include "src/api.h"
@@ -52,7 +48,6 @@ signals:
     void pathsPicked(const QStringList& paths);
 
 public:
-
     void GetOpenPaths(
         QPointer<QWidget> parent,
         const QString& caption,
@@ -70,7 +65,7 @@ public:
 
 private:
     Api* api_ = nullptr;
-};  // class FileDialog
+};
 
 }  // namespace platform
 
@@ -79,59 +74,24 @@ namespace Platform::FileDialog {
 inline bool Get(
     QPointer<QWidget> parent,
     QStringList& files,
-    QByteArray& remoteContent,
+    QByteArray& /*remoteContent*/,
     const QString& caption,
-    const QString& filter,
+    const QString& /*filter*/,
     platform::Type type,
-    QString startFile
+    const QString& startFile
 ) {
-    if (!gtk_init_check(nullptr, nullptr)) {
-        return false;
-    }
+    QFileDialog dialog(parent, caption, startFile);
+    dialog.setNameFilters({
+        QObject::tr("Video files") + " (*.mp4 *.mkv *.avi *.mov *.webm *.flv *.wmv *.m4v *.ts)",
+        QObject::tr("All files") + " (*)"
+    });
+    dialog.setFileMode(type == platform::Type::ReadFiles
+                       ? QFileDialog::ExistingFiles
+                       : QFileDialog::ExistingFile);
 
-    GtkWidget* dialog = gtk_file_chooser_dialog_new(
-        caption.toUtf8().constData(),
-        nullptr,
-        GTK_FILE_CHOOSER_ACTION_OPEN,
-        "_Cancel",
-        GTK_RESPONSE_CANCEL,
-        "_Open",
-        GTK_RESPONSE_ACCEPT,
-        nullptr
-    );
-
-    if (type == platform::Type::ReadFiles) {
-        gtk_file_chooser_set_select_multiple(GTK_FILE_CHOOSER(dialog), TRUE);
-    }
-
-    GtkFileFilter* videoFilter = gtk_file_filter_new();
-    gtk_file_filter_set_name(videoFilter, "Video files");
-    gtk_file_filter_add_mime_type(videoFilter, "video/*");
-    gtk_file_chooser_add_filter(GTK_FILE_CHOOSER(dialog), videoFilter);
-
-    GtkFileFilter* allFilter = gtk_file_filter_new();
-    gtk_file_filter_set_name(allFilter, "All files");
-    gtk_file_filter_add_pattern(allFilter, "*");
-    gtk_file_chooser_add_filter(GTK_FILE_CHOOSER(dialog), allFilter);
-
-    // Set starting directory
-    gtk_file_chooser_set_current_folder(GTK_FILE_CHOOSER(dialog), startFile.toUtf8().constData());
-
-    gint result = gtk_dialog_run(GTK_DIALOG(dialog));
-
-    if (result == GTK_RESPONSE_ACCEPT) {
-        GSList* filenames = gtk_file_chooser_get_filenames(GTK_FILE_CHOOSER(dialog));
-        for (GSList* f = filenames; f; f = f->next) {
-            files.push_back(QString::fromUtf8((char*)f->data));
-            g_free(f->data);
-        }
-        g_slist_free(filenames);
-        gtk_widget_destroy(dialog);
-        return true;
-    }
-
-    gtk_widget_destroy(dialog);
-    return false;
+    if (dialog.exec() != QDialog::Accepted) return false;
+    files = dialog.selectedFiles();
+    return !files.isEmpty();
 }
 
 }  // namespace Platform::FileDialog
