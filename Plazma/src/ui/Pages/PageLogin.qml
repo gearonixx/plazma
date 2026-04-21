@@ -20,13 +20,11 @@ Page {
         function onWaitingForCodeChanged() {
             if (AuthorizationCodeModel.waitingForAuthCode) {
                 root.authStep = 1
-                // Phone step is done — safe to clear the field now.
                 phoneField.text = ""
             }
         }
     }
 
-    // Error banner
     Rectangle {
         visible: Session.errorMessage.length > 0
         anchors.top: parent.top

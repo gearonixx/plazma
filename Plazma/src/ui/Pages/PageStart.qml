@@ -16,6 +16,31 @@ Page {
     background: Rectangle { color: PlazmaStyle.color.warmWhite }
 
     Rectangle {
+        visible: Session.errorMessage.length > 0
+        anchors.top: parent.top
+        anchors.left: parent.left
+        anchors.right: parent.right
+        anchors.margins: 8
+        height: visible ? errorText.implicitHeight + 20 : 0
+        radius: 8
+        color: "#F8D7DA"
+        border.color: "#F5C2C7"
+        border.width: 1
+        z: 20
+
+        Text {
+            id: errorText
+            anchors.fill: parent
+            anchors.margins: 10
+            text: qsTr("Login failed: %1").arg(Session.errorMessage)
+            color: "#842029"
+            font.pixelSize: 12
+            wrapMode: Text.WordWrap
+            verticalAlignment: Text.AlignVCenter
+        }
+    }
+
+    Rectangle {
         id: langButton
         anchors.top: parent.top
         anchors.left: parent.left
@@ -140,6 +165,8 @@ Page {
                 BasicButtonType {
                     Layout.fillWidth: true
                     Layout.preferredHeight: 46
+
+                    enabled: Session.errorMessage.length === 0
 
                     defaultColor: PlazmaStyle.color.goldenApricot
                     hoveredColor: PlazmaStyle.color.warmGold

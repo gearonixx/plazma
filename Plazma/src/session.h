@@ -35,7 +35,7 @@ public:
 
     void start(const UserLogin& user);
     void reportError(int statusCode, const QString& message);
-    QString errorMessage() const { return errorMessage_; }
+    [[nodiscard]] QString errorMessage() const { return errorMessage_; }
 
 public slots:
     // Handles errors originating from TDLib (as opposed to the HTTP API).

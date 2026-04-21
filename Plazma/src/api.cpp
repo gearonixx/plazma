@@ -32,24 +32,38 @@ void RequestBuilder::send() {
     );
 }
 
-RequestBuilder Api::request(const QString& endpoint, const QJsonObject& body, const HttpMethod& method) {
+RequestBuilder Api::request(Endpoint endpoint, const QJsonObject& body, const HttpMethod& method) {
+    return request(endpoint, QUrlQuery{}, body, method);
+}
+
+RequestBuilder Api::request(
+    Endpoint endpoint,
+    const QUrlQuery& params,
+    const QJsonObject& body,
+    const HttpMethod& method
+) {
     Q_ASSERT(nam_ != nullptr);
 
-    QNetworkRequest req(QUrl(QString(kBaseUrl) + endpoint));
+    const auto path = toEndpointString(endpoint);
+    QUrl url(QString(kBaseUrl) + path);
+    if (!params.isEmpty()) url.setQuery(params);
+
+    QNetworkRequest req(url);
     req.setHeader(QNetworkRequest::ContentTypeHeader, "application/json");
     req.setRawHeader("Connection", "close");
 
-    qDebug() << "[API]" << toMethodString(method) << endpoint;
+    qDebug() << "[API]" << toMethodString(method) << url.toString(QUrl::RemoveUserInfo);
 
     return RequestBuilder(nam_, req, method, QJsonDocument(body).toJson(QJsonDocument::Compact));
 }
 
-RequestBuilder Api::request(const QString& endpoint, QHttpMultiPart* multiPart) {
+RequestBuilder Api::request(Endpoint endpoint, QHttpMultiPart* multiPart) {
     Q_ASSERT(nam_ != nullptr);
 
-    QNetworkRequest req(QUrl(QString(kBaseUrl) + endpoint));
+    const auto path = toEndpointString(endpoint);
+    QNetworkRequest req(QUrl(QString(kBaseUrl) + path));
 
-    qDebug() << "[API] POST (multipart)" << endpoint;
+    qDebug() << "[API] POST (multipart)" << path;
 
     return RequestBuilder(nam_, req, multiPart);
 }
@@ -64,7 +78,7 @@ void Api::loginUser(const UserLogin& user) {
         {"is_premium", user.isPremium},
     };
 
-    request("/v1/auth/login", body, HttpMethod::kPost)
+    request(Endpoint::kAuthLogin, body, HttpMethod::kPost)
         .done([this](const QJsonObject& json) {
             QString validationError;
 
@@ -81,7 +95,8 @@ void Api::loginUser(const UserLogin& user) {
             }
         })
         .fail([this](int statusCode, const QString& error) {
-            qWarning() << "[API] loginUser failed — POST" << (QString(kBaseUrl) + "/v1/auth/login")
+            qWarning() << "[API] loginUser failed — POST"
+                       << (QString(kBaseUrl) + toEndpointString(Endpoint::kAuthLogin))
                        << "status:" << statusCode << "error:" << error;
             emit loginError(statusCode, error);
         })
@@ -89,7 +104,7 @@ void Api::loginUser(const UserLogin& user) {
 }
 
 void Api::uploadFile(
-    const QString& endpoint,
+    Endpoint endpoint,
     const QString& fieldName,
     const QString& filename,
     const QString& mime,
@@ -123,14 +138,15 @@ void Api::uploadFile(
         multiPart->append(thumbPart);
     }
 
+    const auto path = toEndpointString(endpoint);
     request(endpoint, multiPart)
-        .done([this, endpoint, filename](const QJsonObject&) {
-            qDebug() << "[API] upload ok:" << endpoint;
-            emit uploadFinished(endpoint, filename);
+        .done([this, path, filename](const QJsonObject&) {
+            qDebug() << "[API] upload ok:" << path;
+            emit uploadFinished(path, filename);
         })
-        .fail([this, endpoint](int code, const QString& error) {
+        .fail([this, path](int code, const QString& error) {
             qWarning() << "[API] upload failed:" << code << error;
-            emit uploadFailed(endpoint, code, error);
+            emit uploadFailed(path, code, error);
         })
         .send();
 }
@@ -184,14 +200,10 @@ void Api::uploadFile(
 //   - No pagination yet. Cap the response at ~200 rows until we add a cursor.
 // ────────────────────────────────────────────────────────────────────────────
 void Api::fetchVideos(const QString& query, Fn<void(QJsonArray)> onOk, Fn<void(int, QString)> onFail) {
-    QString endpoint = QStringLiteral("/v1/videos");
-    if (!query.isEmpty()) {
-        QUrlQuery q;
-        q.addQueryItem("q", query);
-        endpoint += "?" + q.toString(QUrl::FullyEncoded);
-    }
+    QUrlQuery params;
+    if (!query.isEmpty()) params.addQueryItem("q", query);
 
-    request(endpoint, {}, HttpMethod::kGet)
+    request(Endpoint::kVideos, params, {}, HttpMethod::kGet)
         .done([ok = std::move(onOk)](const QJsonObject& json) {
             const auto arr = json.value("videos").toArray();
             qDebug() << "[API] fetchVideos =>" << arr.size() << "items";

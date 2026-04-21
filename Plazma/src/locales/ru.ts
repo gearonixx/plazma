@@ -115,12 +115,12 @@
 <context>
     <name>PageLogin</name>
     <message>
-        <location filename="../ui/Pages/PageLogin.qml" line="47"/>
+        <location filename="../ui/Pages/PageLogin.qml" line="45"/>
         <source>Login failed: %1</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/Pages/PageLogin.qml" line="113"/>
+        <location filename="../ui/Pages/PageLogin.qml" line="111"/>
         <source>Your Phone Number</source>
         <translation>Ваш номер телефона</translation>
     </message>
@@ -131,28 +131,28 @@ and enter your phone number</source>
 и введите номер телефона</translation>
     </message>
     <message>
-        <location filename="../ui/Pages/PageLogin.qml" line="122"/>
+        <location filename="../ui/Pages/PageLogin.qml" line="120"/>
         <source>Enter your number with country code</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/Pages/PageLogin.qml" line="134"/>
+        <location filename="../ui/Pages/PageLogin.qml" line="132"/>
         <source>+1 234 567 8900</source>
         <translation>+7 999 123 4567</translation>
     </message>
     <message>
-        <location filename="../ui/Pages/PageLogin.qml" line="166"/>
-        <location filename="../ui/Pages/PageLogin.qml" line="255"/>
+        <location filename="../ui/Pages/PageLogin.qml" line="164"/>
+        <location filename="../ui/Pages/PageLogin.qml" line="253"/>
         <source>Next</source>
         <translation>Далее</translation>
     </message>
     <message>
-        <location filename="../ui/Pages/PageLogin.qml" line="200"/>
+        <location filename="../ui/Pages/PageLogin.qml" line="198"/>
         <source>Enter The Code</source>
         <translation>Введите код</translation>
     </message>
     <message>
-        <location filename="../ui/Pages/PageLogin.qml" line="209"/>
+        <location filename="../ui/Pages/PageLogin.qml" line="207"/>
         <source>We&apos;ve sent the code to your Telegram app</source>
         <translation type="unfinished"></translation>
     </message>
@@ -163,7 +163,7 @@ Telegram app</source>
 приложение Telegram</translation>
     </message>
     <message>
-        <location filename="../ui/Pages/PageLogin.qml" line="221"/>
+        <location filename="../ui/Pages/PageLogin.qml" line="219"/>
         <source>Your code</source>
         <translation>Ваш код</translation>
     </message>
@@ -339,31 +339,36 @@ Telegram app</source>
 <context>
     <name>PageStart</name>
     <message>
-        <location filename="../ui/Pages/PageStart.qml" line="85"/>
+        <location filename="../ui/Pages/PageStart.qml" line="35"/>
+        <source>Login failed: %1</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/Pages/PageStart.qml" line="110"/>
         <source>Plazma</source>
         <translation>Plazma</translation>
     </message>
     <message>
-        <location filename="../ui/Pages/PageStart.qml" line="93"/>
+        <location filename="../ui/Pages/PageStart.qml" line="118"/>
         <source>Your private video feed,
 powered by Telegram</source>
         <translation>Ваша личная видеолента
 на базе Telegram</translation>
     </message>
     <message>
-        <location filename="../ui/Pages/PageStart.qml" line="124"/>
+        <location filename="../ui/Pages/PageStart.qml" line="149"/>
         <source>Get started</source>
         <translation>Начать</translation>
     </message>
     <message>
-        <location filename="../ui/Pages/PageStart.qml" line="133"/>
+        <location filename="../ui/Pages/PageStart.qml" line="158"/>
         <source>Connect with your Telegram
 account to start watching</source>
         <translation>Подключите свой аккаунт Telegram,
 чтобы начать смотреть</translation>
     </message>
     <message>
-        <location filename="../ui/Pages/PageStart.qml" line="149"/>
+        <location filename="../ui/Pages/PageStart.qml" line="174"/>
         <source>Start Watching</source>
         <translation>Погнали</translation>
     </message>

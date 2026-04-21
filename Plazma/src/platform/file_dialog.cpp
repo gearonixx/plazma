@@ -181,7 +181,7 @@ void FileDialog::prepareFileTasks(storages::prepare::PreparedList&& bundle, plaz
                         thumb = thumb_future.get();
                     }
                     api_->uploadFile(
-                        "/v1/videos/upload", "video", result.filename, result.filemime, result.filedata, thumb
+                        Endpoint::kVideosUpload, "video", result.filename, result.filemime, result.filedata, thumb
                     );
                 },
             })

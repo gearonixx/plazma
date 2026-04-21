@@ -7,11 +7,24 @@
 #include <QNetworkAccessManager>
 #include <QNetworkReply>
 #include <QObject>
+#include <QUrlQuery>
 
 #include "session.h"
 #include "storage/task_queue.h"
 
 enum class HttpMethod { kGet, kPost, kHead, kPut, kDelete, kPatch, kOptions };
+
+enum class Endpoint { kAuthLogin, kVideos, kVideosUpload };
+
+[[nodiscard]] static QString toEndpointString(Endpoint endpoint) {
+    static const std::unordered_map<Endpoint, QString> kPaths = {
+        {Endpoint::kAuthLogin, QStringLiteral("/v1/auth/login")},
+        {Endpoint::kVideos, QStringLiteral("/v1/videos")},
+        {Endpoint::kVideosUpload, QStringLiteral("/v1/videos/upload")},
+    };
+
+    return kPaths.at(endpoint);
+}
 
 [[nodiscard]] static QByteArray toMethodString(HttpMethod method) {
     static const std::unordered_map<HttpMethod, QByteArray> kMethods = {
@@ -65,11 +78,17 @@ public:
     // request() returns a RequestBuilder — you must chain .send() on it or
     // the HTTP call never happens, so dropping the result is always a bug.
     [[nodiscard]] RequestBuilder
-    request(const QString& endpoint, const QJsonObject& body = {}, const HttpMethod& method = HttpMethod::kGet);
-    [[nodiscard]] RequestBuilder request(const QString& endpoint, QHttpMultiPart* multiPart);
+    request(Endpoint endpoint, const QJsonObject& body = {}, const HttpMethod& method = HttpMethod::kGet);
+    [[nodiscard]] RequestBuilder request(
+        Endpoint endpoint,
+        const QUrlQuery& params,
+        const QJsonObject& body = {},
+        const HttpMethod& method = HttpMethod::kGet
+    );
+    [[nodiscard]] RequestBuilder request(Endpoint endpoint, QHttpMultiPart* multiPart);
     void loginUser(const UserLogin& user);
     void uploadFile(
-        const QString& endpoint,
+        Endpoint endpoint,
         const QString& fieldName,
         const QString& filename,
         const QString& mime,
