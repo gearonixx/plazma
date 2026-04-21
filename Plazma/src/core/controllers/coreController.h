@@ -3,15 +3,15 @@
 #include <QCoreApplication>
 #include <QQmlApplicationEngine>
 
+#include "src/api.h"
 #include "src/controllers/pageController.h"
 #include "src/controllers/systemController.h"
-#include "src/api.h"
 #include "src/settings.h"
 
 #include "src/models/auth_code_model.h"
+#include "src/models/file_dialog_model.h"
 #include "src/models/language_model.h"
 #include "src/models/phone_number_model.h"
-#include "src/models/file_dialog_model.h"
 #include "src/models/user_model.h"
 #include "src/models/video_feed_model.h"
 #include "src/platform/file_dialog.h"
@@ -62,7 +62,6 @@ private:
 
     QSharedPointer<UserModel> userModel_;
     QSharedPointer<Session> session_;
-
 
     QScopedPointer<platform::FileDialog> fileDialog_;
     QSharedPointer<FileDialogModel> fileDialogModel_;

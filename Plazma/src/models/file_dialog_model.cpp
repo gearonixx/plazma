@@ -13,6 +13,4 @@ FileDialogModel::FileDialogModel(platform::FileDialog* fileDialog, QObject* pare
 
 QStringList FileDialogModel::selectedPaths() const { return selectedPaths_; }
 
-void FileDialogModel::openFilePicker() {
-    fileDialog_->attachFiles(plazma::task_queue::SendMediaType::Video);
-}
+void FileDialogModel::openFilePicker() { fileDialog_->attachFiles(plazma::task_queue::SendMediaType::Video); }

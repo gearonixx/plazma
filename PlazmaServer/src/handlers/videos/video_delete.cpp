@@ -13,10 +13,10 @@ namespace real_medium::handlers::videos::del {
 Handler::Handler(
     const userver::components::ComponentConfig& config,
     const userver::components::ComponentContext& context
-) : HttpHandlerBase(config, context),
-    s3_(context.FindComponent<s3::S3Component>()),
-    session_(context.FindComponent<userver::components::Scylla>("scylla").GetSession()) {
-}
+)
+    : HttpHandlerBase(config, context),
+      s3_(context.FindComponent<s3::S3Component>()),
+      session_(context.FindComponent<userver::components::Scylla>("scylla").GetSession()) {}
 
 std::string Handler::HandleRequest(
     userver::server::http::HttpRequest& request,
@@ -55,17 +55,17 @@ std::string Handler::HandleRequest(
         }
 
         const auto storage_url = row.Get<std::string>("storage_url");
-        const auto s3_key      = utils::video::S3KeyFromUrl(storage_url);
+        const auto s3_key = utils::video::S3KeyFromUrl(storage_url);
 
         // day and created_at are needed to delete from videos_by_day.
         // Both are always set for videos created after migration 004.
         const bool have_day_key = !row.IsNull("day") && !row.IsNull("created_at");
-        const auto day          = have_day_key ? row.Get<std::string>("day") : std::string{};
+        const auto day = have_day_key ? row.Get<std::string>("day") : std::string{};
         const int64_t created_at = have_day_key ? row.Get<int64_t>("created_at") : 0LL;
 
         // Delete from S3 first (idempotent — re-runs are safe even if object is gone)
         try {
-            s3_.GetClient()->RemoveObject(s3_key);
+            s3_.GetClient()->DeleteObject(s3_key);
         } catch (const std::exception& ex) {
             LOG_ERROR() << "S3 delete failed for key=" << s3_key << ": " << ex.what();
             request.SetResponseStatus(userver::server::http::HttpStatus::kBadGateway);
@@ -83,7 +83,7 @@ std::string Handler::HandleRequest(
         {
             auto table = session_->GetTable("videos");
             userver::storages::scylla::operations::DeleteOne del;
-            del.WhereInt64("user_id",  owner_id);
+            del.WhereInt64("user_id", owner_id);
             del.WhereString("video_id", video_id);
             table.Execute(del);
         }
@@ -93,7 +93,7 @@ std::string Handler::HandleRequest(
         if (have_day_key) {
             auto table = session_->GetTable("videos_by_day");
             userver::storages::scylla::operations::DeleteOne del;
-            del.WhereString("day",      day);
+            del.WhereString("day", day);
             del.WhereInt64("created_at", created_at);
             del.WhereString("video_id", video_id);
             table.Execute(del);

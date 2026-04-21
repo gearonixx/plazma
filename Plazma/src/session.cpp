@@ -25,9 +25,7 @@ void Session::start(const UserLogin& user) {
 }
 
 void Session::reportError(int statusCode, const QString& message) {
-    errorMessage_ = statusCode > 0
-        ? QStringLiteral("HTTP %1: %2").arg(statusCode).arg(message)
-        : message;
+    errorMessage_ = statusCode > 0 ? QStringLiteral("HTTP %1: %2").arg(statusCode).arg(message) : message;
 
     qWarning() << "[SESSION] login failed:" << errorMessage_;
 
@@ -40,8 +38,9 @@ void Session::reportAuthError(int tdlibCode, const QString& rawMessage) {
     QString friendly;
     if (rawMessage.contains(QStringLiteral("already in use"), Qt::CaseInsensitive) ||
         rawMessage.contains(QStringLiteral("Can't lock file"), Qt::CaseInsensitive)) {
-        friendly = tr("Another Plazma instance is already running. "
-                      "Close it and try again.");
+        friendly =
+            tr("Another Plazma instance is already running. "
+               "Close it and try again.");
     } else if (rawMessage.contains(QStringLiteral("Initialization parameters are needed"))) {
         // This is the *consequence* of a prior setTdlibParameters failure
         // (almost always the binlog lock above). If that case already set a

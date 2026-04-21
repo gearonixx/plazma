@@ -8,7 +8,6 @@
 #include <userver/formats/json/value_builder.hpp>
 #include <userver/logging/log.hpp>
 #include <userver/storages/scylla/operations.hpp>
-#include <userver/storages/scylla/row.hpp>
 
 #include "utils/auth.hpp"
 #include "utils/video.hpp"
@@ -18,9 +17,9 @@ namespace real_medium::handlers::videos::my {
 Handler::Handler(
     const userver::components::ComponentConfig& config,
     const userver::components::ComponentContext& context
-) : HttpHandlerBase(config, context),
-    session_(context.FindComponent<userver::components::Scylla>("scylla").GetSession()) {
-}
+)
+    : HttpHandlerBase(config, context),
+      session_(context.FindComponent<userver::components::Scylla>("scylla").GetSession()) {}
 
 std::string Handler::HandleRequest(
     userver::server::http::HttpRequest& request,
@@ -57,27 +56,27 @@ std::string Handler::HandleRequest(
         for (const auto& row : table.Execute(select)) {
             if (collected >= limit) break;
 
-            const int64_t created_at_ms = row.IsNull("created_at_ms")
-                ? 0LL : row.Get<int64_t>("created_at_ms");
+            const int64_t created_at_ms = row.IsNull("created_at_ms") ? 0LL : row.Get<int64_t>("created_at_ms");
 
-            videos_arr.PushBack(utils::video::BuildVideoJson(
-                row.Get<std::string>("video_id"),
-                auth.user_id,
-                row.Get<std::string>("title"),
-                row.Get<std::string>("storage_url"),
-                row.IsNull("mime")        ? std::string{} : row.Get<std::string>("mime"),
-                row.IsNull("size_bytes")  ? 0LL           : row.Get<int64_t>("size_bytes"),
-                std::nullopt,
-                row.IsNull("thumbnail_url") ? std::string{} : row.Get<std::string>("thumbnail_url"),
-                row.IsNull("visibility")  ? std::string{"public"} : row.Get<std::string>("visibility"),
-                created_at_ms,
-                row.IsNull("storyboard_url") ? std::string{} : row.Get<std::string>("storyboard_url")
-            ));
+            videos_arr.PushBack(
+                utils::video::BuildVideoJson(
+                    row.Get<std::string>("video_id"),
+                    auth.user_id,
+                    row.Get<std::string>("title"),
+                    row.Get<std::string>("storage_url"),
+                    row.IsNull("mime") ? std::string{} : row.Get<std::string>("mime"),
+                    row.IsNull("size_bytes") ? 0LL : row.Get<int64_t>("size_bytes"),
+                    std::nullopt,
+                    row.IsNull("thumbnail_url") ? std::string{} : row.Get<std::string>("thumbnail_url"),
+                    row.IsNull("visibility") ? std::string{"public"} : row.Get<std::string>("visibility"),
+                    created_at_ms,
+                    row.IsNull("storyboard_url") ? std::string{} : row.Get<std::string>("storyboard_url")
+                )
+            );
             ++collected;
         }
     } catch (const std::exception& ex) {
-        LOG_ERROR() << "GET /v1/users/me/videos user_id=" << auth.user_id
-                    << " failed: " << ex.what();
+        LOG_ERROR() << "GET /v1/users/me/videos user_id=" << auth.user_id << " failed: " << ex.what();
         request.SetResponseStatus(userver::server::http::HttpStatus::kInternalServerError);
         return R"({"error": "internal error"})";
     }
@@ -85,9 +84,9 @@ std::string Handler::HandleRequest(
     LOG_INFO() << "GET /v1/users/me/videos user_id=" << auth.user_id;
 
     userver::formats::json::ValueBuilder response;
-    response["videos"]      = videos_arr.ExtractValue();
-    response["next_cursor"] = userver::formats::json::ValueBuilder{
-        userver::formats::common::Type::kNull}.ExtractValue();
+    response["videos"] = videos_arr.ExtractValue();
+    response["next_cursor"] =
+        userver::formats::json::ValueBuilder{userver::formats::common::Type::kNull}.ExtractValue();
     return userver::formats::json::ToString(response.ExtractValue());
 }
 

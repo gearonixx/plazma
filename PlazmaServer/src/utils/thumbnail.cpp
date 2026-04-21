@@ -1,5 +1,6 @@
 #include "thumbnail.hpp"
 
+#include <unistd.h>
 #include <array>
 #include <atomic>
 #include <cstdio>
@@ -8,7 +9,6 @@
 #include <sstream>
 #include <stdexcept>
 #include <string>
-#include <unistd.h>
 #include <vector>
 
 #include <userver/logging/log.hpp>
@@ -19,28 +19,23 @@ namespace {
 // Map MIME to a file extension. Giving ffmpeg a matching suffix helps its
 // container-probing heuristics lock onto the right demuxer immediately.
 std::string ExtFromMime(std::string_view mime) {
-    if (mime == "video/mp4")        return "mp4";
-    if (mime == "video/webm")       return "webm";
+    if (mime == "video/mp4") return "mp4";
+    if (mime == "video/webm") return "webm";
     if (mime == "video/x-matroska") return "mkv";
-    if (mime == "video/quicktime")  return "mov";
-    if (mime == "video/x-msvideo")  return "avi";
-    if (mime == "video/ogg")        return "ogv";
+    if (mime == "video/quicktime") return "mov";
+    if (mime == "video/x-msvideo") return "avi";
+    if (mime == "video/ogg") return "ogv";
     return "bin";
 }
 
 // Compose a unique temp path under /tmp. We can't use mkstemp because ffmpeg
 // wants a specific extension; pid+base_name+counter is collision-resistant
 // enough for our concurrency (single-digit parallel uploads per process).
-std::string MakeTempPath(std::string_view prefix,
-                         std::string_view base_name,
-                         std::string_view ext) {
+std::string MakeTempPath(std::string_view prefix, std::string_view base_name, std::string_view ext) {
     static std::atomic<unsigned long> counter{0};
     std::ostringstream oss;
-    oss << "/tmp/" << prefix
-        << '_' << getpid()
-        << '_' << base_name
-        << '_' << counter.fetch_add(1, std::memory_order_relaxed)
-        << '.' << ext;
+    oss << "/tmp/" << prefix << '_' << getpid() << '_' << base_name << '_'
+        << counter.fetch_add(1, std::memory_order_relaxed) << '.' << ext;
     return oss.str();
 }
 
@@ -66,8 +61,10 @@ std::string ShellQuote(std::string_view s) {
     out.reserve(s.size() + 2);
     out.push_back('\'');
     for (char c : s) {
-        if (c == '\'') out += "'\\''";
-        else           out.push_back(c);
+        if (c == '\'')
+            out += "'\\''";
+        else
+            out.push_back(c);
     }
     out.push_back('\'');
     return out;
@@ -96,8 +93,7 @@ int RunFfmpeg(const std::vector<std::string>& args) {
     }
     const int status = pclose(fp);
     if (status != 0) {
-        LOG_WARNING() << "ffmpeg failed (status=" << status << "): "
-                      << (output.empty() ? "<no output>" : output);
+        LOG_WARNING() << "ffmpeg failed (status=" << status << "): " << (output.empty() ? "<no output>" : output);
     }
     return status;
 }
@@ -105,15 +101,15 @@ int RunFfmpeg(const std::vector<std::string>& args) {
 // RAII temp-file cleanup. Unlink is best-effort and silent on missing files.
 struct TempFile {
     std::string path;
-    ~TempFile() { if (!path.empty()) ::unlink(path.c_str()); }
+    ~TempFile() {
+        if (!path.empty()) ::unlink(path.c_str());
+    }
 };
 
 }  // namespace
 
-std::string Extract(std::string_view video_bytes,
-                    std::string_view mime,
-                    std::string_view base_name,
-                    const Options& opts) {
+std::string
+Extract(std::string_view video_bytes, std::string_view mime, std::string_view base_name, const Options& opts) {
     if (video_bytes.empty()) throw std::runtime_error("thumbnail: empty video bytes");
 
     const std::string ext = ExtFromMime(mime);
@@ -127,12 +123,18 @@ std::string Extract(std::string_view video_bytes,
     // Primary attempt: seek to seek_seconds before decoding (fast, pre-decode seek).
     int rc = RunFfmpeg({
         "-y",
-        "-ss", std::to_string(opts.seek_seconds),
-        "-i",  in.path,
-        "-frames:v", "1",
-        "-vf", scale,
-        "-q:v", std::to_string(opts.quality),
-        "-f", "image2",
+        "-ss",
+        std::to_string(opts.seek_seconds),
+        "-i",
+        in.path,
+        "-frames:v",
+        "1",
+        "-vf",
+        scale,
+        "-q:v",
+        std::to_string(opts.quality),
+        "-f",
+        "image2",
         out.path,
     });
 
@@ -140,11 +142,16 @@ std::string Extract(std::string_view video_bytes,
     if (rc != 0) {
         rc = RunFfmpeg({
             "-y",
-            "-i",  in.path,
-            "-frames:v", "1",
-            "-vf", scale,
-            "-q:v", std::to_string(opts.quality),
-            "-f", "image2",
+            "-i",
+            in.path,
+            "-frames:v",
+            "1",
+            "-vf",
+            scale,
+            "-q:v",
+            std::to_string(opts.quality),
+            "-f",
+            "image2",
             out.path,
         });
     }
@@ -155,10 +162,12 @@ std::string Extract(std::string_view video_bytes,
     return jpg;
 }
 
-std::string ExtractStoryboard(std::string_view video_bytes,
-                              std::string_view mime,
-                              std::string_view base_name,
-                              const StoryboardOptions& opts) {
+std::string ExtractStoryboard(
+    std::string_view video_bytes,
+    std::string_view mime,
+    std::string_view base_name,
+    const StoryboardOptions& opts
+) {
     if (video_bytes.empty()) throw std::runtime_error("storyboard: empty video bytes");
 
     const std::string ext = ExtFromMime(mime);
@@ -171,17 +180,21 @@ std::string ExtractStoryboard(std::string_view video_bytes,
     // tile=CxR assembles them into a single image. ffmpeg stops producing
     // output once the grid is full, so long videos are implicitly clamped.
     std::ostringstream vf;
-    vf << "fps=" << opts.sample_fps_num << '/' << opts.sample_fps_den
-       << ",scale=" << opts.tile_width << ':' << opts.tile_height
-       << ",tile=" << opts.tiles_per_row << 'x' << opts.rows;
+    vf << "fps=" << opts.sample_fps_num << '/' << opts.sample_fps_den << ",scale=" << opts.tile_width << ':'
+       << opts.tile_height << ",tile=" << opts.tiles_per_row << 'x' << opts.rows;
 
     const int rc = RunFfmpeg({
         "-y",
-        "-i", in.path,
-        "-frames:v", "1",
-        "-vf", vf.str(),
-        "-q:v", std::to_string(opts.quality),
-        "-f", "image2",
+        "-i",
+        in.path,
+        "-frames:v",
+        "1",
+        "-vf",
+        vf.str(),
+        "-q:v",
+        std::to_string(opts.quality),
+        "-f",
+        "image2",
         out.path,
     });
     if (rc != 0) throw std::runtime_error("storyboard: ffmpeg extraction failed");

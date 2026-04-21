@@ -22,7 +22,6 @@ public:
     void setAppLanguage(QLocale locale) { setValue("config/language", locale.name()); }
 
 private:
-    // TODO
     void setValue(const QString name, const QVariant& value) { settings_.setValue(name, value); };
 
     mutable QSettings settings_;

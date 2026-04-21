@@ -6,8 +6,8 @@
 #include <cstring>
 #include <sstream>
 
-#include <openssl/hmac.h>
 #include <openssl/evp.h>
+#include <openssl/hmac.h>
 
 namespace real_medium::utils::jwt {
 
@@ -27,8 +27,7 @@ const std::string& GetSecret() {
     return secret;
 }
 
-const char kB64Chars[] =
-    "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
+const char kB64Chars[] = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
 
 std::string Base64Encode(const std::string& in) {
     std::string out;
@@ -41,8 +40,7 @@ std::string Base64Encode(const std::string& in) {
         const unsigned char b = (i < len) ? data[i++] : 0;
         const unsigned char c = (i < len) ? data[i++] : 0;
         // Track how many bytes this group actually had (before we hit end)
-        const int bytes_in_group = static_cast<int>(
-            (i <= len ? 3 : 3 - (int)(i - len)));
+        const int bytes_in_group = static_cast<int>((i <= len ? 3 : 3 - (int)(i - len)));
         out += kB64Chars[a >> 2];
         out += kB64Chars[((a & 3) << 4) | (b >> 4)];
         out += (bytes_in_group >= 2) ? kB64Chars[((b & 0xF) << 2) | (c >> 6)] : '=';
@@ -54,8 +52,10 @@ std::string Base64Encode(const std::string& in) {
 std::string Base64UrlEncode(const std::string& in) {
     auto s = Base64Encode(in);
     for (char& c : s) {
-        if      (c == '+') c = '-';
-        else if (c == '/') c = '_';
+        if (c == '+')
+            c = '-';
+        else if (c == '/')
+            c = '_';
     }
     while (!s.empty() && s.back() == '=') s.pop_back();
     return s;
@@ -64,8 +64,10 @@ std::string Base64UrlEncode(const std::string& in) {
 std::string Base64UrlDecode(std::string s) {
     // Restore standard base64
     for (char& c : s) {
-        if      (c == '-') c = '+';
-        else if (c == '_') c = '/';
+        if (c == '-')
+            c = '+';
+        else if (c == '_')
+            c = '/';
     }
     while (s.size() % 4) s += '=';
 
@@ -98,16 +100,21 @@ std::string Base64UrlDecode(std::string s) {
 std::string HmacSha256Raw(const std::string& data, const std::string& key) {
     unsigned char digest[32];
     unsigned int len = 32;
-    HMAC(EVP_sha256(),
-         key.data(), static_cast<int>(key.size()),
-         reinterpret_cast<const unsigned char*>(data.data()), data.size(),
-         digest, &len);
+    HMAC(
+        EVP_sha256(),
+        key.data(),
+        static_cast<int>(key.size()),
+        reinterpret_cast<const unsigned char*>(data.data()),
+        data.size(),
+        digest,
+        &len
+    );
     return std::string(reinterpret_cast<const char*>(digest), len);
 }
 
 int64_t NowSeconds() {
-    return std::chrono::duration_cast<std::chrono::seconds>(
-        std::chrono::system_clock::now().time_since_epoch()).count();
+    return std::chrono::duration_cast<std::chrono::seconds>(std::chrono::system_clock::now().time_since_epoch())
+        .count();
 }
 
 // Extract integer claim from a minimal JWT payload JSON.
@@ -145,10 +152,8 @@ std::string Mint(int64_t user_id, const std::string& phone) {
     const std::string header_json = R"({"alg":"HS256","typ":"JWT"})";
 
     std::ostringstream payload_ss;
-    payload_ss << R"({"sub":)" << user_id
-               << R"(,"phone":")" << phone
-               << R"(","iat":)" << iat
-               << R"(,"exp":)" << exp << "}";
+    payload_ss << R"({"sub":)" << user_id << R"(,"phone":")" << phone << R"(","iat":)" << iat << R"(,"exp":)" << exp
+               << "}";
     const std::string payload_json = payload_ss.str();
 
     const auto hdr = Base64UrlEncode(header_json);

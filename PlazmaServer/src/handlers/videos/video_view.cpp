@@ -7,9 +7,9 @@ namespace real_medium::handlers::videos::view {
 Handler::Handler(
     const userver::components::ComponentConfig& config,
     const userver::components::ComponentContext& context
-) : HttpHandlerBase(config, context),
-    session_(context.FindComponent<userver::components::Scylla>("scylla").GetSession()) {
-}
+)
+    : HttpHandlerBase(config, context),
+      session_(context.FindComponent<userver::components::Scylla>("scylla").GetSession()) {}
 
 std::string Handler::HandleRequest(
     userver::server::http::HttpRequest& request,

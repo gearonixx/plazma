@@ -1,12 +1,12 @@
 #include "fatal.h"
 
+#include <QtCore/qlogging.h>
 #include <QtCore/QDateTime>
 #include <QtCore/QDir>
 #include <QtCore/QFile>
 #include <QtCore/QStandardPaths>
 #include <QtCore/QString>
 #include <QtCore/QTextStream>
-#include <QtCore/qlogging.h>
 
 #include <atomic>
 #include <cstdio>
@@ -18,13 +18,9 @@ namespace plazma::fatal {
 
 namespace {
 
-// Hot atomics — loaded with std::memory_order_relaxed on the fatal path,
-// exactly as in TdLib. They are written once from install() before anything
-// else runs, so any relaxed reader that observes a non-null callback also
-// observes the fully-constructed state (install() happens-before any fatal).
 std::atomic<Callback> g_callback{nullptr};
-std::atomic<int>      g_max_verbosity{0};
-std::atomic<bool>     g_installed{false};
+std::atomic<int> g_max_verbosity{0};
+std::atomic<bool> g_installed{false};
 
 // Default sink: timestamp to stderr and to <AppDataLocation>/crash.log.
 void default_callback(int verbosity, std::string_view message) {
@@ -32,8 +28,7 @@ void default_callback(int verbosity, std::string_view message) {
     const QString line = QStringLiteral("[%1] [fatal v%2] %3\n")
                              .arg(ts)
                              .arg(verbosity)
-                             .arg(QString::fromUtf8(message.data(),
-                                                    static_cast<qsizetype>(message.size())));
+                             .arg(QString::fromUtf8(message.data(), static_cast<qsizetype>(message.size())));
 
     // stderr first — always reachable even before QStandardPaths resolves.
     std::fputs(line.toUtf8().constData(), stderr);
@@ -60,8 +55,7 @@ void qt_message_handler(QtMsgType type, const QMessageLogContext& ctx, const QSt
     if (type == QtFatalMsg) {
         const QString formatted = qFormatLogMessage(type, ctx, msg);
         const QByteArray utf8 = formatted.toUtf8();
-        process_fatal_error(std::string_view(utf8.constData(),
-                                             static_cast<size_t>(utf8.size())));
+        process_fatal_error(std::string_view(utf8.constData(), static_cast<size_t>(utf8.size())));
         // Unreachable — process_fatal_error is [[noreturn]].
     }
 
@@ -92,27 +86,18 @@ void qt_message_handler(QtMsgType type, const QMessageLogContext& ctx, const QSt
 
 }  // namespace
 
-void set_callback(Callback callback) noexcept {
-    g_callback.store(callback, std::memory_order_relaxed);
-}
+void set_callback(Callback callback) noexcept { g_callback.store(callback, std::memory_order_relaxed); }
 
-Callback get_callback() noexcept {
-    return g_callback.load(std::memory_order_relaxed);
-}
+Callback get_callback() noexcept { return g_callback.load(std::memory_order_relaxed); }
 
-void set_max_verbosity(int level) noexcept {
-    g_max_verbosity.store(level, std::memory_order_relaxed);
-}
+void set_max_verbosity(int level) noexcept { g_max_verbosity.store(level, std::memory_order_relaxed); }
 
-int get_max_verbosity() noexcept {
-    return g_max_verbosity.load(std::memory_order_relaxed);
-}
+int get_max_verbosity() noexcept { return g_max_verbosity.load(std::memory_order_relaxed); }
 
 void install() noexcept {
     bool expected = false;
-    if (!g_installed.compare_exchange_strong(expected, true,
-                                             std::memory_order_acq_rel)) {
-        return;  // already installed
+    if (!g_installed.compare_exchange_strong(expected, true, std::memory_order_acq_rel)) {
+        return;
     }
 
     if (g_callback.load(std::memory_order_relaxed) == nullptr) {

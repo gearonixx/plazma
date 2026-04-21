@@ -15,8 +15,6 @@ public:
         const userver::components::ComponentConfig& config,
         const userver::components::ComponentContext& component_context
     );
-
-
 };
 
 }  // namespace real_medium::handlers

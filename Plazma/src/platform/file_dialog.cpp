@@ -1,7 +1,8 @@
 #include "file_dialog.h"
 
-#include <QByteArray>
 #include <QApplication>
+#include <QByteArray>
+#include <QDebug>
 #include <QFile>
 #include <QFileInfo>
 #include <QObject>
@@ -30,9 +31,7 @@ bool GetFileDialog(
     return Platform::FileDialog::Get(parent, files, remoteContent, caption, filter, type, QString());
 }
 
-FileDialog::FileDialog(Api* api, QObject* parent) : QObject(parent), api_(api) {
-    Q_ASSERT(api != nullptr);
-}
+FileDialog::FileDialog(Api* api, QObject* parent) : QObject(parent), api_(api) { Q_ASSERT(api != nullptr); }
 
 FileDialog::~FileDialog() = default;
 
@@ -83,44 +82,87 @@ void FileDialog::GetOpenPaths(
 
     QProcess ff;
     ff.setProcessChannelMode(QProcess::MergedChannels);
-    ff.start(QStringLiteral("ffmpeg"), QStringList{
-        "-y", "-hide_banner", "-loglevel", "error", "-nostdin",
-        "-ss", "3",
-        "-i", video_path,
-        "-frames:v", "1",
-        "-vf", "scale=480:-2",
-        "-q:v", "3",
-        "-f", "image2",
-        out_path,
-    });
-    if (!ff.waitForStarted(2000)) return {};   // ffmpeg not installed
-    if (!ff.waitForFinished(5000)) { ff.kill(); return {}; }
+    ff.start(
+        QStringLiteral("ffmpeg"),
+        QStringList{
+            "-y",
+            "-hide_banner",
+            "-loglevel",
+            "error",
+            "-nostdin",
+            "-ss",
+            "3",
+            "-i",
+            video_path,
+            "-frames:v",
+            "1",
+            "-vf",
+            "scale=480:-2",
+            "-q:v",
+            "3",
+            "-f",
+            "image2",
+            out_path,
+        }
+    );
+    if (!ff.waitForStarted(2000)) {
+        [[maybe_unused]] static const bool warned = [] {
+            qWarning() << "ffmpeg not found in PATH; client-side thumbnails disabled";
+            return true;
+        }();
+        return {};
+    }
+    if (!ff.waitForFinished(5000)) {
+        ff.kill();
+        qDebug() << "ffmpeg timed out extracting thumbnail for" << video_path;
+        return {};
+    }
     if (ff.exitStatus() != QProcess::NormalExit || ff.exitCode() != 0) {
         // Retry without -ss for short videos where the seek target is past EOF.
         QProcess retry;
         retry.setProcessChannelMode(QProcess::MergedChannels);
-        retry.start(QStringLiteral("ffmpeg"), QStringList{
-            "-y", "-hide_banner", "-loglevel", "error", "-nostdin",
-            "-i", video_path,
-            "-frames:v", "1",
-            "-vf", "scale=480:-2",
-            "-q:v", "3",
-            "-f", "image2",
-            out_path,
-        });
-        if (!retry.waitForFinished(5000)) { retry.kill(); return {}; }
-        if (retry.exitStatus() != QProcess::NormalExit || retry.exitCode() != 0) return {};
+        retry.start(
+            QStringLiteral("ffmpeg"),
+            QStringList{
+                "-y",
+                "-hide_banner",
+                "-loglevel",
+                "error",
+                "-nostdin",
+                "-i",
+                video_path,
+                "-frames:v",
+                "1",
+                "-vf",
+                "scale=480:-2",
+                "-q:v",
+                "3",
+                "-f",
+                "image2",
+                out_path,
+            }
+        );
+        if (!retry.waitForFinished(5000)) {
+            retry.kill();
+            qDebug() << "ffmpeg retry timed out for" << video_path;
+            return {};
+        }
+        if (retry.exitStatus() != QProcess::NormalExit || retry.exitCode() != 0) {
+            qDebug() << "ffmpeg failed to extract thumbnail for" << video_path << "exit code" << retry.exitCode();
+            return {};
+        }
     }
 
     QFile f(out_path);
-    if (!f.open(QIODevice::ReadOnly)) return {};
+    if (!f.open(QIODevice::ReadOnly)) {
+        qDebug() << "failed to read extracted thumbnail at" << out_path;
+        return {};
+    }
     return f.readAll();
 }
 
-[[nodiscard]] static plazma::task_queue::SendMediaType ResolveMediaType(
-    const storages::prepare::PreparedFile& file,
-    plazma::task_queue::SendMediaType requestedType
-) {
+[[nodiscard]] static plazma::task_queue::SendMediaType
+ResolveMediaType(const storages::prepare::PreparedFile& file, plazma::task_queue::SendMediaType requestedType) {
     using FileType = storages::prepare::PreparedFile::Type;
     using SendType = plazma::task_queue::SendMediaType;
 
@@ -130,10 +172,7 @@ void FileDialog::GetOpenPaths(
     return SendType::File;
 }
 
-void FileDialog::prepareFileTasks(
-    storages::prepare::PreparedList&& bundle,
-    plazma::task_queue::SendMediaType type
-) {
+void FileDialog::prepareFileTasks(storages::prepare::PreparedList&& bundle, plazma::task_queue::SendMediaType type) {
     auto tasks = std::vector<std::unique_ptr<plazma::task_queue::Task>>();
     tasks.reserve(bundle.files.size());
 
@@ -141,10 +180,10 @@ void FileDialog::prepareFileTasks(
         const auto mediaType = ResolveMediaType(file, type);
 
         const auto source_path = file.path;
-        const bool is_video    = (mediaType == plazma::task_queue::SendMediaType::Video);
+        const bool is_video = (mediaType == plazma::task_queue::SendMediaType::Video);
 
-        tasks.push_back(std::make_unique<plazma::task_queue::FileLoadTask>(
-            plazma::task_queue::FileLoadTask::Args{
+        tasks.push_back(
+            std::make_unique<plazma::task_queue::FileLoadTask>(plazma::task_queue::FileLoadTask::Args{
                 .path = file.path,
                 .content = file.content,
                 .size = file.size,
@@ -158,16 +197,11 @@ void FileDialog::prepareFileTasks(
                         thumb = ExtractClientThumbnail(source_path);
                     }
                     api_->uploadFile(
-                        "/v1/videos/upload",
-                        "video",
-                        result.filename,
-                        result.filemime,
-                        result.filedata,
-                        thumb
+                        "/v1/videos/upload", "video", result.filename, result.filemime, result.filedata, thumb
                     );
                 },
-            }
-        ));
+            })
+        );
     }
 
     api_->fileLoader()->addTasks(std::move(tasks));

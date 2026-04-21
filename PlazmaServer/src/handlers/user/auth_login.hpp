@@ -10,8 +10,7 @@ class Handler final : public userver::server::handlers::HttpHandlerJsonBase {
 public:
     static constexpr std::string_view kName = "handler-auth-login";
 
-    Handler(const userver::components::ComponentConfig& config,
-            const userver::components::ComponentContext& context);
+    Handler(const userver::components::ComponentConfig& config, const userver::components::ComponentContext& context);
 
     userver::formats::json::Value HandleRequestJsonThrow(
         const userver::server::http::HttpRequest& request,

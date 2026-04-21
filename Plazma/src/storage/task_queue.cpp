@@ -62,9 +62,8 @@ void TaskQueue::wakeThread() {
 
 void TaskQueue::cancelTask(TaskId id) {
     const auto removeFrom = [&](Queue& queue) {
-        const auto it = std::find_if(queue.begin(), queue.end(), [id](const std::unique_ptr<Task>& t) {
-            return t->id() == id;
-        });
+        const auto it =
+            std::find_if(queue.begin(), queue.end(), [id](const std::unique_ptr<Task>& t) { return t->id() == id; });
         if (it != queue.end()) {
             queue.erase(it);
         }
@@ -185,8 +184,7 @@ void FileLoadTask::process() {
         _result->filedata = f.readAll();
     }
 
-    qDebug() << "[FileLoadTask] processed:" << _result->filename
-             << "mime:" << _result->filemime
+    qDebug() << "[FileLoadTask] processed:" << _result->filename << "mime:" << _result->filemime
              << "size:" << _result->filedata.size() << "bytes";
 }
 

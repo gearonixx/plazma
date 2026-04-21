@@ -1,5 +1,7 @@
 #include "mpv_object.h"
 
+#include "src/core/fatal.h"
+
 #include <QtCore/QDateTime>
 #include <QtCore/QDir>
 #include <QtCore/QMetaObject>
@@ -23,33 +25,33 @@ void* getProcAddress(void* /*ctx*/, const char* name) {
 
 QVariant mpvNodeToVariant(const mpv_node& node) {
     switch (node.format) {
-        case MPV_FORMAT_STRING: return QString::fromUtf8(node.u.string);
-        case MPV_FORMAT_FLAG:   return node.u.flag != 0;
-        case MPV_FORMAT_INT64:  return static_cast<qint64>(node.u.int64);
-        case MPV_FORMAT_DOUBLE: return node.u.double_;
+        case MPV_FORMAT_STRING:
+            return QString::fromUtf8(node.u.string);
+        case MPV_FORMAT_FLAG:
+            return node.u.flag != 0;
+        case MPV_FORMAT_INT64:
+            return static_cast<qint64>(node.u.int64);
+        case MPV_FORMAT_DOUBLE:
+            return node.u.double_;
         case MPV_FORMAT_NODE_ARRAY: {
             QVariantList list;
-            for (int i = 0; i < node.u.list->num; ++i)
-                list.append(mpvNodeToVariant(node.u.list->values[i]));
+            for (int i = 0; i < node.u.list->num; ++i) list.append(mpvNodeToVariant(node.u.list->values[i]));
             return list;
         }
         case MPV_FORMAT_NODE_MAP: {
             QVariantMap map;
             for (int i = 0; i < node.u.list->num; ++i)
-                map.insert(QString::fromUtf8(node.u.list->keys[i]),
-                           mpvNodeToVariant(node.u.list->values[i]));
+                map.insert(QString::fromUtf8(node.u.list->keys[i]), mpvNodeToVariant(node.u.list->values[i]));
             return map;
         }
-        default: return {};
+        default:
+            return {};
     }
 }
 
 class MpvRenderer final : public QQuickFramebufferObject::Renderer {
 public:
-    explicit MpvRenderer(MpvObject* owner)
-        : mpv_(owner->mpvHandle())
-        , guard_(owner->callbackGuard())
-    {
+    explicit MpvRenderer(MpvObject* owner) : mpv_(owner->mpvHandle()), guard_(owner->callbackGuard()) {
         mpv_opengl_init_params gl_init_params{getProcAddress, nullptr};
         int advanced_control = 0;
         mpv_render_param params[] = {
@@ -136,8 +138,7 @@ MpvObject::MpvObject(QQuickItem* parent) : QQuickFramebufferObject(parent) {
     mpv_set_option_string(mpv_.get(), "force-seekable", "yes");
     mpv_set_option_string(mpv_.get(), "cache", "yes");
     mpv_set_option_string(mpv_.get(), "demuxer-max-bytes", "150MiB");
-    mpv_set_option_string(mpv_.get(), "stream-lavf-o",
-        "reconnect=1,reconnect_streamed=1,multiple_requests=1");
+    mpv_set_option_string(mpv_.get(), "stream-lavf-o", "reconnect=1,reconnect_streamed=1,multiple_requests=1");
 
     if (mpv_initialize(mpv_.get()) < 0) {
         throw std::runtime_error("mpv_initialize failed");
@@ -145,20 +146,20 @@ MpvObject::MpvObject(QQuickItem* parent) : QQuickFramebufferObject(parent) {
 
     mpv_request_log_messages(mpv_.get(), "v");
 
-    mpv_observe_property(mpv_.get(), 0, "pause",              MPV_FORMAT_FLAG);
-    mpv_observe_property(mpv_.get(), 0, "duration",           MPV_FORMAT_DOUBLE);
-    mpv_observe_property(mpv_.get(), 0, "time-pos",           MPV_FORMAT_DOUBLE);
+    mpv_observe_property(mpv_.get(), 0, "pause", MPV_FORMAT_FLAG);
+    mpv_observe_property(mpv_.get(), 0, "duration", MPV_FORMAT_DOUBLE);
+    mpv_observe_property(mpv_.get(), 0, "time-pos", MPV_FORMAT_DOUBLE);
     mpv_observe_property(mpv_.get(), 0, "demuxer-cache-time", MPV_FORMAT_DOUBLE);
-    mpv_observe_property(mpv_.get(), 0, "volume",             MPV_FORMAT_DOUBLE);
-    mpv_observe_property(mpv_.get(), 0, "mute",               MPV_FORMAT_FLAG);
-    mpv_observe_property(mpv_.get(), 0, "speed",              MPV_FORMAT_DOUBLE);
-    mpv_observe_property(mpv_.get(), 0, "core-idle",          MPV_FORMAT_FLAG);
-    mpv_observe_property(mpv_.get(), 0, "seeking",            MPV_FORMAT_FLAG);
-    mpv_observe_property(mpv_.get(), 0, "eof-reached",        MPV_FORMAT_FLAG);
-    mpv_observe_property(mpv_.get(), 0, "width",              MPV_FORMAT_INT64);
-    mpv_observe_property(mpv_.get(), 0, "height",             MPV_FORMAT_INT64);
-    mpv_observe_property(mpv_.get(), 0, "hwdec-current",      MPV_FORMAT_STRING);
-    mpv_observe_property(mpv_.get(), 0, "video-codec",        MPV_FORMAT_STRING);
+    mpv_observe_property(mpv_.get(), 0, "volume", MPV_FORMAT_DOUBLE);
+    mpv_observe_property(mpv_.get(), 0, "mute", MPV_FORMAT_FLAG);
+    mpv_observe_property(mpv_.get(), 0, "speed", MPV_FORMAT_DOUBLE);
+    mpv_observe_property(mpv_.get(), 0, "core-idle", MPV_FORMAT_FLAG);
+    mpv_observe_property(mpv_.get(), 0, "seeking", MPV_FORMAT_FLAG);
+    mpv_observe_property(mpv_.get(), 0, "eof-reached", MPV_FORMAT_FLAG);
+    mpv_observe_property(mpv_.get(), 0, "width", MPV_FORMAT_INT64);
+    mpv_observe_property(mpv_.get(), 0, "height", MPV_FORMAT_INT64);
+    mpv_observe_property(mpv_.get(), 0, "hwdec-current", MPV_FORMAT_STRING);
+    mpv_observe_property(mpv_.get(), 0, "video-codec", MPV_FORMAT_STRING);
 
     connect(this, &MpvObject::onMpvEvents, this, &MpvObject::handleMpvEvents, Qt::QueuedConnection);
     mpv_set_wakeup_callback(mpv_.get(), &MpvObject::onMpvWakeup, callback_guard_.get());
@@ -329,8 +330,10 @@ void MpvObject::refreshTrackList() {
         track["title"] = m.value("title", m.value("lang", QStringLiteral("Track"))).toString();
         track["lang"] = m.value("lang");
         track["selected"] = m.value("selected").toBool();
-        if (type == "audio") audioTracks_.append(track);
-        else if (type == "sub") subtitleTracks_.append(track);
+        if (type == "audio")
+            audioTracks_.append(track);
+        else if (type == "sub")
+            subtitleTracks_.append(track);
     }
 
     emit tracksChanged();
@@ -359,8 +362,14 @@ void MpvObject::handleMpvEvents() {
                 break;
             }
             case MPV_EVENT_FILE_LOADED: {
-                if (!hasMedia_) { hasMedia_ = true; emit hasMediaChanged(); }
-                if (loading_)   { loading_  = false; emit loadingChanged(); }
+                if (!hasMedia_) {
+                    hasMedia_ = true;
+                    emit hasMediaChanged();
+                }
+                if (loading_) {
+                    loading_ = false;
+                    emit loadingChanged();
+                }
                 refreshTrackList();
                 emit fileLoaded();
                 break;
@@ -372,7 +381,10 @@ void MpvObject::handleMpvEvents() {
                 } else if (ef && ef->reason == MPV_END_FILE_REASON_EOF) {
                     emit endReached();
                 }
-                if (loading_) { loading_ = false; emit loadingChanged(); }
+                if (loading_) {
+                    loading_ = false;
+                    emit loadingChanged();
+                }
                 break;
             }
             case MPV_EVENT_PROPERTY_CHANGE: {

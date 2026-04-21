@@ -29,7 +29,7 @@ public:
     explicit PageController(QObject* parent = nullptr);
 
 public slots:
-    Q_INVOKABLE QString getPagePath(PageLoader::PageEnum page);
+    [[nodiscard]] Q_INVOKABLE QString getPagePath(PageLoader::PageEnum page);
 
     Q_INVOKABLE void goToPage(PageLoader::PageEnum page) { emit goToPageRequested(page); }
     Q_INVOKABLE void replacePage(PageLoader::PageEnum page) { emit replacePageRequested(page); }
@@ -43,7 +43,9 @@ public slots:
     void keyPressEvent(Qt::Key key);
 
     void setDrawerDepth(int depth);
-    int getDrawerDepth() const;
+    [[nodiscard]] int getDrawerDepth() const;
+    // increment/decrement return the new depth — the return is optional info,
+    // callers often just invoke for the side effect, so don't mark nodiscard.
     int incrementDrawerDepth();
     int decrementDrawerDepth();
 

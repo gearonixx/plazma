@@ -2,7 +2,7 @@
 
 #include <QApplication>
 #ifdef Q_OS_WIN
-#  include <windows.h>
+#include <windows.h>
 #endif
 
 #include <qcoreapplication.h>
@@ -35,8 +35,6 @@ Q_DECL_EXPORT int main(int argc, char* argv[]) {
     app.setApplicationDisplayName(APPLICATION_NAME);
     app.setApplicationVersion(APP_VERSION);
 
-    // Install fatal-error plumbing after app identity is set so the default
-    // callback's crash.log lands in the right <AppDataLocation>.
     plazma::fatal::install();
 
     qDebug() << app.organizationName();

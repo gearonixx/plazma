@@ -11,17 +11,19 @@ Utils::Utils(QQmlApplicationEngine* engine) : m_engine(engine) { s_instance = th
 
 Utils* Utils::instance() { return s_instance; }
 
-QString Utils::getRandomString(int len) {
-    const QString possibleCharacters =
-        QStringLiteral("ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789");
+static constexpr char kAlphabet[] = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+static constexpr int kAlphabetLen = sizeof(kAlphabet) - 1;
 
-    QString randomString;
-    randomString.reserve(len);
+QString Utils::getRandomString(int len) {
+    if (len <= 0) return {};
+
+    auto* rng = QRandomGenerator::system();
+
+    QString out(len, Qt::Uninitialized);
     for (int i = 0; i < len; ++i) {
-        randomString.append(
-            possibleCharacters.at(QRandomGenerator::system()->bounded(possibleCharacters.length())));
+        out[i] = QLatin1Char(kAlphabet[rng->bounded(kAlphabetLen)]);
     }
-    return randomString;
+    return out;
 }
 
 QString Utils::safeBase64Decode(QString string) {

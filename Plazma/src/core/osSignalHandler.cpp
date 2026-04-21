@@ -3,9 +3,9 @@
 #include <QCoreApplication>
 
 #ifdef Q_OS_WIN
-#  include <windows.h>
+#include <windows.h>
 #else
-#  include <csignal>
+#include <csignal>
 #endif
 
 namespace {
@@ -21,9 +21,7 @@ static BOOL WINAPI winCtrlHandler(DWORD ctrl) {
     return FALSE;
 }
 #else
-static void posixSignalHandler(int) {
-    QCoreApplication::quit();
-}
+static void posixSignalHandler(int) { QCoreApplication::quit(); }
 #endif
 
 }  // namespace
@@ -38,7 +36,7 @@ void OsSignalHandler::setup() {
     SetConsoleCtrlHandler(winCtrlHandler, TRUE);
 #else
     std::signal(SIGTERM, posixSignalHandler);
-    std::signal(SIGINT,  posixSignalHandler);
+    std::signal(SIGINT, posixSignalHandler);
 #endif
 }
 

@@ -1,5 +1,7 @@
 #include "api.h"
 
+#include <QUrlQuery>
+
 namespace validators {
 std::optional<UserLogin> ensureLoginResponse(const QJsonObject& json, QString& error);
 }
@@ -14,18 +16,20 @@ void RequestBuilder::send() {
         reply = nam_->sendCustomRequest(req_, toMethodString(method_), body_);
     }
 
-    QObject::connect(reply, &QNetworkReply::finished, reply, [reply, done = std::move(done_), fail = std::move(fail_)]() {
-        if (reply->error() != QNetworkReply::NoError) {
-            if (fail) {
-                auto code = reply->attribute(QNetworkRequest::HttpStatusCodeAttribute).toInt();
-                fail(code, reply->errorString());
+    QObject::connect(
+        reply, &QNetworkReply::finished, reply, [reply, done = std::move(done_), fail = std::move(fail_)]() {
+            if (reply->error() != QNetworkReply::NoError) {
+                if (fail) {
+                    auto code = reply->attribute(QNetworkRequest::HttpStatusCodeAttribute).toInt();
+                    fail(code, reply->errorString());
+                }
+            } else if (done) {
+                auto doc = QJsonDocument::fromJson(reply->readAll());
+                done(doc.object());
             }
-        } else if (done) {
-            auto doc = QJsonDocument::fromJson(reply->readAll());
-            done(doc.object());
+            reply->deleteLater();
         }
-        reply->deleteLater();
-    });
+    );
 }
 
 RequestBuilder Api::request(const QString& endpoint, const QJsonObject& body, const HttpMethod& method) {
@@ -131,8 +135,63 @@ void Api::uploadFile(
         .send();
 }
 
-void Api::fetchVideos(Fn<void(QJsonArray)> onOk, Fn<void(int, QString)> onFail) {
-    request("/v1/videos", {}, HttpMethod::kGet)
+// ─── Feed / search contract (frontend ↔ backend) ────────────────────────────
+//
+//   GET /v1/videos              → full chronological feed (latest first).
+//   GET /v1/videos?q=<query>    → search results for <query>.
+//
+// Request
+//   - `q` is a URL-encoded UTF-8 string, trimmed client-side. Max length the
+//     frontend will ever send is ~256 chars (the search TextField).
+//   - Empty/absent `q` means "no search — return the default feed". The
+//     frontend sends `q` only when non-empty, so the handler should treat
+//     missing and empty-string `q` identically.
+//
+// Response (200)
+//   {
+//     "videos": [
+//       {
+//         "id":         "<string, stable video id>",
+//         "title":      "<string>",
+//         "url":        "<string, absolute media URL>",
+//         "size":       <number, bytes>,
+//         "mime":       "<string, e.g. video/mp4>",
+//         "author":     "<string>",
+//         "created_at": "<ISO-8601 string>",
+//         "thumbnail":  "<string, absolute URL or empty>",
+//         "storyboard": "<string, absolute URL of the 10×10 sprite or empty>"
+//       },
+//       ...
+//     ]
+//   }
+//
+// Ordering
+//   - No `q`: `created_at` descending.
+//   - With `q`: relevance descending (ElasticSearch BM25 is fine — suggested
+//     field boosting: title^3, author^2, description^1). Tie-break by
+//     `created_at` desc so results are stable for identical scores.
+//
+// Errors
+//   - Non-2xx status + plain-text or JSON body. The frontend surfaces
+//     `"HTTP <code>: <reply->errorString()>"` in the error banner, so human
+//     readable messages help but aren't parsed.
+//
+// Performance notes for the handler
+//   - The frontend debounces typing (~470ms combined) and dedups by query
+//     string, but does NOT cancel in-flight requests on the wire — it just
+//     ignores stale responses client-side. So the handler must be cheap
+//     enough that back-to-back queries don't pile up; target p95 < 200ms.
+//   - No pagination yet. Cap the response at ~200 rows until we add a cursor.
+// ────────────────────────────────────────────────────────────────────────────
+void Api::fetchVideos(const QString& query, Fn<void(QJsonArray)> onOk, Fn<void(int, QString)> onFail) {
+    QString endpoint = QStringLiteral("/v1/videos");
+    if (!query.isEmpty()) {
+        QUrlQuery q;
+        q.addQueryItem("q", query);
+        endpoint += "?" + q.toString(QUrl::FullyEncoded);
+    }
+
+    request(endpoint, {}, HttpMethod::kGet)
         .done([ok = std::move(onOk)](const QJsonObject& json) {
             const auto arr = json.value("videos").toArray();
             qDebug() << "[API] fetchVideos =>" << arr.size() << "items";

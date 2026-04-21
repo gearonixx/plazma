@@ -71,15 +71,21 @@ void CoreController::initControllers() {
     videoFeedModel_.reset(new VideoFeedModel(&session_->api()));
     qmlRegisterSingletonInstance<VideoFeedModel>(APPLICATION_ID, 1, 0, "VideoFeedModel", videoFeedModel_.data());
 
-    connect(&session_->api(), &Api::uploadFinished, videoFeedModel_.data(),
-            [this](const QString&, const QString& filename) {
-                emit videoFeedModel_->uploadFinished(filename);
-                videoFeedModel_->refresh();
-            });
-    connect(&session_->api(), &Api::uploadFailed, videoFeedModel_.data(),
-            [this](const QString&, int code, const QString& error) {
-                emit videoFeedModel_->uploadFailed(code, error);
-            });
+    connect(
+        &session_->api(),
+        &Api::uploadFinished,
+        videoFeedModel_.data(),
+        [this](const QString&, const QString& filename) {
+            emit videoFeedModel_->uploadFinished(filename);
+            videoFeedModel_->refresh();
+        }
+    );
+    connect(
+        &session_->api(),
+        &Api::uploadFailed,
+        videoFeedModel_.data(),
+        [this](const QString&, int code, const QString& error) { emit videoFeedModel_->uploadFailed(code, error); }
+    );
 }
 
 void CoreController::initSignalHandlers() {
@@ -111,9 +117,7 @@ void CoreController::initAuthBindings() {
         session_->api().loginUser(user);
     });
 
-    connect(&session_->api(), &Api::loginSuccess, this, [this](const UserLogin& user) {
-        session_->start(user);
-    });
+    connect(&session_->api(), &Api::loginSuccess, this, [this](const UserLogin& user) { session_->start(user); });
 
     connect(&session_->api(), &Api::loginError, this, [this](int statusCode, const QString& error) {
         session_->reportError(statusCode, error);
@@ -138,8 +142,7 @@ void CoreController::initTranslationsBindings() {
 };
 
 void CoreController::updateTranslator(const QLocale& locale) const {
-    qDebug() << "[i18n] updateTranslator called, locale:" << locale.name()
-             << "language:" << locale.language();
+    qDebug() << "[i18n] updateTranslator called, locale:" << locale.name() << "language:" << locale.language();
 
     if (!translator_->isEmpty()) {
         QCoreApplication::removeTranslator(translator_.data());

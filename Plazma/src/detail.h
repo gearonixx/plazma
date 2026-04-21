@@ -32,4 +32,3 @@ using lcString = std::string;
 
 template <typename T>
 using lcVector = std::vector<T>;
-

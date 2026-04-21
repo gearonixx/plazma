@@ -81,13 +81,11 @@ inline bool Get(
     const QString& startFile
 ) {
     QFileDialog dialog(parent, caption, startFile);
-    dialog.setNameFilters({
-        QObject::tr("Video files") + " (*.mp4 *.mkv *.avi *.mov *.webm *.flv *.wmv *.m4v *.ts)",
-        QObject::tr("All files") + " (*)"
-    });
-    dialog.setFileMode(type == platform::Type::ReadFiles
-                       ? QFileDialog::ExistingFiles
-                       : QFileDialog::ExistingFile);
+    dialog.setNameFilters(
+        {QObject::tr("Video files") + " (*.mp4 *.mkv *.avi *.mov *.webm *.flv *.wmv *.m4v *.ts)",
+         QObject::tr("All files") + " (*)"}
+    );
+    dialog.setFileMode(type == platform::Type::ReadFiles ? QFileDialog::ExistingFiles : QFileDialog::ExistingFile);
 
     if (dialog.exec() != QDialog::Accepted) return false;
     files = dialog.selectedFiles();

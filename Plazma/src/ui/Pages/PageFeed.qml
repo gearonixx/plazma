@@ -54,6 +54,9 @@ Page {
         anchors.top: parent.top
         anchors.left: parent.left
         anchors.right: parent.right
+
+        onSearchChanged: (query) => VideoFeedModel.onSearchTyped(query)
+        onSearchSubmitted: (query) => VideoFeedModel.onSearchSubmitted(query)
     }
 
     // Error banner

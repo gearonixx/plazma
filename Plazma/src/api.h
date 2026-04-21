@@ -13,7 +13,7 @@
 
 enum class HttpMethod { kGet, kPost, kHead, kPut, kDelete, kPatch, kOptions };
 
-static QByteArray toMethodString(HttpMethod method) {
+[[nodiscard]] static QByteArray toMethodString(HttpMethod method) {
     static const std::unordered_map<HttpMethod, QByteArray> kMethods = {
         {HttpMethod::kGet, "GET"},
         {HttpMethod::kPost, "POST"},
@@ -34,8 +34,14 @@ public:
     RequestBuilder(QNetworkAccessManager* nam, QNetworkRequest req, QHttpMultiPart* multiPart)
         : nam_(nam), req_(std::move(req)), method_(HttpMethod::kPost), multiPart_(multiPart) {}
 
-    RequestBuilder& done(Fn<void(QJsonObject)> cb) { done_ = std::move(cb); return *this; }
-    RequestBuilder& fail(Fn<void(int, QString)> cb) { fail_ = std::move(cb); return *this; }
+    RequestBuilder& done(Fn<void(QJsonObject)> cb) {
+        done_ = std::move(cb);
+        return *this;
+    }
+    RequestBuilder& fail(Fn<void(int, QString)> cb) {
+        fail_ = std::move(cb);
+        return *this;
+    }
     void send();
 
 private:
@@ -56,8 +62,11 @@ public:
           nam_(new QNetworkAccessManager(this)),
           file_loader_(std::make_unique<plazma::task_queue::TaskQueue>()) {}
 
-    RequestBuilder request(const QString& endpoint, const QJsonObject& body = {}, const HttpMethod& method = HttpMethod::kGet);
-    RequestBuilder request(const QString& endpoint, QHttpMultiPart* multiPart);
+    // request() returns a RequestBuilder — you must chain .send() on it or
+    // the HTTP call never happens, so dropping the result is always a bug.
+    [[nodiscard]] RequestBuilder
+    request(const QString& endpoint, const QJsonObject& body = {}, const HttpMethod& method = HttpMethod::kGet);
+    [[nodiscard]] RequestBuilder request(const QString& endpoint, QHttpMultiPart* multiPart);
     void loginUser(const UserLogin& user);
     void uploadFile(
         const QString& endpoint,
@@ -68,9 +77,13 @@ public:
         const QByteArray& thumbnail = {},
         const QString& thumbnailMime = QStringLiteral("image/jpeg")
     );
-    void fetchVideos(Fn<void(QJsonArray)> onOk, Fn<void(int, QString)> onFail = {});
+    // Fetches the video feed. If `query` is non-empty, passes it through as the
+    // `?q=` search param; the server is expected to match against title/author
+    // (see the contract comment in api.cpp). Empty `query` returns the full
+    // chronological feed.
+    void fetchVideos(const QString& query, Fn<void(QJsonArray)> onOk, Fn<void(int, QString)> onFail = {});
 
-    plazma::task_queue::TaskQueue* fileLoader() const { return file_loader_.get(); }
+    [[nodiscard]] plazma::task_queue::TaskQueue* fileLoader() const { return file_loader_.get(); }
 
 signals:
     void loginSuccess(UserLogin user);

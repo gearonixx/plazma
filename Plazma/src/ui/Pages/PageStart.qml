@@ -15,7 +15,6 @@ Page {
 
     background: Rectangle { color: PlazmaStyle.color.warmWhite }
 
-    // Language icon — top-left
     Rectangle {
         id: langButton
         anchors.top: parent.top
@@ -50,7 +49,6 @@ Page {
         }
     }
 
-    // Two-column layout
     RowLayout {
         anchors.fill: parent
         spacing: 0

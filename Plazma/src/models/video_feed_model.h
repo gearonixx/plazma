@@ -1,11 +1,13 @@
 #pragma once
 
 #include <QAbstractListModel>
+#include <QElapsedTimer>
 #include <QString>
 #include <QStringList>
 #include <vector>
 
 class Api;
+class QTimer;
 
 class VideoFeedModel : public QAbstractListModel {
     Q_OBJECT
@@ -47,16 +49,19 @@ public:
     QVariant data(const QModelIndex& index, int role) const override;
     QHash<int, QByteArray> roleNames() const override;
 
-    bool loading() const { return loading_; }
-    QString errorMessage() const { return errorMessage_; }
-    QString currentUrl() const { return currentUrl_; }
-    QString currentTitle() const { return currentTitle_; }
-    int count() const { return static_cast<int>(items_.size()); }
+    [[nodiscard]] bool loading() const { return loading_; }
+    [[nodiscard]] QString errorMessage() const { return errorMessage_; }
+    [[nodiscard]] QString currentUrl() const { return currentUrl_; }
+    [[nodiscard]] QString currentTitle() const { return currentTitle_; }
+    [[nodiscard]] int count() const { return static_cast<int>(items_.size()); }
 
 public slots:
     void refresh();
     void setCurrent(const QString& url, const QString& title);
     void clearCurrent();
+
+    void onSearchTyped(const QString& query);
+    void onSearchSubmitted(const QString& query);
 
 signals:
     void loadingChanged();
@@ -70,6 +75,11 @@ signals:
 private:
     void setLoading(bool loading);
     void setErrorMessage(const QString& message);
+    void fireSearch(const QString& query);
+    void doFetch(const QString& query);
+
+    static constexpr int kSearchDebounceMs = 250;
+    static constexpr int kSubmitThrottleMs = 400;
 
     Api* api_ = nullptr;
     std::vector<VideoItem> items_;
@@ -77,4 +87,11 @@ private:
     QString errorMessage_;
     QString currentUrl_;
     QString currentTitle_;
+
+    QTimer* searchDebounce_ = nullptr;
+    QString pendingQuery_;
+    QString lastFiredQuery_;
+    QString activeQuery_;     // query backing the currently displayed list
+    quint32 requestSeq_ = 0;  // monotonic id; stale responses are dropped
+    QElapsedTimer submitThrottle_;
 };

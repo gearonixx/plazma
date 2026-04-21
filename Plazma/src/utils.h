@@ -13,22 +13,26 @@ class Utils : public QObject {
     Q_OBJECT
 
 public:
-    static Utils* instance();
+    [[nodiscard]] static Utils* instance();
 
     explicit Utils(QQmlApplicationEngine* engine);
 
-    Q_INVOKABLE static QString getRandomString(int len);
+    [[nodiscard]] Q_INVOKABLE static QString getRandomString(int len);
 
-    Q_INVOKABLE static QString safeBase64Decode(QString string);
+    [[nodiscard]] Q_INVOKABLE static QString safeBase64Decode(QString string);
 
-    Q_INVOKABLE static QString verifyJsonString(const QString& source);
-    Q_INVOKABLE static QJsonObject jsonFromString(const QString& string);
+    [[nodiscard]] Q_INVOKABLE static QString verifyJsonString(const QString& source);
+    [[nodiscard]] Q_INVOKABLE static QJsonObject jsonFromString(const QString& string);
 
-    static QString jsonToString(const QJsonObject& json, QJsonDocument::JsonFormat format = QJsonDocument::Indented);
-    static QString jsonToString(const QJsonArray& array, QJsonDocument::JsonFormat format = QJsonDocument::Indented);
+    [[nodiscard]] static QString
+    jsonToString(const QJsonObject& json, QJsonDocument::JsonFormat format = QJsonDocument::Indented);
+    [[nodiscard]] static QString
+    jsonToString(const QJsonArray& array, QJsonDocument::JsonFormat format = QJsonDocument::Indented);
 
-    Q_INVOKABLE static bool initializePath(const QString& path);
-    Q_INVOKABLE static bool createEmptyFile(const QString& path);
+    // initializePath / createEmptyFile return success — caller must check
+    // because failures are silent (no exceptions, no logging on success path).
+    [[nodiscard]] Q_INVOKABLE static bool initializePath(const QString& path);
+    [[nodiscard]] Q_INVOKABLE static bool createEmptyFile(const QString& path);
 
     static void logException(const std::exception& e);
     static void logException(const std::exception_ptr& eptr = std::current_exception());

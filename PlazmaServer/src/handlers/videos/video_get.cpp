@@ -15,9 +15,9 @@ namespace real_medium::handlers::videos::get {
 Handler::Handler(
     const userver::components::ComponentConfig& config,
     const userver::components::ComponentContext& context
-) : HttpHandlerBase(config, context),
-    session_(context.FindComponent<userver::components::Scylla>("scylla").GetSession()) {
-}
+)
+    : HttpHandlerBase(config, context),
+      session_(context.FindComponent<userver::components::Scylla>("scylla").GetSession()) {}
 
 std::string Handler::HandleRequest(
     userver::server::http::HttpRequest& request,
@@ -50,42 +50,40 @@ std::string Handler::HandleRequest(
             return R"({"error": "video not found"})";
         }
 
-        const auto owner_id   = row.Get<int64_t>("user_id");
-        const auto visibility = row.IsNull("visibility")
-            ? std::string{"public"} : row.Get<std::string>("visibility");
+        const auto owner_id = row.Get<int64_t>("user_id");
+        const auto visibility = row.IsNull("visibility") ? std::string{"public"} : row.Get<std::string>("visibility");
 
         // Private videos are only accessible to their owner
-        if (visibility == "private"
-            && (auth.result != utils::AuthResult::kAuthenticated || auth.user_id != owner_id)) {
+        if (visibility == "private" && (auth.result != utils::AuthResult::kAuthenticated || auth.user_id != owner_id)) {
             request.SetResponseStatus(userver::server::http::HttpStatus::kForbidden);
             return R"({"error": "access denied"})";
         }
 
         const int64_t created_at_ms = row.IsNull("created_at") ? 0LL : row.Get<int64_t>("created_at");
-        const auto title            = row.Get<std::string>("title");
-        const auto storage_url      = row.Get<std::string>("storage_url");
-        const auto mime             = row.IsNull("mime")         ? std::string{} : row.Get<std::string>("mime");
-        const auto size_bytes       = row.IsNull("size_bytes")   ? 0LL           : row.Get<int64_t>("size_bytes");
-        const auto thumbnail        = row.IsNull("thumbnail_url") ? std::string{} : row.Get<std::string>("thumbnail_url");
-        const auto storyboard       = row.IsNull("storyboard_url") ? std::string{} : row.Get<std::string>("storyboard_url");
+        const auto title = row.Get<std::string>("title");
+        const auto storage_url = row.Get<std::string>("storage_url");
+        const auto mime = row.IsNull("mime") ? std::string{} : row.Get<std::string>("mime");
+        const auto size_bytes = row.IsNull("size_bytes") ? 0LL : row.Get<int64_t>("size_bytes");
+        const auto thumbnail = row.IsNull("thumbnail_url") ? std::string{} : row.Get<std::string>("thumbnail_url");
+        const auto storyboard = row.IsNull("storyboard_url") ? std::string{} : row.Get<std::string>("storyboard_url");
 
         // Build video object including stats placeholder (zeros until counter table is wired)
         userver::formats::json::ValueBuilder video_vb;
-        video_vb["id"]          = video_id;
-        video_vb["user_id"]     = owner_id;
-        video_vb["title"]       = title;
-        video_vb["url"]         = utils::video::StorageUrlToHttp(storage_url);
-        video_vb["mime"]        = mime;
-        video_vb["size"]        = size_bytes;
-        video_vb["visibility"]  = visibility;
-        video_vb["created_at"]  = utils::video::FormatTimestampMs(created_at_ms);
-        video_vb["duration_ms"] = userver::formats::json::ValueBuilder{
-            userver::formats::common::Type::kNull}.ExtractValue();
+        video_vb["id"] = video_id;
+        video_vb["user_id"] = owner_id;
+        video_vb["title"] = title;
+        video_vb["url"] = utils::video::StorageUrlToHttp(storage_url);
+        video_vb["mime"] = mime;
+        video_vb["size"] = size_bytes;
+        video_vb["visibility"] = visibility;
+        video_vb["created_at"] = utils::video::FormatTimestampMs(created_at_ms);
+        video_vb["duration_ms"] =
+            userver::formats::json::ValueBuilder{userver::formats::common::Type::kNull}.ExtractValue();
         if (!thumbnail.empty()) {
             video_vb["thumbnail"] = utils::video::StorageUrlToHttp(thumbnail);
         } else {
-            video_vb["thumbnail"] = userver::formats::json::ValueBuilder{
-                userver::formats::common::Type::kNull}.ExtractValue();
+            video_vb["thumbnail"] =
+                userver::formats::json::ValueBuilder{userver::formats::common::Type::kNull}.ExtractValue();
         }
         video_vb["storyboard"] = utils::video::BuildStoryboardJson(storyboard);
         video_vb["stats"]["views"] = int64_t{0};
