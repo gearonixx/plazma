@@ -31,6 +31,7 @@ public:
         StoryboardRole,
     };
 
+    // TODO(grnx): yeah like that's too simple
     struct VideoItem {
         QString id;
         QString title;

@@ -100,7 +100,7 @@ public:
     // `?q=` search param; the server is expected to match against title/author
     // (see the contract comment in api.cpp). Empty `query` returns the full
     // chronological feed.
-    void fetchVideos(const QString& query, Fn<void(QJsonArray)> onOk, Fn<void(int, QString)> onFail = {});
+    void fetchVideos(const QString& query, Fn<void(QJsonArray)> onSuccess, Fn<void(int, QString)> onError = {});
 
     [[nodiscard]] plazma::task_queue::TaskQueue* fileLoader() const { return file_loader_.get(); }
 

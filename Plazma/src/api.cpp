@@ -2,6 +2,8 @@
 
 #include <QUrlQuery>
 
+#include "validators/json_guards.h"
+
 namespace validators {
 std::optional<UserLogin> ensureLoginResponse(const QJsonObject& json, QString& error);
 }
@@ -199,19 +201,20 @@ void Api::uploadFile(
 //     enough that back-to-back queries don't pile up; target p95 < 200ms.
 //   - No pagination yet. Cap the response at ~200 rows until we add a cursor.
 // ────────────────────────────────────────────────────────────────────────────
-void Api::fetchVideos(const QString& query, Fn<void(QJsonArray)> onOk, Fn<void(int, QString)> onFail) {
-    QUrlQuery params;
-    if (!query.isEmpty()) params.addQueryItem("q", query);
+void Api::fetchVideos(const QString& query, Fn<void(QJsonArray)> onSuccess, Fn<void(int, QString)> onError) {
+    QUrlQuery queryParams;
+    if (!query.isEmpty()) queryParams.addQueryItem("q", query);
 
-    request(Endpoint::kVideos, params, {}, HttpMethod::kGet)
-        .done([ok = std::move(onOk)](const QJsonObject& json) {
-            const auto arr = json.value("videos").toArray();
-            qDebug() << "[API] fetchVideos =>" << arr.size() << "items";
-            if (ok) ok(arr);
-        })
-        .fail([fail = std::move(onFail)](int code, const QString& error) {
+    auto onVideos = [resolve = std::move(onSuccess)](const QJsonArray& videos) {
+        qDebug() << "[API] fetchVideos =>" << videos.size() << "items";
+        if (resolve) resolve(videos);
+    };
+
+    request(Endpoint::kVideos, queryParams, {}, HttpMethod::kGet)
+        .done(validators::resolveArrayField("videos", "fetchVideos", std::move(onVideos)))
+        .fail([reject = std::move(onError)](int code, const QString& error) {
             qWarning() << "[API] fetchVideos failed:" << code << error;
-            if (fail) fail(code, error);
+            if (reject) reject(code, error);
         })
         .send();
 }

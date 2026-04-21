@@ -368,7 +368,7 @@ account to start watching</source>
 чтобы начать смотреть</translation>
     </message>
     <message>
-        <location filename="../ui/Pages/PageStart.qml" line="174"/>
+        <location filename="../ui/Pages/PageStart.qml" line="176"/>
         <source>Start Watching</source>
         <translation>Погнали</translation>
     </message>

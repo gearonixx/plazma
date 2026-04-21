@@ -118,6 +118,7 @@ void VideoFeedModel::doFetch(const QString& query) {
 
             for (const auto& v : arr) {
                 const auto o = v.toObject();
+                // TODO(grnx): dude that's such a primitive logic
                 items_.push_back(
                     VideoItem{
                         .id = o.value("id").toString(),

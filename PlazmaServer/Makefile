@@ -64,3 +64,8 @@ dist-clean:
 down:
 	$(DOCKER_COMPOSE) down
 
+
+.PHONY: reset
+down:
+	$(DOCKER_COMPOSE) down -v
+
