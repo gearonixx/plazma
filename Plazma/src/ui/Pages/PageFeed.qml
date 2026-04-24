@@ -366,6 +366,61 @@ Page {
                                 font.pixelSize: 10
                             }
                         }
+
+                        // Three-dot options button, shown on hover.
+                        // Placed in the thumbnail so it overlays the artwork —
+                        // matches YouTube's in-card options affordance.
+                        Rectangle {
+                            id: optionsBtn
+                            anchors.top: parent.top
+                            anchors.right: parent.right
+                            anchors.margins: 6
+                            width: 26
+                            height: 26
+                            radius: 13
+                            color: optionsMouse.containsMouse
+                                   ? Qt.rgba(0, 0, 0, 0.82)
+                                   : Qt.rgba(0, 0, 0, 0.55)
+                            opacity: cardMouse.containsMouse
+                                     || optionsMouse.containsMouse
+                                     || optionsMouse.pressed
+                                     ? 1.0 : 0.0
+                            visible: opacity > 0.01
+                            Behavior on opacity { NumberAnimation { duration: 140 } }
+                            Behavior on color { ColorAnimation { duration: 120 } }
+                            z: 2
+
+                            Text {
+                                anchors.centerIn: parent
+                                text: "⋮"
+                                color: "#FFFFFF"
+                                font.pixelSize: 16
+                                font.weight: Font.Bold
+                            }
+
+                            MouseArea {
+                                id: optionsMouse
+                                anchors.fill: parent
+                                hoverEnabled: true
+                                cursorShape: Qt.PointingHandCursor
+                                acceptedButtons: Qt.LeftButton
+                                onClicked: root.openCardMenu(
+                                    optionsBtn,
+                                    optionsBtn.width / 2,
+                                    optionsBtn.height,
+                                    {
+                                        "id": model.id,
+                                        "title": model.title,
+                                        "url": model.url,
+                                        "size": model.size,
+                                        "mime": model.mime,
+                                        "author": model.author,
+                                        "createdAt": model.createdAt,
+                                        "thumbnail": model.thumbnail,
+                                        "storyboard": model.storyboard
+                                    })
+                            }
+                        }
                     }
 
                     // Title + meta
@@ -404,6 +459,7 @@ Page {
                     anchors.fill: parent
                     hoverEnabled: true
                     cursorShape: Qt.PointingHandCursor
+                    acceptedButtons: Qt.LeftButton | Qt.RightButton
 
                     // Update scrub state when hovering over the thumbnail box.
                     // Only react when a storyboard sprite is available; otherwise
@@ -434,13 +490,171 @@ Page {
                         Behavior on color { ColorAnimation { duration: 100 } }
                     }
 
-                    onClicked: {
+                    onClicked: (m) => {
+                        const payload = {
+                            "id": model.id,
+                            "title": model.title,
+                            "url": model.url,
+                            "size": model.size,
+                            "mime": model.mime,
+                            "author": model.author,
+                            "createdAt": model.createdAt,
+                            "thumbnail": model.thumbnail,
+                            "storyboard": model.storyboard,
+                            "description": model.description
+                        }
+                        if (m.button === Qt.RightButton) {
+                            root.openCardMenu(cardMouse, m.x, m.y, payload)
+                            return
+                        }
                         if (!model.url || model.url.length === 0) return
-                        VideoFeedModel.setCurrent(model.url, model.title || "")
+                        VideoFeedModel.setCurrentVideo(payload)
                         PageController.replacePage(PageEnum.PagePlayer)
                     }
                 }
             }
+        }
+    }
+
+    // ── Context menu for feed cards (right-click or three-dot) ────────────────
+    //
+    // Mirrors tdesktop's message-bubble context menu (Ui::PopupMenu with
+    // fillContextMenu, see history_view_context_menu.cpp): play, save, copy
+    // link, separator, danger action. Actions are rebuilt on open so the
+    // "already in N playlists" badge stays fresh.
+    //
+    // The "Download video" entry mirrors tdesktop's AddSaveDocumentAction
+    // (history_view_save_document_action.cpp) — same verb, same placement
+    // right above the Copy URL / separator. State-dependent labels (Open /
+    // Downloading…) match the YouTube Premium download UX.
+    PlazmaPopupMenu {
+        id: cardMenu
+        property var video: ({})
+        property int containingCount: 0
+        property int downloadStatus: -1   // mirrors DownloadsModel::Status ints
+
+        readonly property bool dlActive:    cardMenu.downloadStatus === 0
+                                            || cardMenu.downloadStatus === 1
+        readonly property bool dlCompleted: cardMenu.downloadStatus === 2
+        readonly property bool dlFailed:    cardMenu.downloadStatus === 3
+
+        actions: [
+            {
+                text: qsTr("Play"),
+                glyph: "▶",
+                onTriggered: function() {
+                    if (!cardMenu.video || !cardMenu.video.url) return
+                    VideoFeedModel.setCurrentVideo(cardMenu.video)
+                    PageController.replacePage(PageEnum.PagePlayer)
+                }
+            },
+            {
+                text: cardMenu.containingCount > 0
+                      ? qsTr("Save to playlist · in %1").arg(cardMenu.containingCount)
+                      : qsTr("Save to playlist"),
+                glyph: "+",
+                onTriggered: function() {
+                    savePicker.openWith(cardMenu.video)
+                }
+            },
+            {
+                text: cardMenu.dlActive
+                      ? qsTr("Downloading…")
+                      : (cardMenu.dlCompleted
+                         ? qsTr("Open downloaded video")
+                         : (cardMenu.dlFailed
+                            ? qsTr("Download video · retry")
+                            : qsTr("Download video"))),
+                glyph: cardMenu.dlCompleted ? "✓" : "↓",
+                // While a download is in flight the action is a no-op, so
+                // disabling it keeps the menu honest (and matches tdesktop's
+                // approach of greying out Save As during active transfers).
+                enabled: !cardMenu.dlActive,
+                onTriggered: function() {
+                    if (!cardMenu.video || !cardMenu.video.id) return
+                    if (cardMenu.dlCompleted) {
+                        DownloadsModel.openFile(cardMenu.video.id)
+                        return
+                    }
+                    DownloadsModel.start(cardMenu.video)
+                }
+            },
+            { separator: true },
+            {
+                text: qsTr("Copy video URL"),
+                glyph: "⧉",
+                onTriggered: function() {
+                    if (cardMenu.video && cardMenu.video.url) {
+                        clipboardEdit.text = cardMenu.video.url
+                        clipboardEdit.selectAll()
+                        clipboardEdit.copy()
+                    }
+                }
+            }
+        ]
+    }
+
+    // Clipboard copy relies on TextEdit.copy(): it hits the system clipboard
+    // via QClipboard under the hood, without us needing a C++ bridge.
+    TextEdit {
+        id: clipboardEdit
+        visible: false
+        width: 0
+        height: 0
+    }
+
+    function openCardMenu(anchor, px, py, video) {
+        cardMenu.video = video || ({})
+        const vid = cardMenu.video && cardMenu.video.id ? String(cardMenu.video.id) : ""
+        cardMenu.containingCount = vid.length > 0
+                                   ? PlaylistsModel.playlistsContaining(vid).length
+                                   : 0
+        cardMenu.downloadStatus = vid.length > 0
+                                  ? DownloadsModel.statusOf(vid)
+                                  : -1
+        cardMenu.openAt(anchor, px, py)
+    }
+
+    // The save-to-playlist picker (YouTube-style) mounts on the overlay so
+    // it can dim the whole window.
+    SaveToPlaylistDialog {
+        id: savePicker
+        parent: Overlay.overlay
+    }
+
+    // Toast for PlaylistsModel notifications ("Saved to …", "Already in …").
+    Rectangle {
+        id: toast
+        property string message: ""
+        anchors.horizontalCenter: parent.horizontalCenter
+        anchors.bottom: parent.bottom
+        anchors.bottomMargin: 20
+        height: 36
+        width: toastLabel.implicitWidth + 28
+        radius: 18
+        color: PlazmaStyle.color.darkCharcoal
+        visible: opacity > 0.01
+        opacity: 0.0
+        z: 20
+        Behavior on opacity { NumberAnimation { duration: 180 } }
+
+        Text {
+            id: toastLabel
+            anchors.centerIn: parent
+            text: toast.message
+            color: "#FFFFFF"
+            font.pixelSize: 12
+            font.weight: Font.DemiBold
+        }
+        Timer { id: toastTimer; interval: 2200; onTriggered: toast.opacity = 0.0 }
+    }
+
+    Connections {
+        target: PlaylistsModel
+        function onNotify(message) {
+            toast.message = message
+            toast.opacity = 1.0
+            toastTimer.restart()
         }
     }
 

@@ -2,6 +2,7 @@ import QtQuick
 import QtQuick.Controls
 
 import "Pages"
+import "Controls"
 
 import dev.gearonixx.plazma 1.0
 
@@ -80,7 +81,10 @@ ApplicationWindow {
 
     StackView {
         id: stackView
-        anchors.fill: parent
+        anchors.top: parent.top
+        anchors.left: parent.left
+        anchors.right: parent.right
+        anchors.bottom: downloadBar.top
 
         initialItem: Rectangle {
             objectName: "splash"
@@ -101,6 +105,52 @@ ApplicationWindow {
                     color: PlazmaStyle.color.warmGold
                 }
             }
+        }
+    }
+
+    // Global download bar — lives at the bottom of every page. Persists
+    // across StackView.replace() because it's outside the stack.
+    DownloadBar {
+        id: downloadBar
+        anchors.left: parent.left
+        anchors.right: parent.right
+        anchors.bottom: parent.bottom
+    }
+
+    // Completion toasts from DownloadsModel — surfaced at the top so they
+    // don't overlap with the inline download bar underneath.
+    Rectangle {
+        id: downloadToast
+        property string message: ""
+        anchors.top: parent.top
+        anchors.topMargin: 14
+        anchors.horizontalCenter: parent.horizontalCenter
+        height: 34
+        width: downloadToastLabel.implicitWidth + 28
+        radius: 17
+        color: PlazmaStyle.color.darkCharcoal
+        visible: opacity > 0.01
+        opacity: 0.0
+        z: 50
+        Behavior on opacity { NumberAnimation { duration: 180 } }
+
+        Text {
+            id: downloadToastLabel
+            anchors.centerIn: parent
+            text: downloadToast.message
+            color: "#FFFFFF"
+            font.pixelSize: 12
+            font.weight: Font.DemiBold
+        }
+        Timer { id: downloadToastTimer; interval: 2600; onTriggered: downloadToast.opacity = 0.0 }
+    }
+
+    Connections {
+        target: DownloadsModel
+        function onNotify(message) {
+            downloadToast.message = message
+            downloadToast.opacity = 1.0
+            downloadToastTimer.restart()
         }
     }
 }

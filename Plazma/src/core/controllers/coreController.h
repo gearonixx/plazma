@@ -9,9 +9,12 @@
 #include "src/settings.h"
 
 #include "src/models/auth_code_model.h"
+#include "src/models/downloads_model.h"
 #include "src/models/file_dialog_model.h"
 #include "src/models/language_model.h"
 #include "src/models/phone_number_model.h"
+#include "src/models/playlists_model.h"
+#include "src/models/profile_model.h"
 #include "src/models/user_model.h"
 #include "src/models/video_feed_model.h"
 #include "src/platform/file_dialog.h"
@@ -67,4 +70,7 @@ private:
     QSharedPointer<FileDialogModel> fileDialogModel_;
 
     QSharedPointer<VideoFeedModel> videoFeedModel_;
+    QSharedPointer<ProfileModel> profileModel_;
+    QSharedPointer<PlaylistsModel> playlistsModel_;
+    QSharedPointer<DownloadsModel> downloadsModel_;
 };

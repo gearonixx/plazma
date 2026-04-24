@@ -46,6 +46,8 @@ QVariant VideoFeedModel::data(const QModelIndex& index, int role) const {
             return item.thumbnail;
         case StoryboardRole:
             return item.storyboard;
+        case DescriptionRole:
+            return item.description;
         default:
             return {};
     }
@@ -62,13 +64,11 @@ QHash<int, QByteArray> VideoFeedModel::roleNames() const {
         {CreatedAtRole, "createdAt"},
         {ThumbnailRole, "thumbnail"},
         {StoryboardRole, "storyboard"},
+        {DescriptionRole, "description"},
     };
 }
 
 void VideoFeedModel::refresh() {
-    // Initial load / retry button: reuse the currently displayed query so
-    // hitting "Retry" after a failed search re-runs the same search rather
-    // than silently reverting to the full feed.
     if (loading_) return;
     doFetch(activeQuery_);
 }
@@ -130,6 +130,10 @@ void VideoFeedModel::doFetch(const QString& query) {
                         .createdAt = o.value("created_at").toString(),
                         .thumbnail = o.value("thumbnail").toString(),
                         .storyboard = o.value("storyboard").toString(),
+                        // Try a couple of common field names — the backend
+                        // contract says "description" but older drafts used
+                        // "summary"; fall through so we get whichever is set.
+                        .description = o.value("description").toString(o.value("summary").toString()),
                     }
                 );
             }
@@ -147,16 +151,70 @@ void VideoFeedModel::doFetch(const QString& query) {
 }
 
 void VideoFeedModel::setCurrent(const QString& url, const QString& title) {
-    if (currentUrl_ == url && currentTitle_ == title) return;
+    if (currentUrl_ == url && currentTitle_ == title && currentVideo_.size() <= 2) return;
     currentUrl_ = url;
     currentTitle_ = title;
+    // Minimal metadata only — wipe any leftover feed-row fields so the player
+    // page doesn't end up rendering the *previous* video's author/thumbnail.
+    currentVideo_ = QVariantMap{
+        {QStringLiteral("url"), url},
+        {QStringLiteral("title"), title},
+    };
     emit currentChanged();
 }
 
+void VideoFeedModel::setCurrentVideo(const QVariantMap& video) {
+    const auto url = video.value(QStringLiteral("url")).toString();
+    const auto title = video.value(QStringLiteral("title")).toString();
+    currentUrl_ = url;
+    currentTitle_ = title;
+    currentVideo_ = video;
+    emit currentChanged();
+}
+
+// Turn a VideoItem into the same-shaped QVariantMap QML already sees via
+// `currentVideo`. Kept local because it's the only place the model emits
+// structured rows by value (data() returns them role-by-role).
+static QVariantMap itemToVariant(const VideoFeedModel::VideoItem& v) {
+    return QVariantMap{
+        {QStringLiteral("id"), v.id},
+        {QStringLiteral("title"), v.title},
+        {QStringLiteral("url"), v.url},
+        {QStringLiteral("size"), v.size},
+        {QStringLiteral("mime"), v.mime},
+        {QStringLiteral("author"), v.author},
+        {QStringLiteral("createdAt"), v.createdAt},
+        {QStringLiteral("thumbnail"), v.thumbnail},
+        {QStringLiteral("storyboard"), v.storyboard},
+        {QStringLiteral("description"), v.description},
+    };
+}
+
+QVariantMap VideoFeedModel::nextVideo(const QString& currentId) const {
+    if (currentId.isEmpty() || items_.empty()) return {};
+    for (size_t i = 0; i + 1 < items_.size(); ++i) {
+        if (items_[i].id == currentId) {
+            return itemToVariant(items_[i + 1]);
+        }
+    }
+    return {};
+}
+
+QVariantMap VideoFeedModel::previousVideo(const QString& currentId) const {
+    if (currentId.isEmpty() || items_.empty()) return {};
+    for (size_t i = 1; i < items_.size(); ++i) {
+        if (items_[i].id == currentId) {
+            return itemToVariant(items_[i - 1]);
+        }
+    }
+    return {};
+}
+
 void VideoFeedModel::clearCurrent() {
-    if (currentUrl_.isEmpty() && currentTitle_.isEmpty()) return;
+    if (currentUrl_.isEmpty() && currentTitle_.isEmpty() && currentVideo_.isEmpty()) return;
     currentUrl_.clear();
     currentTitle_.clear();
+    currentVideo_.clear();
     emit currentChanged();
 }
 

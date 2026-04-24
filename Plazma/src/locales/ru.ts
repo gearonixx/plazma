@@ -2,24 +2,123 @@
 <!DOCTYPE TS>
 <TS version="2.1" language="ru_RU">
 <context>
+    <name>DownloadBar</name>
+    <message>
+        <location filename="../ui/Controls/DownloadBar.qml" line="123"/>
+        <source>Video</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/Controls/DownloadBar.qml" line="138"/>
+        <source>Failed — %1</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/Controls/DownloadBar.qml" line="139"/>
+        <source>Download failed</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/Controls/DownloadBar.qml" line="142"/>
+        <source>Saved to %1 · %2</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/Controls/DownloadBar.qml" line="147"/>
+        <source>Canceled</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/Controls/DownloadBar.qml" line="154"/>
+        <source>%1 of %2 · %3%</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/Controls/DownloadBar.qml" line="159"/>
+        <source>%1 downloaded</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/Controls/DownloadBar.qml" line="188"/>
+        <source>Open</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/Controls/DownloadBar.qml" line="189"/>
+        <source>Retry</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/Controls/DownloadBar.qml" line="190"/>
+        <source>Cancel</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/Controls/DownloadBar.qml" line="249"/>
+        <source>Show in folder</source>
+        <translation type="unfinished"></translation>
+    </message>
+</context>
+<context>
+    <name>DownloadsModel</name>
+    <message>
+        <location filename="../models/downloads_model.cpp" line="216"/>
+        <source>Can&apos;t write to %1</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../models/downloads_model.cpp" line="231"/>
+        <location filename="../models/downloads_model.cpp" line="254"/>
+        <location filename="../models/downloads_model.cpp" line="346"/>
+        <source>Download failed: %1</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../models/downloads_model.cpp" line="239"/>
+        <source>Network is unavailable</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../models/downloads_model.cpp" line="273"/>
+        <source>Downloading “%1”</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../models/downloads_model.cpp" line="274"/>
+        <location filename="../models/downloads_model.cpp" line="355"/>
+        <source>video</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../models/downloads_model.cpp" line="355"/>
+        <source>Saved “%1”</source>
+        <translation type="unfinished"></translation>
+    </message>
+</context>
+<context>
     <name>NavBar</name>
     <message>
-        <location filename="../ui/Controls/NavBar.qml" line="75"/>
+        <location filename="../ui/Controls/NavBar.qml" line="101"/>
         <source>Plazma</source>
         <translation type="unfinished">Plazma</translation>
     </message>
     <message>
-        <location filename="../ui/Controls/NavBar.qml" line="136"/>
+        <location filename="../ui/Controls/NavBar.qml" line="162"/>
         <source>Feed</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/Controls/NavBar.qml" line="144"/>
+        <location filename="../ui/Controls/NavBar.qml" line="170"/>
+        <source>Playlists</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/Controls/NavBar.qml" line="179"/>
         <source>Upload</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/Controls/NavBar.qml" line="277"/>
+        <location filename="../ui/Controls/NavBar.qml" line="312"/>
         <source>Search videos, creators, topics…</source>
         <translation type="unfinished"></translation>
     </message>
@@ -52,62 +151,102 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/Pages/PageFeed.qml" line="382"/>
+        <location filename="../ui/Pages/PageFeed.qml" line="437"/>
         <source>Untitled</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/Pages/PageFeed.qml" line="458"/>
+        <location filename="../ui/Pages/PageFeed.qml" line="543"/>
+        <source>Play</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/Pages/PageFeed.qml" line="553"/>
+        <source>Save to playlist · in %1</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/Pages/PageFeed.qml" line="554"/>
+        <source>Save to playlist</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/Pages/PageFeed.qml" line="562"/>
+        <source>Downloading…</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/Pages/PageFeed.qml" line="564"/>
+        <source>Open downloaded video</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/Pages/PageFeed.qml" line="566"/>
+        <source>Download video · retry</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/Pages/PageFeed.qml" line="567"/>
+        <source>Download video</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/Pages/PageFeed.qml" line="584"/>
+        <source>Copy video URL</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/Pages/PageFeed.qml" line="672"/>
         <source>Just now</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/Pages/PageFeed.qml" line="463"/>
+        <location filename="../ui/Pages/PageFeed.qml" line="677"/>
         <source>1 minute ago</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/Pages/PageFeed.qml" line="463"/>
+        <location filename="../ui/Pages/PageFeed.qml" line="677"/>
         <source>%1 minutes ago</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/Pages/PageFeed.qml" line="469"/>
+        <location filename="../ui/Pages/PageFeed.qml" line="683"/>
         <source>1 hour ago</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/Pages/PageFeed.qml" line="469"/>
+        <location filename="../ui/Pages/PageFeed.qml" line="683"/>
         <source>%1 hours ago</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/Pages/PageFeed.qml" line="473"/>
+        <location filename="../ui/Pages/PageFeed.qml" line="687"/>
         <source>Yesterday</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/Pages/PageFeed.qml" line="474"/>
+        <location filename="../ui/Pages/PageFeed.qml" line="688"/>
         <source>%1 days ago</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/Pages/PageFeed.qml" line="479"/>
+        <location filename="../ui/Pages/PageFeed.qml" line="693"/>
         <source>1 week ago</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/Pages/PageFeed.qml" line="479"/>
+        <location filename="../ui/Pages/PageFeed.qml" line="693"/>
         <source>%1 weeks ago</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/Pages/PageFeed.qml" line="485"/>
+        <location filename="../ui/Pages/PageFeed.qml" line="699"/>
         <source>1 month ago</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/Pages/PageFeed.qml" line="485"/>
+        <location filename="../ui/Pages/PageFeed.qml" line="699"/>
         <source>%1 months ago</source>
         <translation type="unfinished"></translation>
     </message>
@@ -178,162 +317,804 @@ Telegram app</source>
 <context>
     <name>PagePlayer</name>
     <message>
-        <location filename="../ui/Pages/PagePlayer.qml" line="94"/>
+        <location filename="../ui/Pages/PagePlayer.qml" line="146"/>
         <source>Saved: %1</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/Pages/PagePlayer.qml" line="95"/>
+        <location filename="../ui/Pages/PagePlayer.qml" line="147"/>
         <source>Error: %1</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/Pages/PagePlayer.qml" line="96"/>
+        <location filename="../ui/Pages/PagePlayer.qml" line="153"/>
         <source>End of video</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/Pages/PagePlayer.qml" line="139"/>
-        <location filename="../ui/Pages/PagePlayer.qml" line="140"/>
-        <location filename="../ui/Pages/PagePlayer.qml" line="241"/>
+        <location filename="../ui/Pages/PagePlayer.qml" line="169"/>
+        <source>Resumed from %1</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/Pages/PagePlayer.qml" line="245"/>
+        <location filename="../ui/Pages/PagePlayer.qml" line="246"/>
+        <location filename="../ui/Pages/PagePlayer.qml" line="389"/>
         <source>Volume %1%</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/Pages/PagePlayer.qml" line="141"/>
+        <location filename="../ui/Pages/PagePlayer.qml" line="247"/>
         <source>Muted</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/Pages/PagePlayer.qml" line="141"/>
+        <location filename="../ui/Pages/PagePlayer.qml" line="247"/>
         <source>Unmuted</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/Pages/PagePlayer.qml" line="153"/>
-        <location filename="../ui/Pages/PagePlayer.qml" line="728"/>
+        <location filename="../ui/Pages/PagePlayer.qml" line="249"/>
+        <location filename="../ui/Pages/PagePlayer.qml" line="1524"/>
+        <source>Theater mode</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/Pages/PagePlayer.qml" line="249"/>
+        <location filename="../ui/Pages/PagePlayer.qml" line="1524"/>
+        <source>Default view</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/Pages/PagePlayer.qml" line="264"/>
+        <location filename="../ui/Pages/PagePlayer.qml" line="867"/>
         <source>Loop on</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/Pages/PagePlayer.qml" line="153"/>
-        <location filename="../ui/Pages/PagePlayer.qml" line="728"/>
+        <location filename="../ui/Pages/PagePlayer.qml" line="264"/>
+        <location filename="../ui/Pages/PagePlayer.qml" line="867"/>
         <source>Loop off</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/Pages/PagePlayer.qml" line="208"/>
+        <location filename="../ui/Pages/PagePlayer.qml" line="356"/>
         <source>Drop to play</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/Pages/PagePlayer.qml" line="286"/>
+        <location filename="../ui/Pages/PagePlayer.qml" line="434"/>
         <source>Nothing playing</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/Pages/PagePlayer.qml" line="295"/>
+        <location filename="../ui/Pages/PagePlayer.qml" line="443"/>
         <source>Pick a video from the feed, drop a file here, or open one from disk.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/Pages/PagePlayer.qml" line="309"/>
-        <location filename="../ui/Pages/PagePlayer.qml" line="375"/>
+        <location filename="../ui/Pages/PagePlayer.qml" line="457"/>
+        <location filename="../ui/Pages/PagePlayer.qml" line="523"/>
         <source>Back to feed</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/Pages/PagePlayer.qml" line="315"/>
-        <location filename="../ui/Pages/PagePlayer.qml" line="551"/>
-        <location filename="../ui/Pages/PagePlayer.qml" line="793"/>
+        <location filename="../ui/Pages/PagePlayer.qml" line="463"/>
+        <location filename="../ui/Pages/PagePlayer.qml" line="684"/>
+        <location filename="../ui/Pages/PagePlayer.qml" line="931"/>
         <source>Open local file</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/Pages/PagePlayer.qml" line="353"/>
+        <location filename="../ui/Pages/PagePlayer.qml" line="501"/>
         <source>Couldn&apos;t play this video</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/Pages/PagePlayer.qml" line="381"/>
+        <location filename="../ui/Pages/PagePlayer.qml" line="529"/>
+        <location filename="../ui/Pages/PagePlayer.qml" line="1206"/>
         <source>Retry</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/Pages/PagePlayer.qml" line="499"/>
+        <location filename="../ui/Pages/PagePlayer.qml" line="636"/>
         <source>Back</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/Pages/PagePlayer.qml" line="507"/>
+        <location filename="../ui/Pages/PagePlayer.qml" line="640"/>
         <source>Back to feed  (Esc)</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/Pages/PagePlayer.qml" line="526"/>
+        <location filename="../ui/Pages/PagePlayer.qml" line="659"/>
         <source>Player</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/Pages/PagePlayer.qml" line="798"/>
+        <location filename="../ui/Pages/PagePlayer.qml" line="690"/>
+        <source>Default view  (T)</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/Pages/PagePlayer.qml" line="690"/>
+        <source>Theater mode  (T)</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/Pages/PagePlayer.qml" line="932"/>
+        <location filename="../ui/Pages/PagePlayer.qml" line="1518"/>
         <source>Take screenshot</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/Pages/PagePlayer.qml" line="805"/>
+        <location filename="../ui/Pages/PagePlayer.qml" line="937"/>
         <source>Audio track</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/Pages/PagePlayer.qml" line="810"/>
-        <location filename="../ui/Pages/PagePlayer.qml" line="826"/>
+        <location filename="../ui/Pages/PagePlayer.qml" line="942"/>
+        <location filename="../ui/Pages/PagePlayer.qml" line="955"/>
         <source>Track %1</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/Pages/PagePlayer.qml" line="818"/>
+        <location filename="../ui/Pages/PagePlayer.qml" line="950"/>
         <source>Subtitles</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/Pages/PagePlayer.qml" line="820"/>
+        <location filename="../ui/Pages/PagePlayer.qml" line="951"/>
         <source>Off</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/Pages/PagePlayer.qml" line="42"/>
+        <location filename="../ui/Pages/PagePlayer.qml" line="1031"/>
+        <source>Untitled</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/Pages/PagePlayer.qml" line="1143"/>
+        <source>Your channel</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/Pages/PagePlayer.qml" line="1161"/>
+        <source>Open your channel</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/Pages/PagePlayer.qml" line="1172"/>
+        <source>Save</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/Pages/PagePlayer.qml" line="1180"/>
+        <source>in %1</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/Pages/PagePlayer.qml" line="1191"/>
+        <source>Share</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/Pages/PagePlayer.qml" line="1203"/>
+        <source>Downloading</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/Pages/PagePlayer.qml" line="1205"/>
+        <source>Open</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/Pages/PagePlayer.qml" line="1206"/>
+        <source>Download</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/Pages/PagePlayer.qml" line="1258"/>
+        <source>More actions</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/Pages/PagePlayer.qml" line="1276"/>
+        <source>Uploaded %1</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/Pages/PagePlayer.qml" line="1349"/>
+        <source>Description</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/Pages/PagePlayer.qml" line="1360"/>
+        <location filename="../ui/Pages/PagePlayer.qml" line="1425"/>
+        <source>Show less</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/Pages/PagePlayer.qml" line="1360"/>
+        <location filename="../ui/Pages/PagePlayer.qml" line="1425"/>
+        <source>Show more</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/Pages/PagePlayer.qml" line="1418"/>
+        <source>About this video</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/Pages/PagePlayer.qml" line="1455"/>
+        <source>Title</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/Pages/PagePlayer.qml" line="1456"/>
+        <source>Uploaded by</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/Pages/PagePlayer.qml" line="1457"/>
+        <source>Uploaded</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/Pages/PagePlayer.qml" line="1458"/>
+        <source>Duration</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/Pages/PagePlayer.qml" line="1459"/>
+        <source>Resolution</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/Pages/PagePlayer.qml" line="1460"/>
+        <source>Codec</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/Pages/PagePlayer.qml" line="1461"/>
+        <source>Decoder</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/Pages/PagePlayer.qml" line="1465"/>
+        <source>File size</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/Pages/PagePlayer.qml" line="1466"/>
+        <source>Content type</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/Pages/PagePlayer.qml" line="1467"/>
+        <source>URL</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/Pages/PagePlayer.qml" line="1498"/>
+        <source>Copy link</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/Pages/PagePlayer.qml" line="1503"/>
+        <source>Copy link at current time</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/Pages/PagePlayer.qml" line="1509"/>
+        <source>Reveal downloaded file</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/Pages/PagePlayer.qml" line="1529"/>
+        <source>Fullscreen</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/Pages/PagePlayer.qml" line="1566"/>
+        <location filename="../ui/Pages/PagePlayer.qml" line="1702"/>
+        <source>Unknown</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/Pages/PagePlayer.qml" line="1602"/>
+        <source>Link copied</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/Pages/PagePlayer.qml" line="1611"/>
+        <source>Link copied at %1</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/Pages/PagePlayer.qml" line="1703"/>
+        <source>By %1</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/Pages/PagePlayer.qml" line="1711"/>
+        <source>No additional information is available for this video.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/Pages/PagePlayer.qml" line="1723"/>
+        <source>Just now</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/Pages/PagePlayer.qml" line="1728"/>
+        <source>1 minute ago</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/Pages/PagePlayer.qml" line="1728"/>
+        <source>%1 minutes ago</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/Pages/PagePlayer.qml" line="1733"/>
+        <source>1 hour ago</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/Pages/PagePlayer.qml" line="1733"/>
+        <source>%1 hours ago</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/Pages/PagePlayer.qml" line="1736"/>
+        <source>Yesterday</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/Pages/PagePlayer.qml" line="1737"/>
+        <source>%1 days ago</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/Pages/PagePlayer.qml" line="1742"/>
+        <source>1 week ago</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/Pages/PagePlayer.qml" line="1742"/>
+        <source>%1 weeks ago</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/Pages/PagePlayer.qml" line="1747"/>
+        <source>1 month ago</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/Pages/PagePlayer.qml" line="1747"/>
+        <source>%1 months ago</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/Pages/PagePlayer.qml" line="107"/>
         <source>Automatic</source>
         <translation>Автоматически</translation>
     </message>
     <message>
-        <location filename="../ui/Pages/PagePlayer.qml" line="45"/>
+        <location filename="../ui/Pages/PagePlayer.qml" line="110"/>
         <source>Software (CPU)</source>
         <translation>Программное (CPU)</translation>
     </message>
     <message>
-        <location filename="../ui/Pages/PagePlayer.qml" line="557"/>
+        <location filename="../ui/Pages/PagePlayer.qml" line="696"/>
         <source>Fullscreen  (F)</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/Pages/PagePlayer.qml" line="834"/>
+        <location filename="../ui/Pages/PagePlayer.qml" line="963"/>
         <source>Hardware acceleration</source>
         <translation>Аппаратное ускорение</translation>
     </message>
     <message>
-        <location filename="../ui/Pages/PagePlayer.qml" line="786"/>
+        <location filename="../ui/Pages/PagePlayer.qml" line="925"/>
         <source>Decoder: %1  ·  %2</source>
         <translation>Декодер: %1  ·  %2</translation>
     </message>
     <message>
-        <location filename="../ui/Pages/PagePlayer.qml" line="784"/>
+        <location filename="../ui/Pages/PagePlayer.qml" line="923"/>
+        <location filename="../ui/Pages/PagePlayer.qml" line="1463"/>
         <source>CPU</source>
         <translation>CPU</translation>
     </message>
     <message>
-        <location filename="../ui/Pages/PagePlayer.qml" line="101"/>
+        <location filename="../ui/Pages/PagePlayer.qml" line="159"/>
         <source>HW %1 unavailable — using CPU</source>
         <translation>HW %1 недоступно — используется CPU</translation>
+    </message>
+</context>
+<context>
+    <name>PagePlaylistDetail</name>
+    <message>
+        <location filename="../ui/Pages/PagePlaylistDetail.qml" line="123"/>
+        <source>%1 %2 · Playlist</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/Pages/PagePlaylistDetail.qml" line="124"/>
+        <source>video</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/Pages/PagePlaylistDetail.qml" line="124"/>
+        <source>videos</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/Pages/PagePlaylistDetail.qml" line="145"/>
+        <source>Play all</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/Pages/PagePlaylistDetail.qml" line="205"/>
+        <source>This playlist is empty</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/Pages/PagePlaylistDetail.qml" line="212"/>
+        <source>Right-click a video in the feed to add it here</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/Pages/PagePlaylistDetail.qml" line="289"/>
+        <source>Untitled</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/Pages/PagePlaylistDetail.qml" line="354"/>
+        <source>Rename</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/Pages/PagePlaylistDetail.qml" line="358"/>
+        <source>Delete playlist</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/Pages/PagePlaylistDetail.qml" line="375"/>
+        <source>Play</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/Pages/PagePlaylistDetail.qml" line="380"/>
+        <source>Save to another playlist</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/Pages/PagePlaylistDetail.qml" line="385"/>
+        <source>Downloading…</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/Pages/PagePlaylistDetail.qml" line="387"/>
+        <source>Open downloaded video</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/Pages/PagePlaylistDetail.qml" line="389"/>
+        <source>Download video · retry</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/Pages/PagePlaylistDetail.qml" line="390"/>
+        <source>Download video</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/Pages/PagePlaylistDetail.qml" line="403"/>
+        <source>Remove from playlist</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/Pages/PagePlaylistDetail.qml" line="460"/>
+        <source>Delete this playlist?</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/Pages/PagePlaylistDetail.qml" line="467"/>
+        <source>“%1” and all its entries will be removed. Videos themselves stay in your feed.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/Pages/PagePlaylistDetail.qml" line="486"/>
+        <source>Cancel</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/Pages/PagePlaylistDetail.qml" line="495"/>
+        <source>Delete</source>
+        <translation type="unfinished"></translation>
+    </message>
+</context>
+<context>
+    <name>PagePlaylists</name>
+    <message>
+        <location filename="../ui/Pages/PagePlaylists.qml" line="45"/>
+        <source>Playlists</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/Pages/PagePlaylists.qml" line="51"/>
+        <source>Sorted A to Z · %1 %2</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/Pages/PagePlaylists.qml" line="53"/>
+        <source>playlist</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/Pages/PagePlaylists.qml" line="53"/>
+        <source>playlists</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/Pages/PagePlaylists.qml" line="80"/>
+        <source>New playlist</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/Pages/PagePlaylists.qml" line="119"/>
+        <source>No playlists yet</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/Pages/PagePlaylists.qml" line="127"/>
+        <source>Save videos from the feed to keep them in one place</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/Pages/PagePlaylists.qml" line="243"/>
+        <source>%1 videos</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/Pages/PagePlaylists.qml" line="300"/>
+        <source>Playlist</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/Pages/PagePlaylists.qml" line="374"/>
+        <source>Open</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/Pages/PagePlaylists.qml" line="382"/>
+        <source>Rename</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/Pages/PagePlaylists.qml" line="390"/>
+        <source>Delete playlist</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/Pages/PagePlaylists.qml" line="448"/>
+        <source>Delete this playlist?</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/Pages/PagePlaylists.qml" line="456"/>
+        <source>“%1” and all its entries will be removed. Videos themselves stay in your feed.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/Pages/PagePlaylists.qml" line="476"/>
+        <source>Cancel</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/Pages/PagePlaylists.qml" line="486"/>
+        <source>Delete</source>
+        <translation type="unfinished"></translation>
+    </message>
+</context>
+<context>
+    <name>PageProfile</name>
+    <message>
+        <location filename="../ui/Pages/PageProfile.qml" line="59"/>
+        <source>Couldn&apos;t %1 — %2</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/Pages/PageProfile.qml" line="62"/>
+        <source>Video deleted</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/Pages/PageProfile.qml" line="65"/>
+        <source>Renamed to &quot;%1&quot;</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/Pages/PageProfile.qml" line="71"/>
+        <source>Uploaded %1</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/Pages/PageProfile.qml" line="74"/>
+        <source>Upload failed (%1): %2</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/Pages/PageProfile.qml" line="267"/>
+        <source>No videos yet</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/Pages/PageProfile.qml" line="268"/>
+        <source>1 video</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/Pages/PageProfile.qml" line="269"/>
+        <source>%1 videos</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/Pages/PageProfile.qml" line="286"/>
+        <source>%1 total</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/Pages/PageProfile.qml" line="305"/>
+        <source>Upload video</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/Pages/PageProfile.qml" line="387"/>
+        <location filename="../ui/Pages/PageProfile.qml" line="713"/>
+        <source>Untitled</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/Pages/PageProfile.qml" line="483"/>
+        <source>You haven&apos;t uploaded anything yet</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/Pages/PageProfile.qml" line="491"/>
+        <source>Your uploads will show up here. You can rename or delete them anytime.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/Pages/PageProfile.qml" line="509"/>
+        <source>Upload your first</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/Pages/PageProfile.qml" line="644"/>
+        <location filename="../ui/Pages/PageProfile.qml" line="815"/>
+        <source>Rename</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/Pages/PageProfile.qml" line="676"/>
+        <location filename="../ui/Pages/PageProfile.qml" line="820"/>
+        <location filename="../ui/Pages/PageProfile.qml" line="1015"/>
+        <source>Delete</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/Pages/PageProfile.qml" line="790"/>
+        <source>Play</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/Pages/PageProfile.qml" line="797"/>
+        <source>Downloading…</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/Pages/PageProfile.qml" line="799"/>
+        <source>Open downloaded video</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/Pages/PageProfile.qml" line="801"/>
+        <source>Download video · retry</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/Pages/PageProfile.qml" line="802"/>
+        <source>Download video</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/Pages/PageProfile.qml" line="868"/>
+        <source>Rename video</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/Pages/PageProfile.qml" line="877"/>
+        <source>New title…</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/Pages/PageProfile.qml" line="911"/>
+        <location filename="../ui/Pages/PageProfile.qml" line="999"/>
+        <source>Cancel</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/Pages/PageProfile.qml" line="927"/>
+        <source>Save</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/Pages/PageProfile.qml" line="969"/>
+        <source>Delete video?</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/Pages/PageProfile.qml" line="977"/>
+        <source>&quot;%1&quot; will be removed from the feed. This can&apos;t be undone.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/Pages/PageProfile.qml" line="1035"/>
+        <source>Just now</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/Pages/PageProfile.qml" line="1040"/>
+        <source>1 minute ago</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/Pages/PageProfile.qml" line="1040"/>
+        <source>%1 minutes ago</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/Pages/PageProfile.qml" line="1045"/>
+        <source>1 hour ago</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/Pages/PageProfile.qml" line="1045"/>
+        <source>%1 hours ago</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/Pages/PageProfile.qml" line="1048"/>
+        <source>Yesterday</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/Pages/PageProfile.qml" line="1049"/>
+        <source>%1 days ago</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/Pages/PageProfile.qml" line="1054"/>
+        <source>1 week ago</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/Pages/PageProfile.qml" line="1054"/>
+        <source>%1 weeks ago</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/Pages/PageProfile.qml" line="1059"/>
+        <source>1 month ago</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/Pages/PageProfile.qml" line="1059"/>
+        <source>%1 months ago</source>
+        <translation type="unfinished"></translation>
     </message>
 </context>
 <context>
@@ -422,6 +1203,47 @@ We&apos;ll push it to the server and add it to the feed.</source>
     </message>
 </context>
 <context>
+    <name>PlaylistsModel</name>
+    <message>
+        <location filename="../models/playlists_model.cpp" line="78"/>
+        <source>Choose a different name</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../models/playlists_model.cpp" line="154"/>
+        <source>Already in “%1”</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../models/playlists_model.cpp" line="169"/>
+        <source>Saved to “%1”</source>
+        <translation type="unfinished"></translation>
+    </message>
+</context>
+<context>
+    <name>ProfileModel</name>
+    <message>
+        <location filename="../models/profile_model.cpp" line="78"/>
+        <source>Signed out</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../models/profile_model.cpp" line="84"/>
+        <source>User #%1</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../models/profile_model.cpp" line="229"/>
+        <source>delete</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../models/profile_model.cpp" line="268"/>
+        <source>rename</source>
+        <translation type="unfinished"></translation>
+    </message>
+</context>
+<context>
     <name>QObject</name>
     <message>
         <location filename="../platform/file_dialog.h" line="85"/>
@@ -431,6 +1253,107 @@ We&apos;ll push it to the server and add it to the feed.</source>
     <message>
         <location filename="../platform/file_dialog.h" line="86"/>
         <source>All files</source>
+        <translation type="unfinished"></translation>
+    </message>
+</context>
+<context>
+    <name>RenamePlaylistDialog</name>
+    <message>
+        <location filename="../ui/Controls/RenamePlaylistDialog.qml" line="73"/>
+        <source>Rename playlist</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/Controls/RenamePlaylistDialog.qml" line="73"/>
+        <source>New playlist</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/Controls/RenamePlaylistDialog.qml" line="94"/>
+        <source>Playlist name</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/Controls/RenamePlaylistDialog.qml" line="132"/>
+        <source>Cancel</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/Controls/RenamePlaylistDialog.qml" line="156"/>
+        <source>Save</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/Controls/RenamePlaylistDialog.qml" line="156"/>
+        <source>Create</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/Controls/RenamePlaylistDialog.qml" line="174"/>
+        <source>Enter a name</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/Controls/RenamePlaylistDialog.qml" line="176"/>
+        <source>Another playlist already uses this name</source>
+        <translation type="unfinished"></translation>
+    </message>
+</context>
+<context>
+    <name>SaveToPlaylistDialog</name>
+    <message>
+        <location filename="../ui/Controls/SaveToPlaylistDialog.qml" line="108"/>
+        <source>Save video to…</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/Controls/SaveToPlaylistDialog.qml" line="152"/>
+        <source>Untitled</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/Controls/SaveToPlaylistDialog.qml" line="171"/>
+        <source>No playlists yet. Create your first below.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/Controls/SaveToPlaylistDialog.qml" line="236"/>
+        <source>%1 videos</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/Controls/SaveToPlaylistDialog.qml" line="310"/>
+        <source>New playlist</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/Controls/SaveToPlaylistDialog.qml" line="354"/>
+        <source>Playlist name</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/Controls/SaveToPlaylistDialog.qml" line="388"/>
+        <source>Cancel</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/Controls/SaveToPlaylistDialog.qml" line="416"/>
+        <source>Create</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/Controls/SaveToPlaylistDialog.qml" line="439"/>
+        <source>Enter a name</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/Controls/SaveToPlaylistDialog.qml" line="443"/>
+        <source>A playlist with that name already exists</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/Controls/SaveToPlaylistDialog.qml" line="448"/>
+        <source>Couldn’t create the playlist</source>
         <translation type="unfinished"></translation>
     </message>
 </context>

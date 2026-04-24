@@ -71,6 +71,15 @@ void CoreController::initControllers() {
     videoFeedModel_.reset(new VideoFeedModel(&session_->api()));
     qmlRegisterSingletonInstance<VideoFeedModel>(APPLICATION_ID, 1, 0, "VideoFeedModel", videoFeedModel_.data());
 
+    profileModel_.reset(new ProfileModel(session_.data(), &session_->api()));
+    qmlRegisterSingletonInstance<ProfileModel>(APPLICATION_ID, 1, 0, "ProfileModel", profileModel_.data());
+
+    playlistsModel_.reset(new PlaylistsModel());
+    qmlRegisterSingletonInstance<PlaylistsModel>(APPLICATION_ID, 1, 0, "PlaylistsModel", playlistsModel_.data());
+
+    downloadsModel_.reset(new DownloadsModel(&session_->api()));
+    qmlRegisterSingletonInstance<DownloadsModel>(APPLICATION_ID, 1, 0, "DownloadsModel", downloadsModel_.data());
+
     connect(
         &session_->api(),
         &Api::uploadFinished,
@@ -78,6 +87,9 @@ void CoreController::initControllers() {
         [this](const QString&, const QString& filename) {
             emit videoFeedModel_->uploadFinished(filename);
             videoFeedModel_->refresh();
+            // Keep the profile grid in sync so a fresh upload shows up on
+            // the "my videos" page without the user having to hit refresh.
+            profileModel_->refresh();
         }
     );
     connect(
@@ -86,6 +98,16 @@ void CoreController::initControllers() {
         videoFeedModel_.data(),
         [this](const QString&, int code, const QString& error) { emit videoFeedModel_->uploadFailed(code, error); }
     );
+
+    // Cross-model sync: a delete or rename on the profile page should be
+    // reflected in the main feed too. We just trigger a refresh on the feed
+    // — cheap and keeps them authoritatively consistent with the server.
+    connect(profileModel_.data(), &ProfileModel::videoDeleted, videoFeedModel_.data(), [this](const QString&) {
+        videoFeedModel_->refresh();
+    });
+    connect(profileModel_.data(), &ProfileModel::videoRenamed, videoFeedModel_.data(), [this](const QString&, const QString&) {
+        videoFeedModel_->refresh();
+    });
 }
 
 void CoreController::initSignalHandlers() {

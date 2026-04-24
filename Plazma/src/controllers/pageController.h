@@ -13,6 +13,9 @@ enum class PageEnum {
     PageFeed,
     PageUpload,
     PagePlayer,
+    PageProfile,
+    PagePlaylists,
+    PagePlaylistDetail,
 };
 
 Q_ENUM_NS(PageEnum);

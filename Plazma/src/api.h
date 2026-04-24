@@ -102,6 +102,30 @@ public:
     // chronological feed.
     void fetchVideos(const QString& query, Fn<void(QJsonArray)> onSuccess, Fn<void(int, QString)> onError = {});
 
+    // Mutations on a single video, keyed by `id`. The REST contract is:
+    //   PATCH  /v1/videos/{id}   body: {"title": "..."}   → 200
+    //   DELETE /v1/videos/{id}                            → 204
+    // Paths are built against kBaseUrl directly since the Endpoint enum only
+    // covers fixed paths. Both callbacks are optional.
+    void renameVideo(
+        const QString& id,
+        const QString& newTitle,
+        Fn<void()> onSuccess = {},
+        Fn<void(int, QString)> onError = {}
+    );
+    void deleteVideo(const QString& id, Fn<void()> onSuccess = {}, Fn<void(int, QString)> onError = {});
+
+    // Streaming GET for offline downloads. Returns the underlying QNetworkReply
+    // so the caller can wire readyRead()/downloadProgress()/finished() to write
+    // bytes incrementally to disk instead of buffering the whole file in RAM.
+    //
+    // Ownership: the reply's parent is the QNAM (Qt's default); the caller
+    // must call reply->deleteLater() when they're done, and if they want to
+    // cancel mid-transfer they can call reply->abort(). We don't go through
+    // RequestBuilder because RB collapses the stream into a single QJsonObject
+    // callback — fine for JSON APIs, useless for a 400 MB video file.
+    [[nodiscard]] QNetworkReply* startDownload(const QUrl& url);
+
     [[nodiscard]] plazma::task_queue::TaskQueue* fileLoader() const { return file_loader_.get(); }
 
 signals:

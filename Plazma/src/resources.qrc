@@ -8,9 +8,18 @@
         <file>ui/Pages/PageFeed.qml</file>
         <file>ui/Pages/PageUpload.qml</file>
         <file>ui/Pages/PagePlayer.qml</file>
+        <file>ui/Pages/PageProfile.qml</file>
+        <file>ui/Pages/PagePlaylists.qml</file>
+        <file>ui/Pages/PagePlaylistDetail.qml</file>
 
         <file>ui/Controls/BasicButtonType.qml</file>
         <file>ui/Controls/NavBar.qml</file>
+        <file>ui/Controls/PlazmaPopupMenu.qml</file>
+        <file>ui/Controls/PlazmaMenuItem.qml</file>
+        <file>ui/Controls/PlazmaMenuSeparator.qml</file>
+        <file>ui/Controls/SaveToPlaylistDialog.qml</file>
+        <file>ui/Controls/RenamePlaylistDialog.qml</file>
+        <file>ui/Controls/DownloadBar.qml</file>
 
         <file>ui/Modules/Style/PlazmaStyle.qml</file>
         <file>ui/Modules/Style/qmldir</file>

@@ -52,18 +52,44 @@ Rectangle {
         anchors.leftMargin: 16
         spacing: 12
 
+        // Clickable avatar chip — doubles as the shortcut to the profile
+        // page (matches Telegram/YouTube where the avatar in the header is
+        // the entry point to "me").
         Rectangle {
+            id: navAvatar
             Layout.preferredWidth: 36
             Layout.preferredHeight: 36
             radius: 18
-            color: PlazmaStyle.color.softAmber
+            color: avatarMouse.containsMouse
+                   ? PlazmaStyle.color.honeyYellow
+                   : PlazmaStyle.color.softAmber
+            Behavior on color { ColorAnimation { duration: 120 } }
+
+            border.color: root.activePage === PageEnum.PageProfile
+                          ? PlazmaStyle.color.warmGold
+                          : "transparent"
+            border.width: 2
 
             Text {
                 anchors.centerIn: parent
-                text: Session.firstName.length > 0 ? Session.firstName.charAt(0) : "?"
+                text: Session.username.length > 0
+                      ? Session.username.charAt(0).toUpperCase()
+                      : (Session.firstName.length > 0 ? Session.firstName.charAt(0) : "#")
                 font.pixelSize: 16
                 font.weight: Font.Bold
                 color: PlazmaStyle.color.warmGold
+            }
+
+            MouseArea {
+                id: avatarMouse
+                anchors.fill: parent
+                hoverEnabled: true
+                cursorShape: Qt.PointingHandCursor
+                onClicked: {
+                    if (root.activePage !== PageEnum.PageProfile) {
+                        PageController.replacePage(PageEnum.PageProfile)
+                    }
+                }
             }
         }
 
@@ -137,6 +163,15 @@ Rectangle {
             active: root.activePage === PageEnum.PageFeed
             onTriggered: {
                 if (!active) PageController.replacePage(PageEnum.PageFeed)
+            }
+        }
+
+        NavTab {
+            label: qsTr("Playlists")
+            active: root.activePage === PageEnum.PagePlaylists
+                    || root.activePage === PageEnum.PagePlaylistDetail
+            onTriggered: {
+                if (!active) PageController.replacePage(PageEnum.PagePlaylists)
             }
         }
 
@@ -398,7 +433,9 @@ Rectangle {
         signal triggered()
 
         Layout.preferredHeight: 36
-        Layout.preferredWidth: 96
+        // Size to content so the three tabs fit on a 780px-fixed window
+        // without starving the center search.
+        Layout.preferredWidth: tabLabel.implicitWidth + 24
         radius: 18
 
         color: active
@@ -410,6 +447,7 @@ Rectangle {
         Behavior on color { ColorAnimation { duration: 120 } }
 
         Text {
+            id: tabLabel
             anchors.centerIn: parent
             text: tab.label
             font.pixelSize: 13

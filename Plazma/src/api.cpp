@@ -201,6 +201,71 @@ void Api::uploadFile(
 //     enough that back-to-back queries don't pile up; target p95 < 200ms.
 //   - No pagination yet. Cap the response at ~200 rows until we add a cursor.
 // ────────────────────────────────────────────────────────────────────────────
+void Api::renameVideo(
+    const QString& id,
+    const QString& newTitle,
+    Fn<void()> onSuccess,
+    Fn<void(int, QString)> onError
+) {
+    Q_ASSERT(nam_ != nullptr);
+
+    QNetworkRequest req(QUrl(QString(kBaseUrl) + QStringLiteral("/v1/videos/") + id));
+    req.setHeader(QNetworkRequest::ContentTypeHeader, "application/json");
+    req.setRawHeader("Connection", "close");
+
+    const auto body = QJsonDocument(QJsonObject{{"title", newTitle}}).toJson(QJsonDocument::Compact);
+
+    qDebug() << "[API] PATCH" << req.url().toString(QUrl::RemoveUserInfo);
+
+    RequestBuilder(nam_, req, HttpMethod::kPatch, body)
+        .done([resolve = std::move(onSuccess), id](const QJsonObject&) {
+            qDebug() << "[API] renameVideo ok:" << id;
+            if (resolve) resolve();
+        })
+        .fail([reject = std::move(onError), id](int code, const QString& error) {
+            qWarning() << "[API] renameVideo failed:" << id << code << error;
+            if (reject) reject(code, error);
+        })
+        .send();
+}
+
+QNetworkReply* Api::startDownload(const QUrl& url) {
+    Q_ASSERT(nam_ != nullptr);
+
+    QNetworkRequest req(url);
+    // Identify ourselves; some CDNs geo-throttle empty UA traffic.
+    req.setRawHeader("User-Agent", "Plazma/1.0 (+https://plazma.local)");
+    // Opt into transparent gzip/deflate and HTTP/2 multiplexing where the
+    // server offers it. The video feed happens to be served as-is, but this
+    // makes the same path work if someone proxies it through a CDN with
+    // compression.
+    req.setAttribute(QNetworkRequest::Http2AllowedAttribute, true);
+    req.setAttribute(QNetworkRequest::RedirectPolicyAttribute, QNetworkRequest::NoLessSafeRedirectPolicy);
+
+    qDebug() << "[API] GET (download)" << url.toString(QUrl::RemoveUserInfo);
+    return nam_->get(req);
+}
+
+void Api::deleteVideo(const QString& id, Fn<void()> onSuccess, Fn<void(int, QString)> onError) {
+    Q_ASSERT(nam_ != nullptr);
+
+    QNetworkRequest req(QUrl(QString(kBaseUrl) + QStringLiteral("/v1/videos/") + id));
+    req.setRawHeader("Connection", "close");
+
+    qDebug() << "[API] DELETE" << req.url().toString(QUrl::RemoveUserInfo);
+
+    RequestBuilder(nam_, req, HttpMethod::kDelete, QByteArray{})
+        .done([resolve = std::move(onSuccess), id](const QJsonObject&) {
+            qDebug() << "[API] deleteVideo ok:" << id;
+            if (resolve) resolve();
+        })
+        .fail([reject = std::move(onError), id](int code, const QString& error) {
+            qWarning() << "[API] deleteVideo failed:" << id << code << error;
+            if (reject) reject(code, error);
+        })
+        .send();
+}
+
 void Api::fetchVideos(const QString& query, Fn<void(QJsonArray)> onSuccess, Fn<void(int, QString)> onError) {
     QUrlQuery queryParams;
     if (!query.isEmpty()) queryParams.addQueryItem("q", query);
