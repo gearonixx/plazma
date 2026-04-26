@@ -53,6 +53,7 @@ RequestBuilder Api::request(
     QNetworkRequest req(url);
     req.setHeader(QNetworkRequest::ContentTypeHeader, "application/json");
     req.setRawHeader("Connection", "close");
+    applyAuth(req);
 
     qDebug() << "[API]" << toMethodString(method) << url.toString(QUrl::RemoveUserInfo);
 
@@ -64,6 +65,7 @@ RequestBuilder Api::request(Endpoint endpoint, QHttpMultiPart* multiPart) {
 
     const auto path = toEndpointString(endpoint);
     QNetworkRequest req(QUrl(QString(kBaseUrl) + path));
+    applyAuth(req);
 
     qDebug() << "[API] POST (multipart)" << path;
 
@@ -91,10 +93,19 @@ void Api::loginUser(const UserLogin& user) {
             if (!user) {
                 qWarning() << "[API] loginUser validation failed:" << validationError;
                 emit loginError(0, validationError);
-            } else {
-                qDebug() << "[API] loginUser =>" << user->userId << user->username;
-                emit loginSuccess(*user);
+                return;
             }
+
+            const auto token = validators::extractNonEmptyString(json, QStringLiteral("token"), validationError);
+            if (!token) {
+                qWarning() << "[API] loginUser missing token:" << validationError;
+                emit loginError(0, validationError);
+                return;
+            }
+            setAuthToken(token->toUtf8());
+
+            qDebug() << "[API] loginUser =>" << user->userId << user->username;
+            emit loginSuccess(*user);
         })
         .fail([this](int statusCode, const QString& error) {
             qWarning() << "[API] loginUser failed — POST"
@@ -212,6 +223,7 @@ void Api::renameVideo(
     QNetworkRequest req(QUrl(QString(kBaseUrl) + QStringLiteral("/v1/videos/") + id));
     req.setHeader(QNetworkRequest::ContentTypeHeader, "application/json");
     req.setRawHeader("Connection", "close");
+    applyAuth(req);
 
     const auto body = QJsonDocument(QJsonObject{{"title", newTitle}}).toJson(QJsonDocument::Compact);
 
@@ -229,20 +241,39 @@ void Api::renameVideo(
         .send();
 }
 
-QNetworkReply* Api::startDownload(const QUrl& url) {
+QNetworkReply* Api::startDownload(const QUrl& url, qint64 resumeOffset) {
     Q_ASSERT(nam_ != nullptr);
 
     QNetworkRequest req(url);
     // Identify ourselves; some CDNs geo-throttle empty UA traffic.
     req.setRawHeader("User-Agent", "Plazma/1.0 (+https://plazma.local)");
-    // Opt into transparent gzip/deflate and HTTP/2 multiplexing where the
-    // server offers it. The video feed happens to be served as-is, but this
-    // makes the same path work if someone proxies it through a CDN with
-    // compression.
+    // Force identity encoding. Videos are already compressed, so a transparent
+    // gzip/deflate layer just burns CPU and — worse — makes Content-Length
+    // refer to encoded bytes while readyRead() delivers decoded ones, which
+    // breaks both progress accounting and any byte-range resume that follows.
+    req.setRawHeader("Accept-Encoding", "identity");
+    // Opt into HTTP/2 multiplexing where the server offers it.
     req.setAttribute(QNetworkRequest::Http2AllowedAttribute, true);
     req.setAttribute(QNetworkRequest::RedirectPolicyAttribute, QNetworkRequest::NoLessSafeRedirectPolicy);
+    // Qt's default cap is 50, which is way more than any sane CDN needs and
+    // gives a malicious / misconfigured server a long redirect chain to walk
+    // before we time out. tdesktop uses 5 (storage/file_download_web.cpp).
+    req.setMaximumRedirectsAllowed(5);
+    // Idle-transfer timeout. Qt 6 resets this on every received byte, so it
+    // aborts on a true stall (wifi drop, server stuck) without killing
+    // slow-but-alive transfers. Setting it on the request is portable across
+    // Qt minor versions; the equivalent QNetworkReply::setTransferTimeout
+    // was deprecated/removed in some 6.x patch releases.
+    constexpr int kIdleTimeoutMs = 30000;
+    req.setTransferTimeout(kIdleTimeoutMs);
 
-    qDebug() << "[API] GET (download)" << url.toString(QUrl::RemoveUserInfo);
+    if (resumeOffset > 0) {
+        const auto rangeHeader = QByteArrayLiteral("bytes=") + QByteArray::number(resumeOffset) + '-';
+        req.setRawHeader("Range", rangeHeader);
+        qDebug() << "[API] GET (download, resume from" << resumeOffset << ")" << url.toString(QUrl::RemoveUserInfo);
+    } else {
+        qDebug() << "[API] GET (download)" << url.toString(QUrl::RemoveUserInfo);
+    }
     return nam_->get(req);
 }
 
@@ -251,6 +282,7 @@ void Api::deleteVideo(const QString& id, Fn<void()> onSuccess, Fn<void(int, QStr
 
     QNetworkRequest req(QUrl(QString(kBaseUrl) + QStringLiteral("/v1/videos/") + id));
     req.setRawHeader("Connection", "close");
+    applyAuth(req);
 
     qDebug() << "[API] DELETE" << req.url().toString(QUrl::RemoveUserInfo);
 

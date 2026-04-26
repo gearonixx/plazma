@@ -4,57 +4,67 @@
 <context>
     <name>DownloadBar</name>
     <message>
-        <location filename="../ui/Controls/DownloadBar.qml" line="123"/>
+        <location filename="../ui/Controls/DownloadBar.qml" line="130"/>
         <source>Video</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/Controls/DownloadBar.qml" line="138"/>
+        <location filename="../ui/Controls/DownloadBar.qml" line="145"/>
         <source>Failed — %1</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/Controls/DownloadBar.qml" line="139"/>
+        <location filename="../ui/Controls/DownloadBar.qml" line="146"/>
         <source>Download failed</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/Controls/DownloadBar.qml" line="142"/>
+        <location filename="../ui/Controls/DownloadBar.qml" line="149"/>
         <source>Saved to %1 · %2</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/Controls/DownloadBar.qml" line="147"/>
+        <location filename="../ui/Controls/DownloadBar.qml" line="154"/>
         <source>Canceled</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/Controls/DownloadBar.qml" line="154"/>
+        <location filename="../ui/Controls/DownloadBar.qml" line="161"/>
         <source>%1 of %2 · %3%</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/Controls/DownloadBar.qml" line="159"/>
+        <location filename="../ui/Controls/DownloadBar.qml" line="166"/>
         <source>%1 downloaded</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/Controls/DownloadBar.qml" line="188"/>
+        <location filename="../ui/Controls/DownloadBar.qml" line="195"/>
         <source>Open</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/Controls/DownloadBar.qml" line="189"/>
+        <location filename="../ui/Controls/DownloadBar.qml" line="196"/>
         <source>Retry</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/Controls/DownloadBar.qml" line="190"/>
+        <location filename="../ui/Controls/DownloadBar.qml" line="197"/>
         <source>Cancel</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/Controls/DownloadBar.qml" line="249"/>
+        <location filename="../ui/Controls/DownloadBar.qml" line="269"/>
+        <source>Resume</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/Controls/DownloadBar.qml" line="270"/>
+        <source>Pause</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/Controls/DownloadBar.qml" line="299"/>
         <source>Show in folder</source>
         <translation type="unfinished"></translation>
     </message>
@@ -62,103 +72,118 @@
 <context>
     <name>DownloadsModel</name>
     <message>
-        <location filename="../models/downloads_model.cpp" line="572"/>
+        <location filename="../models/downloads_model.cpp" line="750"/>
         <source>Can&apos;t write to %1</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../models/downloads_model.cpp" line="555"/>
-        <location filename="../models/downloads_model.cpp" line="576"/>
-        <location filename="../models/downloads_model.cpp" line="593"/>
-        <location filename="../models/downloads_model.cpp" line="784"/>
-        <location filename="../models/downloads_model.cpp" line="790"/>
-        <location filename="../models/downloads_model.cpp" line="802"/>
+        <location filename="../models/downloads_model.cpp" line="706"/>
+        <location filename="../models/downloads_model.cpp" line="754"/>
+        <location filename="../models/downloads_model.cpp" line="775"/>
+        <location filename="../models/downloads_model.cpp" line="1060"/>
+        <location filename="../models/downloads_model.cpp" line="1071"/>
+        <location filename="../models/downloads_model.cpp" line="1081"/>
         <source>Download failed: %1</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../models/downloads_model.cpp" line="220"/>
+        <location filename="../models/downloads_model.cpp" line="267"/>
+        <source>%1/s</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../models/downloads_model.cpp" line="275"/>
+        <source>%1 / %2</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../models/downloads_model.cpp" line="295"/>
         <source>almost done</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../models/downloads_model.cpp" line="221"/>
+        <location filename="../models/downloads_model.cpp" line="296"/>
         <source>%1s left</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../models/downloads_model.cpp" line="225"/>
+        <location filename="../models/downloads_model.cpp" line="300"/>
         <source>%1m %2s left</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../models/downloads_model.cpp" line="225"/>
+        <location filename="../models/downloads_model.cpp" line="300"/>
         <source>%1m left</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../models/downloads_model.cpp" line="229"/>
+        <location filename="../models/downloads_model.cpp" line="304"/>
         <source>%1h %2m left</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../models/downloads_model.cpp" line="229"/>
+        <location filename="../models/downloads_model.cpp" line="304"/>
         <source>%1h left</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../models/downloads_model.cpp" line="311"/>
+        <location filename="../models/downloads_model.cpp" line="383"/>
         <source>Can&apos;t download — this video has no source URL</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../models/downloads_model.cpp" line="490"/>
+        <location filename="../models/downloads_model.cpp" line="640"/>
         <source>File is no longer available</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../models/downloads_model.cpp" line="550"/>
+        <location filename="../models/downloads_model.cpp" line="701"/>
         <source>Not enough disk space (%1 free, %2 needed)</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../models/downloads_model.cpp" line="589"/>
+        <location filename="../models/downloads_model.cpp" line="771"/>
         <source>Network is unavailable</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../models/downloads_model.cpp" line="626"/>
+        <location filename="../models/downloads_model.cpp" line="799"/>
         <source>Downloading “%1”</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../models/downloads_model.cpp" line="626"/>
-        <location filename="../models/downloads_model.cpp" line="808"/>
+        <location filename="../models/downloads_model.cpp" line="799"/>
+        <location filename="../models/downloads_model.cpp" line="1088"/>
         <source>video</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../models/downloads_model.cpp" line="768"/>
+        <location filename="../models/downloads_model.cpp" line="1041"/>
         <source>Retrying… (%1 / %2)</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../models/downloads_model.cpp" line="782"/>
+        <location filename="../models/downloads_model.cpp" line="1055"/>
         <source>HTTP %1</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../models/downloads_model.cpp" line="788"/>
+        <location filename="../models/downloads_model.cpp" line="1065"/>
         <source>Unknown error</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../models/downloads_model.cpp" line="799"/>
+        <location filename="../models/downloads_model.cpp" line="1076"/>
+        <source>File handle vanished</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../models/downloads_model.cpp" line="1079"/>
         <source>Could not finalize the downloaded file</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../models/downloads_model.cpp" line="808"/>
+        <location filename="../models/downloads_model.cpp" line="1088"/>
         <source>Saved “%1”</source>
         <translation type="unfinished"></translation>
     </message>
@@ -166,27 +191,27 @@
 <context>
     <name>NavBar</name>
     <message>
-        <location filename="../ui/Controls/NavBar.qml" line="101"/>
+        <location filename="../ui/Controls/NavBar.qml" line="118"/>
         <source>Plazma</source>
         <translation type="unfinished">Plazma</translation>
     </message>
     <message>
-        <location filename="../ui/Controls/NavBar.qml" line="162"/>
+        <location filename="../ui/Controls/NavBar.qml" line="194"/>
         <source>Feed</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/Controls/NavBar.qml" line="170"/>
+        <location filename="../ui/Controls/NavBar.qml" line="202"/>
         <source>Playlists</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/Controls/NavBar.qml" line="179"/>
+        <location filename="../ui/Controls/NavBar.qml" line="211"/>
         <source>Upload</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/Controls/NavBar.qml" line="312"/>
+        <location filename="../ui/Controls/NavBar.qml" line="344"/>
         <source>Search videos, creators, topics…</source>
         <translation type="unfinished"></translation>
     </message>
@@ -1194,16 +1219,21 @@ Telegram app</source>
     <name>PageStart</name>
     <message>
         <location filename="../ui/Pages/PageStart.qml" line="35"/>
+        <location filename="../ui/window/page_start.cpp" line="143"/>
         <source>Login failed: %1</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui/Pages/PageStart.qml" line="110"/>
+        <location filename="../ui/window/page_start.cpp" line="51"/>
+        <location filename="../ui/window/page_start.cpp" line="111"/>
         <source>Plazma</source>
         <translation>Plazma</translation>
     </message>
     <message>
         <location filename="../ui/Pages/PageStart.qml" line="118"/>
+        <location filename="../ui/window/page_start.cpp" line="58"/>
+        <location filename="../ui/window/page_start.cpp" line="112"/>
         <source>Your private video feed,
 powered by Telegram</source>
         <translation>Ваша личная видеолента
@@ -1211,11 +1241,15 @@ powered by Telegram</source>
     </message>
     <message>
         <location filename="../ui/Pages/PageStart.qml" line="149"/>
+        <location filename="../ui/window/page_start.cpp" line="68"/>
+        <location filename="../ui/window/page_start.cpp" line="113"/>
         <source>Get started</source>
         <translation>Начать</translation>
     </message>
     <message>
         <location filename="../ui/Pages/PageStart.qml" line="158"/>
+        <location filename="../ui/window/page_start.cpp" line="75"/>
+        <location filename="../ui/window/page_start.cpp" line="114"/>
         <source>Connect with your Telegram
 account to start watching</source>
         <translation>Подключите свой аккаунт Telegram,
@@ -1223,6 +1257,8 @@ account to start watching</source>
     </message>
     <message>
         <location filename="../ui/Pages/PageStart.qml" line="176"/>
+        <location filename="../ui/window/page_start.cpp" line="84"/>
+        <location filename="../ui/window/page_start.cpp" line="115"/>
         <source>Start Watching</source>
         <translation>Погнали</translation>
     </message>
@@ -1462,6 +1498,70 @@ We&apos;ll push it to the server and add it to the feed.</source>
     <message>
         <location filename="../session.cpp" line="55"/>
         <source>The code has expired. Request a new one.</source>
+        <translation type="unfinished"></translation>
+    </message>
+</context>
+<context>
+    <name>SettingsBox</name>
+    <message>
+        <location filename="../ui/Boxes/SettingsBox.qml" line="16"/>
+        <source>Settings</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/Boxes/SettingsBox.qml" line="47"/>
+        <source>Downloads</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/Boxes/SettingsBox.qml" line="57"/>
+        <source>Save videos to</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/Boxes/SettingsBox.qml" line="68"/>
+        <source>Open in file manager</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/Boxes/SettingsBox.qml" line="78"/>
+        <source>Reset to default location</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/Boxes/SettingsBox.qml" line="112"/>
+        <source>Done</source>
+        <translation type="unfinished"></translation>
+    </message>
+</context>
+<context>
+    <name>SettingsModel</name>
+    <message>
+        <location filename="../models/settings_model.cpp" line="50"/>
+        <source>Choose download folder</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../models/settings_model.cpp" line="58"/>
+        <source>That folder doesn&apos;t exist.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../models/settings_model.cpp" line="62"/>
+        <source>Plazma can&apos;t write to that folder.</source>
+        <translation type="unfinished"></translation>
+    </message>
+</context>
+<context>
+    <name>TdConfirmBox</name>
+    <message>
+        <location filename="../ui/Modules/Td/TdConfirmBox.qml" line="12"/>
+        <source>OK</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/Modules/Td/TdConfirmBox.qml" line="13"/>
+        <source>Cancel</source>
         <translation type="unfinished"></translation>
     </message>
 </context>

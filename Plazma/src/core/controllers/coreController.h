@@ -15,6 +15,7 @@
 #include "src/models/phone_number_model.h"
 #include "src/models/playlists_model.h"
 #include "src/models/profile_model.h"
+#include "src/models/settings_model.h"
 #include "src/models/user_model.h"
 #include "src/models/video_feed_model.h"
 #include "src/platform/file_dialog.h"
@@ -33,6 +34,19 @@ public:
 
     QSharedPointer<PageController> pageController() const;
     void setQmlRoot() const;
+
+    // Accessors so non-QML widgets (the new C++ shell) can also bind to the
+    // same singleton model instances.
+    [[nodiscard]] Session              *session()        const { return session_.data(); }
+    [[nodiscard]] LanguageModel        *languageModel()  const { return language_model_.data(); }
+    [[nodiscard]] PhoneNumberModel     *phoneModel()     const { return phoneNumberModel_.data(); }
+    [[nodiscard]] AuthorizationCodeModel *authCodeModel() const { return authCodeModel_.data(); }
+    [[nodiscard]] UserModel            *userModel()      const { return userModel_.data(); }
+    [[nodiscard]] VideoFeedModel       *videoFeedModel() const { return videoFeedModel_.data(); }
+    [[nodiscard]] ProfileModel         *profileModel()   const { return profileModel_.data(); }
+    [[nodiscard]] PlaylistsModel       *playlistsModel() const { return playlistsModel_.data(); }
+    [[nodiscard]] DownloadsModel       *downloadsModel() const { return downloadsModel_.data(); }
+    [[nodiscard]] SettingsModel        *settingsModel()  const { return settingsModel_.data(); }
 
 signals:
     void translationsUpdated() const;
@@ -59,6 +73,7 @@ private:
     QScopedPointer<SystemsController> systemsController_;
 
     QSharedPointer<LanguageModel> language_model_;
+    QSharedPointer<SettingsModel> settingsModel_;
 
     QSharedPointer<PhoneNumberModel> phoneNumberModel_;
     QSharedPointer<AuthorizationCodeModel> authCodeModel_;

@@ -55,7 +55,7 @@ else()
 endif()
 
 # ── Qt ────────────────────────────────────────────────────────────────────────
-string(REPLACE "." ";" _ver_list ${CMAKE_PROJECT_VERSION})
+string(REPLACE "." ";" _ver_list ${PROJECT_VERSION})
 list(GET _ver_list 0 APP_MAJOR_VERSION)
 
 find_package(Qt6 REQUIRED COMPONENTS Core Widgets Qml Quick OpenGL LinguistTools)
@@ -72,7 +72,8 @@ qt6_add_resources(QRC ${CMAKE_CURRENT_BINARY_DIR}/locales.qrc)
 
 # ── Executable ────────────────────────────────────────────────────────────────
 file(GLOB_RECURSE SOURCES "src/*.cpp" "src/*.h")
-add_executable(plazma ${SOURCES} ${RESOURCES} src/models/user_model.cpp)
+add_executable(plazma ${SOURCES} ${RESOURCES} src/models/user_model.cpp
+        src/models/downloads_model.cpp)
 
 target_include_directories(plazma PRIVATE
     ${CMAKE_SOURCE_DIR}

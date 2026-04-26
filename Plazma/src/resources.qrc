@@ -11,6 +11,7 @@
         <file>ui/Pages/PageProfile.qml</file>
         <file>ui/Pages/PagePlaylists.qml</file>
         <file>ui/Pages/PagePlaylistDetail.qml</file>
+        <file>ui/Pages/PageTdShowcase.qml</file>
 
         <file>ui/Controls/BasicButtonType.qml</file>
         <file>ui/Controls/NavBar.qml</file>
@@ -21,8 +22,34 @@
         <file>ui/Controls/RenamePlaylistDialog.qml</file>
         <file>ui/Controls/DownloadBar.qml</file>
 
+        <file>ui/Boxes/SettingsBox.qml</file>
+
         <file>ui/Modules/Style/PlazmaStyle.qml</file>
         <file>ui/Modules/Style/qmldir</file>
+
+        <file>ui/Modules/Td/qmldir</file>
+        <file>ui/Modules/Td/TdPalette.qml</file>
+        <file>ui/Modules/Td/TdStyle.qml</file>
+        <file>ui/Modules/Td/TdAnimations.js</file>
+        <file>ui/Modules/Td/TdAbstractButton.qml</file>
+        <file>ui/Modules/Td/TdRipple.qml</file>
+        <file>ui/Modules/Td/TdRoundButton.qml</file>
+        <file>ui/Modules/Td/TdIconButton.qml</file>
+        <file>ui/Modules/Td/TdIcon.qml</file>
+        <file>ui/Modules/Td/TdSpinner.qml</file>
+        <file>ui/Modules/Td/TdFlatLabel.qml</file>
+        <file>ui/Modules/Td/TdInputField.qml</file>
+        <file>ui/Modules/Td/TdScrollArea.qml</file>
+        <file>ui/Modules/Td/TdShadow.qml</file>
+        <file>ui/Modules/Td/TdSeparator.qml</file>
+        <file>ui/Modules/Td/TdPopupMenu.qml</file>
+        <file>ui/Modules/Td/TdMenuItem.qml</file>
+        <file>ui/Modules/Td/TdMenuSeparator.qml</file>
+        <file>ui/Modules/Td/TdBoxContent.qml</file>
+        <file>ui/Modules/Td/TdConfirmBox.qml</file>
+        <file>ui/Modules/Td/TdLayerManager.qml</file>
+        <file>ui/Modules/Td/TdSettingsRow.qml</file>
+        <file>ui/Modules/Td/TdSectionHeader.qml</file>
     </qresource>
 </RCC>
 

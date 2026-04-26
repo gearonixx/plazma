@@ -2,6 +2,7 @@
 
 #include "core/controllers/coreController.h"
 #include "settings.h"
+#include "ui/window/main_window.h"
 
 #if defined(Q_OS_ANDROID) || defined(Q_OS_IOS)
 #include <QGuiApplication>
@@ -37,6 +38,11 @@ public slots:
     void forceQuit();
 
 private:
+    // Brings up the tdesktop-style C++ widget shell (MainWindow + PageStart),
+    // gated on the PLAZMA_NATIVE_UI env var so the legacy QML window stays
+    // the default until every page is ported.
+    void initNativeShell();
+
     QQmlApplicationEngine* qmlEngine_{};
 
     QUrl rootQmlFileUrl_{};
@@ -45,6 +51,8 @@ private:
 
     QScopedPointer<CoreController> coreController_;
     QSharedPointer<TelegramClient> telegramClient_;
+
+    QScopedPointer<Ui::MainWindow> nativeWindow_;
 
     static bool forceQuit_;
 

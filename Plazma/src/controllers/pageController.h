@@ -16,6 +16,7 @@ enum class PageEnum {
     PageProfile,
     PagePlaylists,
     PagePlaylistDetail,
+    PageTdShowcase,
 };
 
 Q_ENUM_NS(PageEnum);

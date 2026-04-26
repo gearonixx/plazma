@@ -9,11 +9,15 @@
 #include <memory>
 #include <vector>
 
+#include "src/storage/part_file.h"
+#include "src/utils/speed_meter.h"
+
 class Api;
-class QFile;
 class QNetworkReply;
 class QTimer;
 class Session;
+class Settings;
+class SignalThrottle;
 
 // DownloadsModel
 // ──────────────
@@ -58,6 +62,14 @@ class DownloadsModel : public QAbstractListModel {
     Q_PROPERTY(int latestStatus READ latestStatus NOTIFY latestChanged)
     Q_PROPERTY(QString latestDestPath READ latestDestPath NOTIFY latestChanged)
     Q_PROPERTY(QString latestError READ latestError NOTIFY latestChanged)
+    // Categorized failure reason — defaults to ErrorNone. QML can switch on
+    // it to show a tailored icon (cloud-off vs disk-full vs server-error)
+    // or surface a "Free up space" link when it's ErrorDiskSpace.
+    Q_PROPERTY(int latestErrorReason READ latestErrorReason NOTIFY latestChanged)
+    // Pre-formatted scalars so QML doesn't re-implement size/speed/eta
+    // formatting in three different places. All locale-aware.
+    Q_PROPERTY(QString latestSpeedText READ latestSpeedText NOTIFY latestChanged)
+    Q_PROPERTY(QString latestSizeText READ latestSizeText NOTIFY latestChanged)
     Q_PROPERTY(bool latestVisible READ latestVisible NOTIFY latestChanged)
     // Instantaneous throughput in bytes / second (EMA-smoothed). Zero when
     // not active or when we haven't accumulated enough samples yet.
@@ -78,7 +90,9 @@ class DownloadsModel : public QAbstractListModel {
 
     // Where the next download will land. Surfaced so the UI can render
     // "Saved to ~/Videos/Plazma" in the completion row and in tooltips.
-    Q_PROPERTY(QString downloadsFolder READ downloadsFolder CONSTANT)
+    // NOTIFY-driven (not CONSTANT) — the user can change the destination
+    // folder from the settings dialog at any time.
+    Q_PROPERTY(QString downloadsFolder READ downloadsFolder NOTIFY downloadsFolderChanged)
 
     // Soft concurrency ceiling. Exposed so QML can say "2 of 3 slots in
     // use" if we ever build a detail view.
@@ -91,8 +105,24 @@ public:
         Completed = 2,     // file finalized on disk
         Failed = 3,        // gave up after exhausting retries
         Canceled = 4,      // user-initiated abort
+        Paused = 5,        // user-initiated pause; .part is preserved for resume
     };
     Q_ENUM(Status)
+
+    // Categorized failure reasons so QML can pick an icon / tone / action
+    // without parsing the human-readable error string. Mirrors the same idea
+    // as tdesktop's FailureReason in storage/file_download.h.
+    enum ErrorReason : int {
+        ErrorNone = 0,
+        ErrorNetwork = 1,         // connection refused, DNS, host unreachable
+        ErrorTimeout = 2,         // idle timeout fired mid-transfer
+        ErrorHttp = 3,            // 4xx / 5xx after redirects resolved
+        ErrorDiskSpace = 4,       // pre-flight or in-flight disk-full
+        ErrorDiskWrite = 5,       // write/flush/rename failed
+        ErrorAuth = 6,            // session vanished or 401/403
+        ErrorOther = 7,
+    };
+    Q_ENUM(ErrorReason)
 
     enum Roles {
         IdRole = Qt::UserRole + 1,
@@ -109,7 +139,12 @@ public:
         FinishedAtRole,
     };
 
-    explicit DownloadsModel(Api* api, Session* session = nullptr, QObject* parent = nullptr);
+    explicit DownloadsModel(
+        Api* api,
+        Session* session = nullptr,
+        Settings* settings = nullptr,
+        QObject* parent = nullptr
+    );
     ~DownloadsModel() override;
 
     int rowCount(const QModelIndex& parent = {}) const override;
@@ -129,6 +164,9 @@ public:
     [[nodiscard]] int latestStatus() const;
     [[nodiscard]] QString latestDestPath() const;
     [[nodiscard]] QString latestError() const;
+    [[nodiscard]] int latestErrorReason() const;
+    [[nodiscard]] QString latestSpeedText() const;
+    [[nodiscard]] QString latestSizeText() const;
     [[nodiscard]] bool latestVisible() const { return latestVisible_; }
     [[nodiscard]] qreal latestSpeed() const;
     [[nodiscard]] qint64 latestEtaSec() const;
@@ -154,6 +192,24 @@ public slots:
     // Re-run a failed / canceled download using the cached payload. For
     // a completed entry, this is a no-op (the file is already on disk).
     Q_INVOKABLE void retry(const QString& id);
+
+    // User-initiated pause. The current network reply is aborted, the .part
+    // file is preserved on disk, and the entry transitions to Paused. The
+    // free concurrency slot is given to whatever's next in the queue.
+    // No-op on entries that aren't actively transferring.
+    Q_INVOKABLE void pause(const QString& id);
+
+    // User-initiated resume. Re-queues a Paused entry — kickOff() will see
+    // the leftover .part and ask the server for a Range continuation. No-op
+    // on entries that aren't paused.
+    Q_INVOKABLE void resume(const QString& id);
+
+    // Bulk pause / resume. Pause-all walks active+queued entries and pauses
+    // each (preserving .part files). Resume-all walks paused entries and
+    // re-queues them. Both no-op when there's nothing in the relevant
+    // state. Useful for the "going on metered network" case.
+    Q_INVOKABLE void pauseAll();
+    Q_INVOKABLE void resumeAll();
 
     // Remove an entry from the list. On an active row this also cancels.
     // Removes the persisted record for Completed rows.
@@ -193,6 +249,7 @@ signals:
     void activeCountChanged();
     void queuedCountChanged();
     void latestChanged();
+    void downloadsFolderChanged();
 
     // Human-readable single-line notifications, consumed by toasts.
     void notify(QString message);
@@ -202,27 +259,33 @@ private:
         QString id;
         QString title;
         QString sourceUrl;
-        QString destPath;       // final path, e.g. .../Plazma/Foo.mp4
-        QString partPath;       // working path, destPath + ".part"
+        QString destPath;       // final path, e.g. .../Plazma/Foo.mp4 (kept in
+                                // sync with file_->destPath() once attached)
         QString mime;
         qint64 received = 0;
         qint64 total = 0;       // Content-Length (or feed-provided size)
         qint64 finishedAtMsec = 0;
         Status status = Status::Queued;
         QString error;
+        ErrorReason errorReason = ErrorReason::ErrorNone;
 
-        // Transfer-time state (all live in RAM only — not persisted).
-        QPointer<QNetworkReply> reply;
-        std::unique_ptr<QFile> file;
+        // Per-job abstractions — own the moving parts so the surrounding
+        // model only deals with high-level state transitions.
+        std::unique_ptr<PartFile> file;
+        SpeedMeter speed;
         QElapsedTimer wallClock;   // started when the entry is first created
-        qint64 lastSampleMsec = 0;
-        qint64 lastSampleBytes = 0;
-        double speedBps = 0.0;
+
+        // Transfer-time network state (RAM only — not persisted).
+        QPointer<QNetworkReply> reply;
 
         int retriesLeft = 0;
         bool userCanceled = false;
+        bool userPaused = false;   // distinguishes user-initiated pause from
+                                   // a transient network drop
         int httpStatus = 0;        // stashed on metaDataChanged → drives "HTTP 404" error text
         bool persisted = false;    // loaded from QSettings (no reply ever)
+        bool destReconciled = false;  // dest path already updated to match
+                                      // the response's Content-Type
     };
 
     // Lookup helpers (don't mutate).
@@ -230,25 +293,27 @@ private:
     [[nodiscard]] Entry* find(const QString& id);
     [[nodiscard]] const Entry* find(const QString& id) const;
 
-    // Pick a destination path for `title` given the source URL + mime.
-    // Handles collision by appending " (1)", " (2)", … if a file already
-    // exists.
-    [[nodiscard]] QString computeDestPath(const QString& title, const QString& sourceUrl, const QString& mime) const;
-
     // Open the .part file + start the reply for the first time (or after
     // a retry). Assumes entry is currently Queued. Transitions to
     // Downloading on success; to Failed on a pre-flight failure.
     void kickOff(Entry& entry);
 
-    // Wire the reply → entry. Assumes the entry's QFile is already opened
+    // Wire the reply → entry. Assumes the entry's PartFile is already opened
     // and the entry is in Downloading state. Installs metaDataChanged
-    // (HTTP status gate), readyRead (chunked write), downloadProgress
-    // (total tracking), finished (flush + rename or retry).
+    // (HTTP status gate + content-type sniff + 206/200 reconciliation),
+    // readyRead (chunked write), downloadProgress (total tracking),
+    // finished (flush + rename or retry).
     void attachReply(Entry& entry);
 
     // Handle a QNetworkReply::finished callback — cleanup file/reply,
     // decide whether to retry/cancel/complete, update row state.
     void handleFinished(Entry& entry);
+
+    // Apply the response's Content-Type header to the entry's destination
+    // path. Re-derives the path with the right extension if the URL guess
+    // was wrong. Idempotent — runs at most once per attempt, and only
+    // before any bytes have hit the .part file.
+    void reconcileDestFromContentType(Entry& entry);
 
     // Pull any Queued entries into active until we hit kMaxConcurrent.
     // Called from start() and at the end of handleFinished().
@@ -260,18 +325,37 @@ private:
     void scheduleRetryKick(const QString& id, int delayMs);
 
     // Notify the list view that entry `i` changed, and if it's the
-    // entry driving the "latest*" scalars, republish those too.
+    // entry driving the "latest*" scalars, route through the latest signal
+    // throttle so a chunk-storm doesn't saturate QML bindings.
     void notifyRowChanged(int i);
 
-    void setStatus(Entry& entry, Status s, const QString& error = {});
-    void updateSpeed(Entry& entry);
+    // Bypass the throttle for terminal transitions (Completed / Failed /
+    // Canceled / Paused) so the user sees the final state immediately.
+    void emitLatestImmediately();
 
-    // QSettings persistence of Completed entries only.
+    void setStatus(Entry& entry, Status s, const QString& error = {},
+                   ErrorReason reason = ErrorReason::ErrorNone);
+
+    // Pre-flight: enough free disk for `entry.total` (when known) plus a
+    // safety margin? Returns true on pass; on fail, transitions the entry
+    // to Failed with a localized error and emits notify().
+    [[nodiscard]] bool checkDiskBudget(Entry& entry);
+
+    // Cleanly tear down a transfer's network reply + file handle. Used by
+    // pause(), cancel(), session-logout, and the destructor. The .part is
+    // kept on disk iff `keepPartFile` is true.
+    void teardownTransfer(Entry& entry, bool keepPartFile);
+
+    // QSettings persistence — two independent groups so one rewrite can't
+    // corrupt the other:
+    //   * downloads/completed — history of finished downloads (file on disk)
+    //   * downloads/paused    — user-paused or session-stranded transfers
+    //                            with their .part files preserved on disk.
+    //                            Reconstructed as Status::Paused on load so
+    //                            the user explicitly resumes.
     void loadPersisted();
     void savePersisted() const;
-
-    static QString sanitizeFilename(const QString& title);
-    static QString extensionFor(const QString& sourceUrl, const QString& mime);
+    void savePaused() const;
 
     // Tuning constants — picked to match the "feel" of YouTube Premium
     // and tdesktop's download manager.
@@ -284,11 +368,22 @@ private:
     static constexpr int kBarHideDelayMs     = 4500;
     static constexpr int kBarHideFailMs      = 8000;
     static constexpr int kMaxPersistedCompleted = 100;
+    // UI signal coalescing window. ~60 Hz keeps a fast download bar smooth
+    // without firing latestChanged on every readyRead chunk.
+    static constexpr int kLatestThrottleMs   = 16;
+    // Minimum bytes already on disk before resume is worth attempting —
+    // below this threshold the round-trip cost of a Range request usually
+    // beats the savings.
+    static constexpr qint64 kMinResumeBytes  = 64LL * 1024;
+    // Disk-space safety cushion above the declared file size.
+    static constexpr qint64 kDiskSafetyBytes = 64LL * 1024 * 1024;
 
     Api* api_ = nullptr;
     Session* session_ = nullptr;
+    Settings* settings_ = nullptr;
     std::vector<std::unique_ptr<Entry>> entries_;
     QString latestId_;
     bool latestVisible_ = false;
     QTimer* hideTimer_ = nullptr;
+    SignalThrottle* latestThrottle_ = nullptr;
 };

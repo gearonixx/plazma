@@ -8,6 +8,7 @@ import dev.gearonixx.plazma 1.0
 
 import PageEnum 1.0
 import Style 1.0
+import Td 1.0
 
 ApplicationWindow {
     id: root
@@ -41,7 +42,13 @@ ApplicationWindow {
         }
     }
 
-    Component.onCompleted: reroute()
+    Component.onCompleted: {
+        // TdLayerManager hosts every modal layer (settings, future
+        // confirmations, …). Anchor it to the application root so layers
+        // overlay both the StackView pages and the global DownloadBar.
+        TdLayerManager.attach(root)
+        reroute()
+    }
 
     Connections {
         objectName: "pageControllerConnection"

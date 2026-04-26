@@ -6,6 +6,7 @@ import dev.gearonixx.plazma 1.0
 
 import PageEnum 1.0
 import Style 1.0
+import Td 1.0
 
 Rectangle {
     id: root
@@ -42,6 +43,14 @@ Rectangle {
             searchInput.forceActiveFocus()
             searchInput.selectAll()
         }
+    }
+
+    // Global feed refresh — Ctrl/⌘+R, matching browser reload muscle memory.
+    Shortcut {
+        sequences: [StandardKey.Refresh, "Ctrl+R"]
+        context: Qt.ApplicationShortcut
+        enabled: !VideoFeedModel.loading
+        onActivated: VideoFeedModel.refresh()
     }
 
     // ── Left cluster: avatar + brand ─────────────────────────────────────
@@ -93,30 +102,56 @@ Rectangle {
             }
         }
 
-        ColumnLayout {
+        // Brand label — on the Feed page it doubles as a reload affordance,
+        // mirroring how clicking the YouTube logo on the home page refreshes
+        // the feed. Elsewhere it just navigates back to Feed.
+        Item {
             Layout.preferredWidth: 180
-            spacing: 0
+            Layout.preferredHeight: brandColumn.implicitHeight
 
-            Text {
-                text: qsTr("Plazma")
-                font.pixelSize: 16
-                font.weight: Font.DemiBold
-                color: PlazmaStyle.color.textPrimary
-                elide: Text.ElideRight
-                Layout.fillWidth: true
+            ColumnLayout {
+                id: brandColumn
+                anchors.fill: parent
+                spacing: 0
+
+                Text {
+                    text: qsTr("Plazma")
+                    font.pixelSize: 16
+                    font.weight: Font.DemiBold
+                    color: brandMouse.containsMouse
+                           ? PlazmaStyle.color.warmGold
+                           : PlazmaStyle.color.textPrimary
+                    Behavior on color { ColorAnimation { duration: 120 } }
+                    elide: Text.ElideRight
+                    Layout.fillWidth: true
+                }
+
+                Text {
+                    text: Session.username.length > 0 ? "@" + Session.username : Session.phoneNumber
+                    font.pixelSize: 11
+                    color: PlazmaStyle.color.textSecondary
+                    elide: Text.ElideRight
+                    Layout.fillWidth: true
+                }
             }
 
-            Text {
-                text: Session.username.length > 0 ? "@" + Session.username : Session.phoneNumber
-                font.pixelSize: 11
-                color: PlazmaStyle.color.textSecondary
-                elide: Text.ElideRight
-                Layout.fillWidth: true
+            MouseArea {
+                id: brandMouse
+                anchors.fill: parent
+                hoverEnabled: true
+                cursorShape: Qt.PointingHandCursor
+                onClicked: {
+                    if (root.activePage === PageEnum.PageFeed) {
+                        if (!VideoFeedModel.loading) VideoFeedModel.refresh()
+                    } else {
+                        PageController.replacePage(PageEnum.PageFeed)
+                    }
+                }
             }
         }
     }
 
-    // ── Right cluster: reload + nav tabs ─────────────────────────────────
+    // ── Right cluster: nav tabs ──────────────────────────────────────────
     RowLayout {
         id: rightCluster
         anchors.right: parent.right
@@ -124,37 +159,34 @@ Rectangle {
         anchors.rightMargin: 16
         spacing: 12
 
+        // Settings entry — gear icon. Mirrors tdesktop's main-menu cog and
+        // OBS's "Settings" toolbar button. Single click opens the modal
+        // settings layer; the layer manager handles dim, animation, and
+        // close-on-outside-click.
         Rectangle {
+            id: settingsBtn
             Layout.preferredWidth: 32
             Layout.preferredHeight: 32
             radius: 16
-            color: reloadMouse.containsMouse ? PlazmaStyle.color.softAmber : "transparent"
-
+            color: settingsMouse.containsMouse ? PlazmaStyle.color.softAmber : "transparent"
             Behavior on color { ColorAnimation { duration: 120 } }
 
             Text {
                 anchors.centerIn: parent
-                text: "↻"
+                text: "⚙"
                 font.pixelSize: 17
-                color: VideoFeedModel.loading
-                       ? PlazmaStyle.color.textHint
+                color: settingsMouse.containsMouse
+                       ? PlazmaStyle.color.warmGold
                        : PlazmaStyle.color.textSecondary
-
-                RotationAnimation on rotation {
-                    running: VideoFeedModel.loading
-                    loops: Animation.Infinite
-                    from: 0; to: 360
-                    duration: 900
-                }
+                Behavior on color { ColorAnimation { duration: 120 } }
             }
 
             MouseArea {
-                id: reloadMouse
+                id: settingsMouse
                 anchors.fill: parent
                 hoverEnabled: true
                 cursorShape: Qt.PointingHandCursor
-                enabled: !VideoFeedModel.loading
-                onClicked: VideoFeedModel.refresh()
+                onClicked: TdLayerManager.show("qrc:/ui/Boxes/SettingsBox.qml", {})
             }
         }
 

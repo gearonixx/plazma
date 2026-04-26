@@ -52,6 +52,9 @@ void CoreController::initModels(TelegramClient* client) {
     language_model_.reset(new LanguageModel(settings_));
     qmlRegisterSingletonInstance<LanguageModel>(APPLICATION_ID, 1, 0, "LanguageModel", language_model_.data());
 
+    settingsModel_.reset(new SettingsModel(settings_));
+    qmlRegisterSingletonInstance<SettingsModel>(APPLICATION_ID, 1, 0, "SettingsModel", settingsModel_.data());
+
     qmlRegisterType<MpvObject>(APPLICATION_ID, 1, 0, "MpvObject");
 };
 
@@ -77,7 +80,7 @@ void CoreController::initControllers() {
     playlistsModel_.reset(new PlaylistsModel());
     qmlRegisterSingletonInstance<PlaylistsModel>(APPLICATION_ID, 1, 0, "PlaylistsModel", playlistsModel_.data());
 
-    downloadsModel_.reset(new DownloadsModel(&session_->api()));
+    downloadsModel_.reset(new DownloadsModel(&session_->api(), nullptr, settings_.get()));
     qmlRegisterSingletonInstance<DownloadsModel>(APPLICATION_ID, 1, 0, "DownloadsModel", downloadsModel_.data());
 
     connect(

@@ -119,14 +119,23 @@ public:
     // so the caller can wire readyRead()/downloadProgress()/finished() to write
     // bytes incrementally to disk instead of buffering the whole file in RAM.
     //
+    // `resumeOffset` > 0 sends a `Range: bytes=N-` request so an interrupted
+    // transfer can pick up where it left off. The caller is responsible for
+    // checking the response status — 206 confirms the resume, 200 means the
+    // server ignored the Range header and is sending the whole file from byte 0
+    // (so the on-disk .part must be truncated before bytes are appended).
+    //
     // Ownership: the reply's parent is the QNAM (Qt's default); the caller
     // must call reply->deleteLater() when they're done, and if they want to
     // cancel mid-transfer they can call reply->abort(). We don't go through
     // RequestBuilder because RB collapses the stream into a single QJsonObject
     // callback — fine for JSON APIs, useless for a 400 MB video file.
-    [[nodiscard]] QNetworkReply* startDownload(const QUrl& url);
+    [[nodiscard]] QNetworkReply* startDownload(const QUrl& url, qint64 resumeOffset = 0);
 
     [[nodiscard]] plazma::task_queue::TaskQueue* fileLoader() const { return file_loader_.get(); }
+
+    void setAuthToken(QByteArray token) { authToken_ = std::move(token); }
+    [[nodiscard]] bool hasAuthToken() const { return !authToken_.isEmpty(); }
 
 signals:
     void loginSuccess(UserLogin user);
@@ -138,7 +147,12 @@ private:
     static constexpr auto kBaseUrl = "http://localhost:8080";
 
     QNetworkAccessManager* nam_;
+    QByteArray authToken_;
     int requestId_ = 0;
+
+    void applyAuth(QNetworkRequest& req) const {
+        if (!authToken_.isEmpty()) req.setRawHeader("Authorization", "Bearer " + authToken_);
+    }
 
     std::unique_ptr<plazma::task_queue::TaskQueue> file_loader_;
 };

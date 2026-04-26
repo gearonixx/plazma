@@ -26,10 +26,14 @@ Rectangle {
     readonly property int statusCompleted:   2
     readonly property int statusFailed:      3
     readonly property int statusCanceled:    4
+    readonly property int statusPaused:      5
 
     readonly property int currentStatus: DownloadsModel.latestStatus
     readonly property bool hasLatest: DownloadsModel.latestId.length > 0
     readonly property bool shouldShow: hasLatest && DownloadsModel.latestVisible
+    readonly property bool isInFlight: currentStatus === statusDownloading
+                                       || currentStatus === statusQueued
+    readonly property bool canTogglePause: isInFlight || currentStatus === statusPaused
 
     // Slide-up animation: the bar lives outside the screen vertically when
     // hidden so it never steals hit-tests on the page below.
@@ -69,8 +73,11 @@ Rectangle {
                ? PlazmaStyle.color.errorRed
                : (currentStatus === statusCompleted
                   ? "#0F9D58"
-                  : PlazmaStyle.color.burntOrange)
+                  : (currentStatus === statusPaused
+                     ? PlazmaStyle.color.textSecondary
+                     : PlazmaStyle.color.burntOrange))
         Behavior on width { NumberAnimation { duration: 140 } }
+        Behavior on color { ColorAnimation { duration: 160 } }
     }
 
     RowLayout {
@@ -219,6 +226,49 @@ Rectangle {
                     // Active → cancel.
                     DownloadsModel.cancel(id)
                 }
+            }
+        }
+
+        // Pause / Resume toggle — visible only while there's something to
+        // pause or resume. The bytes already on disk are preserved across the
+        // pause and the next attempt picks up via HTTP Range, so the user can
+        // safely yield bandwidth to something else without losing progress.
+        Rectangle {
+            Layout.preferredHeight: 30
+            Layout.preferredWidth: 30
+            radius: 15
+            color: pauseMouse.containsMouse ? PlazmaStyle.color.softAmber : "transparent"
+            Behavior on color { ColorAnimation { duration: 120 } }
+            visible: root.canTogglePause
+
+            Text {
+                anchors.centerIn: parent
+                text: root.currentStatus === root.statusPaused ? "▶" : "⏸"
+                font.pixelSize: 12
+                color: pauseMouse.containsMouse
+                       ? "#FFFFFF"
+                       : PlazmaStyle.color.textSecondary
+            }
+
+            MouseArea {
+                id: pauseMouse
+                anchors.fill: parent
+                hoverEnabled: true
+                cursorShape: Qt.PointingHandCursor
+                onClicked: {
+                    const id = DownloadsModel.latestId
+                    if (id.length === 0) return
+                    if (root.currentStatus === root.statusPaused) {
+                        DownloadsModel.resume(id)
+                    } else {
+                        DownloadsModel.pause(id)
+                    }
+                }
+                ToolTip.visible: pauseMouse.containsMouse
+                ToolTip.text: root.currentStatus === root.statusPaused
+                              ? qsTr("Resume")
+                              : qsTr("Pause")
+                ToolTip.delay: 350
             }
         }
 

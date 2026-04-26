@@ -1,0 +1,56 @@
+module Td
+
+singleton TdPalette         1.0 TdPalette.qml
+singleton TdStyle           1.0 TdStyle.qml
+singleton TdTheme           1.0 TdTheme.qml
+singleton TdLayerManager    1.0 TdLayerManager.qml
+singleton TdNotifications   1.0 TdNotifications.qml
+
+TdAbstractButton    1.0 TdAbstractButton.qml
+TdRipple            1.0 TdRipple.qml
+TdIcon              1.0 TdIcon.qml
+TdRoundButton       1.0 TdRoundButton.qml
+TdIconButton        1.0 TdIconButton.qml
+TdFlatButton        1.0 TdFlatButton.qml
+TdFlatLabel         1.0 TdFlatLabel.qml
+TdLink              1.0 TdLink.qml
+
+TdInputField        1.0 TdInputField.qml
+TdSearchInput       1.0 TdSearchInput.qml
+TdCheckbox          1.0 TdCheckbox.qml
+TdRadioButton       1.0 TdRadioButton.qml
+TdToggle            1.0 TdToggle.qml
+TdSlider            1.0 TdSlider.qml
+TdProgressBar       1.0 TdProgressBar.qml
+TdSpinner           1.0 TdSpinner.qml
+
+TdScrollArea        1.0 TdScrollArea.qml
+TdScrollShadow      1.0 TdScrollShadow.qml
+TdShadow            1.0 TdShadow.qml
+TdSeparator         1.0 TdSeparator.qml
+
+TdPopupMenu         1.0 TdPopupMenu.qml
+TdMenuItem          1.0 TdMenuItem.qml
+TdMenuSeparator     1.0 TdMenuSeparator.qml
+
+TdBoxContent        1.0 TdBoxContent.qml
+TdConfirmBox        1.0 TdConfirmBox.qml
+
+TdTabBar            1.0 TdTabBar.qml
+TdTab               1.0 TdTab.qml
+
+TdSettingsRow       1.0 TdSettingsRow.qml
+TdSectionHeader     1.0 TdSectionHeader.qml
+TdInfoRow           1.0 TdInfoRow.qml
+TdEmptyState        1.0 TdEmptyState.qml
+
+TdAvatar            1.0 TdAvatar.qml
+TdBadge             1.0 TdBadge.qml
+TdTooltip           1.0 TdTooltip.qml
+TdToast             1.0 TdToast.qml
+
+TdSidebarItem       1.0 TdSidebarItem.qml
+TdNavigationDrawer  1.0 TdNavigationDrawer.qml
+TdTitleBar          1.0 TdTitleBar.qml
+
+TdShortcut          1.0 TdShortcut.qml

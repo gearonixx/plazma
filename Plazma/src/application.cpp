@@ -1,6 +1,7 @@
 #include "application.h"
 
 #include <QObject>
+#include <QProcessEnvironment>
 #include <QUrl>
 
 #include <QQmlApplicationEngine>
@@ -11,6 +12,8 @@
 
 #include "controllers/pageController.h"
 #include "models/language_model.h"
+#include "ui/window/main_window.h"
+#include "ui/window/page_start.h"
 
 static constexpr const char* kRootQmlFileUrl = "qrc:/ui/main.qml";
 static constexpr const char* kQmlModulesUrl = "qrc:/ui/Modules/";
@@ -56,7 +59,29 @@ void PlazmaApplication::init() {
     coreController_->setQmlRoot();
 
     coreController_->pageController()->showOnStartup();
+
+    initNativeShell();
 };
+
+void PlazmaApplication::initNativeShell() {
+    // Off by default — the new framework only handles a subset of pages.
+    // Launch with `PLAZMA_NATIVE_UI=1` to preview the C++ widget shell.
+    const auto env = QProcessEnvironment::systemEnvironment();
+    if (env.value(QStringLiteral("PLAZMA_NATIVE_UI")) != QStringLiteral("1")) {
+        return;
+    }
+
+    nativeWindow_.reset(new Ui::MainWindow());
+    auto *startPage = new Ui::PageStart(
+        nullptr,
+        coreController_->session(),
+        coreController_->languageModel(),
+        coreController_->phoneModel(),
+        coreController_->pageController().data());
+    nativeWindow_->showSection(startPage);
+    nativeWindow_->setWindowTitle(QStringLiteral("Plazma — Native UI Preview"));
+    nativeWindow_->show();
+}
 
 void PlazmaApplication::onObjectCreated(QObject* qmlObject, const QUrl& objectUrl) {
     Q_ASSERT(!rootQmlFileUrl_.isEmpty());
