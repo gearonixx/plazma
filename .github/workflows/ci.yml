@@ -29,7 +29,7 @@ jobs:
         run: |
           sudo apt-get update -qq
           sudo apt-get install -y \
-            cmake ninja-build pkg-config \
+            cmake ninja-build pkg-config gperf \
             qt6-base-dev qt6-declarative-dev qt6-tools-dev \
             qt6-l10n-tools libqt6opengl6-dev qml6-module-qtquick \
             libmpv-dev
@@ -87,15 +87,36 @@ jobs:
         run: |
           pacman -Syu --noconfirm
           pacman -S --noconfirm \
-            base-devel cmake ninja pkgconf git \
+            base-devel cmake ninja pkgconf git gperf \
             qt6-base qt6-declarative qt6-tools qt6-svg \
-            mpv tdlib
+            mpv openssl zlib
+
+      - name: Cache TdLib
+        id: cache-tdlib
+        uses: actions/cache@v4
+        with:
+          path: /root/tdlib-install
+          key: tdlib-8fc2344-arch-${{ runner.arch }}
+
+      - name: Build TdLib
+        if: steps.cache-tdlib.outputs.cache-hit != 'true'
+        run: |
+          git clone https://github.com/tdlib/td.git /root/td
+          git -C /root/td checkout 8fc2344f3e3d
+          cmake -B /root/td/build -S /root/td \
+            -GNinja \
+            -DCMAKE_BUILD_TYPE=Release \
+            -DCMAKE_INSTALL_PREFIX=/root/tdlib-install \
+            -DTD_ENABLE_LTO=OFF
+          cmake --build /root/td/build -j$(nproc)
+          cmake --install /root/td/build
 
       - name: Build Plazma
         run: |
           cmake -B Plazma/build -S Plazma \
             -GNinja \
-            -DCMAKE_BUILD_TYPE=Release
+            -DCMAKE_BUILD_TYPE=Release \
+            -DTd_DIR=/root/tdlib-install/lib/cmake/Td
           cmake --build Plazma/build -j$(nproc)
 
   # ── Windows ─────────────────────────────────────────────────────────────────
@@ -158,14 +179,19 @@ jobs:
         uses: actions/cache@v4
         with:
           path: mpv-sdk
-          key: mpv-sdk-20240714-c7e8d31
+          key: mpv-sdk-20250420-3600c71
 
       - name: Download MPV SDK
         if: steps.cache-mpv.outputs.cache-hit != 'true'
         shell: pwsh
         run: |
-          $url = "https://downloads.sourceforge.net/project/mpv-player-windows/libmpv/mpv-dev-x86_64-20240714-git-c7e8d31.7z"
-          Invoke-WebRequest -Uri $url -OutFile mpv-dev.7z
+          $url = "https://master.dl.sourceforge.net/project/mpv-player-windows/libmpv/mpv-dev-x86_64-20250420-git-3600c71.7z?viasf=1"
+          Invoke-WebRequest -Uri $url -OutFile mpv-dev.7z -UserAgent "Wget"
+          $size = (Get-Item mpv-dev.7z).Length
+          if ($size -lt 1MB) {
+            Write-Error "MPV download too small ($size bytes) — likely an HTML error page, not the archive"
+            exit 1
+          }
           7z x mpv-dev.7z -ompv-sdk
           Push-Location mpv-sdk
           lib /def:mpv.def /name:libmpv-2.dll /out:mpv.lib /MACHINE:X64
