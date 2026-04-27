@@ -39,27 +39,27 @@ jobs:
         uses: actions/cache@v4
         with:
           path: ~/tdlib-install
-          key: tdlib-8fc2344-ubuntu-22.04-${{ runner.arch }}
+          key: tdlib-8fc2344-ubuntu-22.04-${{ runner.arch }}-v2
 
       - name: Build TdLib
         if: steps.cache-tdlib.outputs.cache-hit != 'true'
         run: |
-          git clone https://github.com/tdlib/td.git ~/td
-          git -C ~/td checkout 8fc2344f3e3d
-          cmake -B ~/td/build -S ~/td \
+          git clone https://github.com/tdlib/td.git "$HOME/td"
+          git -C "$HOME/td" checkout 8fc2344f3e3d
+          cmake -B "$HOME/td/build" -S "$HOME/td" \
             -GNinja \
             -DCMAKE_BUILD_TYPE=Release \
-            -DCMAKE_INSTALL_PREFIX=~/tdlib-install \
+            -DCMAKE_INSTALL_PREFIX="$HOME/tdlib-install" \
             -DTD_ENABLE_LTO=OFF
-          cmake --build ~/td/build -j$(nproc)
-          cmake --install ~/td/build
+          cmake --build "$HOME/td/build" -j$(nproc)
+          cmake --install "$HOME/td/build"
 
       - name: Build Plazma
         run: |
           cmake -B Plazma/build -S Plazma \
             -GNinja \
             -DCMAKE_BUILD_TYPE=Release \
-            -DTd_DIR=~/tdlib-install/lib/cmake/Td
+            -DTd_DIR="$HOME/tdlib-install/lib/cmake/Td"
           cmake --build Plazma/build -j$(nproc)
 
       - name: Debug via tmate (on failure, ci-* branches and manual dispatch only)
@@ -96,7 +96,7 @@ jobs:
         uses: actions/cache@v4
         with:
           path: /root/tdlib-install
-          key: tdlib-8fc2344-arch-${{ runner.arch }}
+          key: tdlib-8fc2344-arch-${{ runner.arch }}-v2
 
       - name: Build TdLib
         if: steps.cache-tdlib.outputs.cache-hit != 'true'
@@ -146,7 +146,7 @@ jobs:
         uses: actions/cache@v4
         with:
           path: C:/vcpkg/installed
-          key: vcpkg-tdlib-deps-${{ runner.arch }}-v2
+          key: vcpkg-tdlib-deps-${{ runner.arch }}-v3
 
       - name: Install TdLib build deps via vcpkg
         shell: pwsh
@@ -157,7 +157,7 @@ jobs:
         uses: actions/cache@v4
         with:
           path: C:/tdlib-install
-          key: tdlib-8fc2344-${{ runner.arch }}-msvc2022-v2
+          key: tdlib-8fc2344-${{ runner.arch }}-msvc2022-v3
 
       - name: Build TdLib from source
         if: steps.cache-tdlib.outputs.cache-hit != 'true'
@@ -171,8 +171,10 @@ jobs:
             -DCMAKE_INSTALL_PREFIX=C:/tdlib-install `
             -DCMAKE_TOOLCHAIN_FILE=C:/vcpkg/scripts/buildsystems/vcpkg.cmake `
             -DVCPKG_TARGET_TRIPLET=x64-windows `
+            -DGPERF_EXECUTABLE=C:/vcpkg/installed/x64-windows/tools/gperf/gperf.exe `
+            -DOPENSSL_ROOT_DIR=C:/vcpkg/installed/x64-windows `
             -DTD_ENABLE_LTO=OFF
-          cmake --build C:/td/build --target install -- -j 2
+          cmake --build C:/td/build --target install --parallel 1
 
       - name: Cache MPV SDK
         id: cache-mpv
