@@ -111,6 +111,7 @@ jobs:
           target: desktop
           arch: win64_msvc2022_64
           modules: 'qtdeclarative qtimageformats'
+          aqtversion: '==3.1.*'
           cache: true
 
       - name: Setup MSVC dev environment
