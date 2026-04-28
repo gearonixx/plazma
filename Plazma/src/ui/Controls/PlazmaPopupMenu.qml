@@ -38,10 +38,19 @@ Popup {
 
     closePolicy: Popup.CloseOnPressOutside | Popup.CloseOnEscape
 
-    contentItem: Item {
+    contentItem: FocusScope {
+        focus: true
         implicitWidth: Math.max(root.minWidth,
                                 Math.min(root.maxWidth, column.implicitWidth + 8))
         implicitHeight: column.implicitHeight + 12
+
+        Keys.onPressed: (e) => {
+            if (e.key === Qt.Key_Down)      { root._moveActive(1);  e.accepted = true }
+            else if (e.key === Qt.Key_Up)   { root._moveActive(-1); e.accepted = true }
+            else if (e.key === Qt.Key_Return || e.key === Qt.Key_Enter) {
+                root._invoke(root._activeIndex); e.accepted = true
+            }
+        }
 
         Column {
             id: column
@@ -163,14 +172,6 @@ Popup {
     property int _activeIndex: -1
 
     onOpened: _activeIndex = -1
-
-    Keys.onPressed: (e) => {
-        if (e.key === Qt.Key_Down)      { _moveActive(1);  e.accepted = true }
-        else if (e.key === Qt.Key_Up)   { _moveActive(-1); e.accepted = true }
-        else if (e.key === Qt.Key_Return || e.key === Qt.Key_Enter) {
-            _invoke(_activeIndex); e.accepted = true
-        }
-    }
 
     function _moveActive(dir) {
         if (!actions || actions.length === 0) return

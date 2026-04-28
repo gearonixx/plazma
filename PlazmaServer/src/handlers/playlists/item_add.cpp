@@ -144,6 +144,7 @@ std::string Handler::HandleRequest(
 
     const auto playlist_id = request.GetPathArg("id");
     if (playlist_id.empty() || !pl::IsValidId(playlist_id)) {
+        LOG_WARNING() << "POST /v1/playlists/*/items invalid playlist_id=" << playlist_id;
         request.SetResponseStatus(userver::server::http::HttpStatus::kNotFound);
         return R"({"error": "playlist not found"})";
     }
@@ -165,6 +166,9 @@ std::string Handler::HandleRequest(
     try {
         auto meta = pc::LoadPlaylistById(session_, playlist_id);
         if (!meta.has_value() || meta->user_id != auth.user_id) {
+            LOG_WARNING() << "POST /v1/playlists/" << playlist_id << "/items meta_found="
+                          << meta.has_value() << " user_id=" << auth.user_id
+                          << " meta_user_id=" << (meta.has_value() ? meta->user_id : -1);
             request.SetResponseStatus(userver::server::http::HttpStatus::kNotFound);
             return R"({"error": "playlist not found"})";
         }
@@ -200,6 +204,7 @@ std::string Handler::HandleRequest(
         // ── Verify the video exists & merge with optional client snapshot
         const auto canonical = LoadCanonicalVideo(session_, video_id);
         if (!canonical.has_value()) {
+            LOG_WARNING() << "POST /v1/playlists/" << playlist_id << "/items video_not_found video_id=" << video_id;
             request.SetResponseStatus(userver::server::http::HttpStatus::kNotFound);
             return R"({"error": "video not found"})";
         }
