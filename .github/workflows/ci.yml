@@ -192,11 +192,16 @@ jobs:
             Write-Error "MPV download too small ($size bytes) — likely an HTML error page, not the archive"
             exit 1
           }
+          # 20250420 archive ships libmpv.dll.a directly — no .def, no need
+          # to regenerate the import lib via `lib /def:`. Layout under MPV_DIR
+          # already matches what Plazma's CMake expects (include/, libmpv.dll.a).
           7z x mpv-dev.7z -ompv-sdk
-          Push-Location mpv-sdk
-          lib /def:mpv.def /name:libmpv-2.dll /out:mpv.lib /MACHINE:X64
-          Copy-Item mpv.lib libmpv.dll.a -Force
-          Pop-Location
+          if (-not (Test-Path mpv-sdk/libmpv.dll.a)) {
+            Write-Host "Extracted contents:"
+            Get-ChildItem -Path mpv-sdk -Recurse | ForEach-Object { Write-Host $_.FullName }
+            Write-Error "libmpv.dll.a not found at mpv-sdk root after extract"
+            exit 1
+          }
 
       - name: Build Plazma
         shell: pwsh
