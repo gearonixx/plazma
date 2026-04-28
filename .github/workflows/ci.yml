@@ -40,7 +40,7 @@ jobs:
           version: '6.5.3'
           host: linux
           target: desktop
-          arch: linux_gcc_64
+          arch: gcc_64
           modules: 'qtimageformats'
           cache: true
 
