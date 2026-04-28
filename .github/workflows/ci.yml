@@ -25,14 +25,24 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Install Qt6 + MPV
+      - name: Install build tools + MPV
         run: |
           sudo apt-get update -qq
           sudo apt-get install -y \
             cmake ninja-build pkg-config gperf \
-            qt6-base-dev qt6-declarative-dev qt6-tools-dev \
-            qt6-l10n-tools libqt6opengl6-dev qml6-module-qtquick \
+            libgl1-mesa-dev libxkbcommon-dev \
+            libfontconfig1-dev libfreetype-dev libxcb-cursor0 \
             libmpv-dev
+
+      - name: Install Qt6
+        uses: jurplel/install-qt-action@v4
+        with:
+          version: '6.5.3'
+          host: linux
+          target: desktop
+          arch: linux_gcc_64
+          modules: 'qtimageformats'
+          cache: true
 
       - name: Cache TdLib
         id: cache-tdlib
@@ -196,7 +206,12 @@ jobs:
           }
           7z x mpv-dev.7z -ompv-sdk
           Push-Location mpv-sdk
-          lib /def:mpv.def /name:libmpv-2.dll /out:mpv.lib /MACHINE:X64
+          $def = Get-ChildItem -Filter '*.def' | Select-Object -First 1
+          $dll = Get-ChildItem -Filter '*.dll' | Select-Object -First 1
+          if (-not $def) { throw "no .def file at mpv-sdk root after extract" }
+          if (-not $dll) { throw "no .dll file at mpv-sdk root after extract" }
+          Write-Host "Generating import lib from def=$($def.Name) dll=$($dll.Name)"
+          lib /def:$($def.Name) /name:$($dll.Name) /out:mpv.lib /MACHINE:X64
           Copy-Item mpv.lib libmpv.dll.a -Force
           Pop-Location
 
