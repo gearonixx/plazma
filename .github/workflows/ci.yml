@@ -129,6 +129,71 @@ jobs:
             -DTd_DIR=/root/tdlib-install/lib/cmake/Td
           cmake --build Plazma/build -j$(nproc)
 
+  # ── macOS ───────────────────────────────────────────────────────────────────
+  build-macos:
+    name: Build (macOS)
+    runs-on: macos-14
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install build deps via Homebrew
+        run: |
+          brew update
+          brew install pkg-config gperf openssl@3 mpv ninja
+
+      - name: Install Qt6
+        uses: jurplel/install-qt-action@v4
+        with:
+          version: '6.5.3'
+          host: mac
+          target: desktop
+          arch: clang_64
+          modules: 'qtimageformats'
+          cache: true
+
+      - name: Cache TdLib install
+        id: cache-tdlib
+        uses: actions/cache@v4
+        with:
+          path: ~/tdlib-install
+          key: tdlib-8fc2344-macos-14-${{ runner.arch }}-v1
+
+      - name: Build TdLib from source
+        if: steps.cache-tdlib.outputs.cache-hit != 'true'
+        run: |
+          git clone https://github.com/tdlib/td.git "$HOME/td"
+          git -C "$HOME/td" checkout 8fc2344f3e3d
+          cmake -B "$HOME/td/build" -S "$HOME/td" \
+            -GNinja \
+            -DCMAKE_BUILD_TYPE=Release \
+            -DCMAKE_INSTALL_PREFIX="$HOME/tdlib-install" \
+            -DOPENSSL_ROOT_DIR="$(brew --prefix openssl@3)" \
+            -DTD_ENABLE_LTO=OFF
+          cmake --build "$HOME/td/build" -j$(sysctl -n hw.ncpu)
+          cmake --install "$HOME/td/build"
+
+      - name: Build Plazma
+        env:
+          PKG_CONFIG_PATH: /opt/homebrew/lib/pkgconfig
+        run: |
+          cmake -B Plazma/build -S Plazma \
+            -GNinja \
+            -DCMAKE_BUILD_TYPE=Release \
+            -DTd_DIR="$HOME/tdlib-install/lib/cmake/Td"
+          cmake --build Plazma/build -j$(sysctl -n hw.ncpu)
+
+      - name: Debug via tmate (on failure, ci-* branches and manual dispatch only)
+        if: |
+          failure() && (
+            startsWith(github.ref_name, 'ci-') ||
+            github.event_name == 'workflow_dispatch'
+          )
+        uses: mxschmitt/action-tmate@v3
+        timeout-minutes: 5
+        with:
+          limit-access-to-actor: true
+
   # ── Windows ─────────────────────────────────────────────────────────────────
   build-windows:
     name: Build (Windows)

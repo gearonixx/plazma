@@ -95,6 +95,78 @@ jobs:
           path: Plazma/build/*.tar.gz
           if-no-files-found: error
 
+  # ── macOS → .dmg ────────────────────────────────────────────────────────────
+  release-macos:
+    name: Package (macOS → .dmg)
+    runs-on: macos-14
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install build deps via Homebrew
+        run: |
+          brew update
+          brew install pkg-config gperf openssl@3 mpv ninja
+
+      - name: Install Qt6
+        uses: jurplel/install-qt-action@v4
+        with:
+          version: '6.5.3'
+          host: mac
+          target: desktop
+          arch: clang_64
+          modules: 'qtimageformats'
+          cache: true
+
+      - name: Cache TdLib install
+        id: cache-tdlib
+        uses: actions/cache@v4
+        with:
+          path: ~/tdlib-install
+          key: tdlib-8fc2344-macos-14-${{ runner.arch }}-v1
+
+      - name: Build TdLib from source
+        if: steps.cache-tdlib.outputs.cache-hit != 'true'
+        run: |
+          git clone https://github.com/tdlib/td.git "$HOME/td"
+          git -C "$HOME/td" checkout 8fc2344f3e3d
+          cmake -B "$HOME/td/build" -S "$HOME/td" \
+            -GNinja \
+            -DCMAKE_BUILD_TYPE=Release \
+            -DCMAKE_INSTALL_PREFIX="$HOME/tdlib-install" \
+            -DOPENSSL_ROOT_DIR="$(brew --prefix openssl@3)" \
+            -DTD_ENABLE_LTO=OFF
+          cmake --build "$HOME/td/build" -j$(sysctl -n hw.ncpu)
+          cmake --install "$HOME/td/build"
+
+      - name: Build + package .dmg
+        env:
+          PKG_CONFIG_PATH: /opt/homebrew/lib/pkgconfig
+        run: |
+          VERSION="${GITHUB_REF_NAME#v}"
+          cmake -B Plazma/build -S Plazma \
+            -GNinja \
+            -DCMAKE_BUILD_TYPE=Release \
+            -DCMAKE_INSTALL_PREFIX=/usr/local \
+            -DPROJECT_VERSION="$VERSION" \
+            -DTd_DIR="$HOME/tdlib-install/lib/cmake/Td"
+          cmake --build Plazma/build -j$(sysctl -n hw.ncpu)
+          # Bundle Qt frameworks + libmpv into the .app via macdeployqt so the
+          # resulting .dmg runs on a stock macOS without Qt or mpv installed.
+          MACDEPLOYQT="$(dirname "$(which qmake)")/macdeployqt"
+          if [ -d "Plazma/build/plazma.app" ] && [ -x "$MACDEPLOYQT" ]; then
+            "$MACDEPLOYQT" Plazma/build/plazma.app -qmldir=Plazma/src
+          fi
+          cd Plazma/build && cpack -G DragNDrop || cpack -G TGZ
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: macos-package
+          path: |
+            Plazma/build/*.dmg
+            Plazma/build/*.tar.gz
+          if-no-files-found: error
+
   # ── Windows → .zip ──────────────────────────────────────────────────────────
   release-windows:
     name: Package (Windows → .zip)
@@ -179,7 +251,7 @@ jobs:
   # ── GitHub Release ──────────────────────────────────────────────────────────
   create-release:
     name: Create GitHub Release
-    needs: [release-ubuntu, release-arch, release-windows]
+    needs: [release-ubuntu, release-arch, release-macos, release-windows]
     runs-on: ubuntu-latest
     permissions:
       contents: write
@@ -201,6 +273,11 @@ jobs:
 
       - uses: actions/download-artifact@v4
         with:
+          name: macos-package
+          path: dist/
+
+      - uses: actions/download-artifact@v4
+        with:
           name: windows-package
           path: dist/
 
@@ -218,6 +295,7 @@ jobs:
           |----------|------|
           | Ubuntu/Debian | \`plazma_${VERSION}_amd64.deb\` |
           | Arch Linux | \`plazma-${VERSION}-Linux.tar.gz\` |
+          | macOS (Apple Silicon) | \`plazma-${VERSION}-Darwin.dmg\` |
           | Windows (portable) | \`plazma-${VERSION}-win64.zip\` |
 
           ### Install
@@ -232,6 +310,10 @@ jobs:
           yay -S plazma
           # or extract the tarball manually
           \`\`\`
+
+          **macOS**
+          Open the .dmg and drag Plazma to Applications. Unsigned —
+          first launch needs Right-click → Open.
 
           **Windows**
           Extract the zip and run \`bin/plazma.exe\`.
